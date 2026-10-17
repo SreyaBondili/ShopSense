@@ -1,6 +1,6 @@
 # ShopSense – Multi-Vendor E-Commerce Analytics Platform
 
-**Infosys Springboard Internship Project | Milestone 1 (Weeks 1–2)**
+**Infosys Springboard Internship Project | Milestone 1 **
 
 ShopSense is a multi-vendor e-commerce analytics platform designed to help marketplace administrators and individual vendors track sales, manage inventory, and analyze business performance in real time.
 
