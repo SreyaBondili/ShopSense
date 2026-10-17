@@ -805,8 +805,8 @@ def render_customer_catalog():
                         st.subheader(p.get("product_name", "Product"))
                         st.caption(f"Category: **{p.get('category', 'General')}**")
                         st.markdown(f"### ${float(p.get('price', 0.0)):,.2f}")
-                        st.markdown(f"**Availability:** {stock_badge}")
-                        st.caption(f"Vendor: {p.get('vendor_name', f'Vendor #{p.get(\"vendor_id\")}')}")
+                        vendor_disp = p.get("vendor_name") or f"Vendor #{p.get('vendor_id', '')}"
+                        st.caption(f"Vendor: {vendor_disp}")
 
                         # Order Placement Form
                         if stock_qty > 0:
