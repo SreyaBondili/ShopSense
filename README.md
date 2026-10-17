@@ -205,4 +205,4 @@ ShopSense/
 ## 👩‍💻 Author
 
 **Sreya Bondili**  
-Infosys Springboard Internship 2026
+
