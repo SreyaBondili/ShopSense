@@ -37,6 +37,15 @@ def seed():
             is_active=True
         )
         db.add(admin_user)
+        
+        customer_user = User(
+            full_name="Alice Johnson (Customer)",
+            email="customer@shopsense.com",
+            password_hash=hash_password("Customer@123"),
+            role=UserRole.CUSTOMER,
+            is_active=True
+        )
+        db.add(customer_user)
         db.commit()
         db.refresh(admin_user)
 

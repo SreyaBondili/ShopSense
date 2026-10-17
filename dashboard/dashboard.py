@@ -77,7 +77,7 @@ def logout():
     st.rerun()
 
 # ==========================================
-# 1. AUTHENTICATION (LOGIN / REGISTER)
+# 1. AUTHENTICATION (3 PORTAL MODES & REGISTRATION)
 # ==========================================
 def render_auth_page():
     st.title("🛍️ ShopSense – Multi-Vendor Analytics Platform")
@@ -88,8 +88,25 @@ def render_auth_page():
         tab_login, tab_register = st.tabs(["🔐 Sign In", "📝 Create Account"])
 
         with tab_login:
-            st.subheader("Login to your Account")
-            login_email = st.text_input("Email Address", key="login_email")
+            # 3 Dedicated Login Modes as specified in project transcript
+            portal_mode = st.radio(
+                "Select Login Portal Mode:",
+                ["🛒 Customer / Shopper", "🏪 Vendor Partner", "🛡️ Administrator"],
+                horizontal=True,
+                key="portal_mode"
+            )
+
+            if portal_mode == "🛒 Customer / Shopper":
+                st.info("🛒 **Customer Portal**: Browse marketplace products, check live inventory, and place orders.")
+                email_hint = "e.g. customer@shopsense.com"
+            elif portal_mode == "🏪 Vendor Partner":
+                st.info("🏪 **Vendor Portal**: Manage your product catalog, real-time inventory, and vendor sales.")
+                email_hint = "e.g. techworld@example.com"
+            else:
+                st.info("🛡️ **Admin Portal**: Complete marketplace management, vendor approvals, and live analytics.")
+                email_hint = "e.g. admin@shopsense.com"
+
+            login_email = st.text_input("Email Address", placeholder=email_hint, key="login_email")
             login_password = st.text_input("Password", type="password", key="login_password")
 
             if st.button("Sign In", type="primary", use_container_width=True):
@@ -110,12 +127,12 @@ def render_auth_page():
                         st.error(f"Login failed: {str(e)}")
 
             st.markdown("---")
-            st.markdown("**Quick Demo Logins:**")
-            col_admin, col_vendor = st.columns(2)
-            with col_admin:
-                if st.button("🔑 Quick Admin Login", use_container_width=True):
+            st.markdown("**Quick Demo Logins (1-Click Evaluation):**")
+            col_cust, col_vendor, col_admin = st.columns(3)
+            with col_cust:
+                if st.button("🛒 Customer Login", use_container_width=True):
                     try:
-                        resp = api.login("admin@shopsense.com", "Admin@123")
+                        resp = api.login("customer@shopsense.com", "Customer@123")
                         st.session_state["token"] = resp["access_token"]
                         st.session_state["user"] = resp["email"]
                         st.session_state["user_name"] = resp["full_name"]
@@ -125,9 +142,21 @@ def render_auth_page():
                     except Exception as e:
                         st.error(f"Demo login failed: {str(e)}")
             with col_vendor:
-                if st.button("🏪 Quick Vendor Login", use_container_width=True):
+                if st.button("🏪 Vendor Login", use_container_width=True):
                     try:
                         resp = api.login("techworld@example.com", "Vendor@123")
+                        st.session_state["token"] = resp["access_token"]
+                        st.session_state["user"] = resp["email"]
+                        st.session_state["user_name"] = resp["full_name"]
+                        st.session_state["role"] = resp["role"]
+                        st.session_state["vendor_id"] = resp.get("vendor_id")
+                        st.rerun()
+                    except Exception as e:
+                        st.error(f"Demo login failed: {str(e)}")
+            with col_admin:
+                if st.button("🛡️ Admin Login", use_container_width=True):
+                    try:
+                        resp = api.login("admin@shopsense.com", "Admin@123")
                         st.session_state["token"] = resp["access_token"]
                         st.session_state["user"] = resp["email"]
                         st.session_state["user_name"] = resp["full_name"]
@@ -139,12 +168,28 @@ def render_auth_page():
 
         with tab_register:
             st.subheader("Register New Account")
-            reg_name = st.text_input("Full Name", key="reg_name")
-            reg_email = st.text_input("Email", key="reg_email")
+            reg_name = st.text_input("Full Name", placeholder="e.g. Jane Doe", key="reg_name")
+            reg_email = st.text_input("Email", placeholder="e.g. jane@example.com", key="reg_email")
             reg_pw = st.text_input("Password (min 6 chars)", type="password", key="reg_pw")
-            reg_role = st.selectbox("Role", ["VENDOR", "ADMIN"], key="reg_role")
+            reg_role = st.selectbox(
+                "Register Account As:",
+                ["CUSTOMER", "VENDOR", "ADMIN"],
+                format_func=lambda r: {
+                    "CUSTOMER": "🛒 Customer / User (Browse & Purchase Products)",
+                    "VENDOR": "🏪 Vendor / Seller (Sell & Manage Catalog)",
+                    "ADMIN": "🛡️ Marketplace Administrator"
+                }[r],
+                key="reg_role"
+            )
 
-            if st.button("Register", use_container_width=True):
+            if reg_role == "CUSTOMER":
+                st.caption("ℹ️ Customer accounts can browse the multi-vendor catalog, view live inventory levels, and place orders.")
+            elif reg_role == "VENDOR":
+                st.caption("ℹ️ Vendor accounts can manage their product catalog, track stock, and monitor sales performance.")
+            else:
+                st.caption("ℹ️ Administrator accounts have full marketplace oversight across all vendors and analytics.")
+
+            if st.button("Create Account", type="primary", use_container_width=True):
                 if not reg_name or not reg_email or not reg_pw:
                     st.error("All fields are required.")
                 elif len(reg_pw) < 6:
@@ -152,8 +197,8 @@ def render_auth_page():
                 else:
                     try:
                         with st.spinner("Creating account..."):
-                            resp = api.register(reg_name, reg_email, reg_pw, reg_role)
-                            st.success("Account created successfully! You can now sign in.")
+                            resp = api.register(reg_name.strip(), reg_email.strip(), reg_pw, reg_role)
+                            st.success(f"Account for '{reg_name}' created successfully as {reg_role}! You can now sign in.")
                     except Exception as e:
                         st.error(f"Registration error: {str(e)}")
 
@@ -705,6 +750,141 @@ def render_analytics_page():
             )
 
 # ==========================================
+# 8. CUSTOMER / SHOPPER PORTAL VIEWS
+# ==========================================
+def render_customer_catalog():
+    token = st.session_state["token"]
+    st.title("🛍️ Marketplace Catalog")
+    st.markdown("Browse multi-vendor products, check real-time stock levels, and place direct purchase orders.")
+
+    try:
+        products = api.get_products(token)
+    except Exception as e:
+        st.error(f"Error fetching product catalog: {e}")
+        return
+
+    if not products:
+        st.info("No products currently available in the marketplace.")
+        return
+
+    # Filters
+    col_search, col_cat = st.columns([2, 1])
+    with col_search:
+        search_query = st.text_input("🔍 Search by product name", "").strip().lower()
+    with col_cat:
+        categories = ["All Categories"] + sorted(list(set(p.get("category", "General") for p in products)))
+        selected_category = st.selectbox("Filter Category", categories)
+
+    # Filtered products
+    filtered = products
+    if search_query:
+        filtered = [p for p in filtered if search_query in p.get("product_name", "").lower()]
+    if selected_category != "All Categories":
+        filtered = [p for p in filtered if p.get("category") == selected_category]
+
+    st.write(f"Showing **{len(filtered)}** available products:")
+    st.markdown("---")
+
+    # Display product cards in responsive columns
+    cols_per_row = 3
+    for i in range(0, len(filtered), cols_per_row):
+        row_cols = st.columns(cols_per_row)
+        for j in range(cols_per_row):
+            if i + j < len(filtered):
+                p = filtered[i + j]
+                with row_cols[j]:
+                    stock_qty = p.get("stock", 0)
+                    if stock_qty == 0:
+                        stock_badge = "🔴 OUT OF STOCK"
+                    elif stock_qty <= 10:
+                        stock_badge = f"🟡 LOW STOCK ({stock_qty} left)"
+                    else:
+                        stock_badge = f"🟢 IN STOCK ({stock_qty} units)"
+
+                    with st.container(border=True):
+                        st.subheader(p.get("product_name", "Product"))
+                        st.caption(f"Category: **{p.get('category', 'General')}**")
+                        st.markdown(f"### ${float(p.get('price', 0.0)):,.2f}")
+                        st.markdown(f"**Availability:** {stock_badge}")
+                        st.caption(f"Vendor: {p.get('vendor_name', f'Vendor #{p.get(\"vendor_id\")}')}")
+
+                        # Order Placement Form
+                        if stock_qty > 0:
+                            qty = st.number_input(
+                                "Quantity to Order",
+                                min_value=1,
+                                max_value=stock_qty,
+                                value=1,
+                                step=1,
+                                key=f"cust_qty_{p['product_id']}"
+                            )
+                            total_cost = round(float(p.get("price", 0.0)) * qty, 2)
+                            if st.button(f"🛒 Buy Now (${total_cost:,.2f})", key=f"cust_buy_{p['product_id']}", type="primary", use_container_width=True):
+                                try:
+                                    with st.spinner("Processing purchase order..."):
+                                        res = api.create_transaction(token, {
+                                            "product_id": p["product_id"],
+                                            "quantity": qty
+                                        })
+                                        st.success(f"🎉 Order Confirmed! Transaction #{res['transaction_id']} placed for ${res['amount']:,.2f}. Inventory deducted in MySQL.")
+                                        st.rerun()
+                                except Exception as err:
+                                    st.error(f"Purchase failed: {err}")
+                        else:
+                            st.button("Sold Out", disabled=True, use_container_width=True)
+
+def render_customer_orders():
+    token = st.session_state["token"]
+    st.title("📦 My Order & Purchase History")
+    st.markdown("Review all orders placed through the ShopSense marketplace.")
+
+    try:
+        txs = api.get_transactions(token)
+        if txs:
+            df = pd.DataFrame(txs)
+            total_orders = len(df)
+            total_spent = df["amount"].sum()
+            total_items = df["quantity"].sum()
+
+            m1, m2, m3 = st.columns(3)
+            with m1:
+                st.metric("Total Orders Placed", f"{total_orders}")
+            with m2:
+                st.metric("Total Items Purchased", f"{total_items:,}")
+            with m3:
+                st.metric("Total Spend", f"${total_spent:,.2f}")
+
+            st.markdown("---")
+            st.subheader("Order Records")
+            st.dataframe(
+                df[["transaction_id", "product_name", "vendor_name", "quantity", "amount", "transaction_date"]],
+                use_container_width=True,
+                hide_index=True
+            )
+        else:
+            st.info("You haven't placed any orders yet. Visit the **Browse Catalog** page to purchase items!")
+    except Exception as e:
+        st.error(f"Error fetching orders: {e}")
+
+def render_customer_profile():
+    st.title("👤 Customer Profile")
+    user_name = st.session_state.get("user_name", "Customer")
+    user_email = st.session_state.get("user", "")
+    role = st.session_state.get("role", "CUSTOMER")
+
+    with st.container(border=True):
+        c1, c2 = st.columns([1, 2])
+        with c1:
+            st.image("https://api.dicebear.com/7.x/bottts/svg?seed=" + user_email, width=120)
+        with c2:
+            st.subheader(user_name)
+            st.markdown(f"**Email:** `{user_email}`")
+            st.markdown(f"**Account Type:** `{role}` (Verified Shopper)")
+            st.markdown("**Status:** 🟢 `ACTIVE`")
+
+    st.info("💡 You are registered as an active Customer. You can browse vendor catalogs and place purchase orders.")
+
+# ==========================================
 # MAIN APPLICATION ROUTER
 # ==========================================
 def main():
@@ -724,9 +904,12 @@ def main():
             st.markdown("---")
 
             # Nav items depend on role
-            nav_options = ["Dashboard", "Products", "Inventory", "Transactions", "Analytics"]
-            if role == "ADMIN":
-                nav_options.insert(1, "Vendors")
+            if role == "CUSTOMER":
+                nav_options = ["🛍️ Browse Catalog", "📦 My Purchase History", "👤 My Profile"]
+            elif role == "ADMIN":
+                nav_options = ["Dashboard", "Vendors", "Products", "Inventory", "Transactions", "Analytics"]
+            else:  # VENDOR
+                nav_options = ["Dashboard", "Products", "Inventory", "Transactions", "Analytics"]
 
             chosen_page = st.radio("Navigation", nav_options, index=0)
 
@@ -734,19 +917,28 @@ def main():
             if st.button("🚪 Logout", use_container_width=True):
                 logout()
 
-        # Render chosen page
-        if chosen_page == "Dashboard":
-            render_dashboard_page()
-        elif chosen_page == "Vendors":
-            render_vendors_page()
-        elif chosen_page == "Products":
-            render_products_page()
-        elif chosen_page == "Inventory":
-            render_inventory_page()
-        elif chosen_page == "Transactions":
-            render_transactions_page()
-        elif chosen_page == "Analytics":
-            render_analytics_page()
+        # Render chosen page based on role and selection
+        if role == "CUSTOMER":
+            if chosen_page == "🛍️ Browse Catalog":
+                render_customer_catalog()
+            elif chosen_page == "📦 My Purchase History":
+                render_customer_orders()
+            elif chosen_page == "👤 My Profile":
+                render_customer_profile()
+        else:
+            if chosen_page == "Dashboard":
+                render_dashboard_page()
+            elif chosen_page == "Vendors":
+                render_vendors_page()
+            elif chosen_page == "Products":
+                render_products_page()
+            elif chosen_page == "Inventory":
+                render_inventory_page()
+            elif chosen_page == "Transactions":
+                render_transactions_page()
+            elif chosen_page == "Analytics":
+                render_analytics_page()
 
 if __name__ == "__main__":
     main()
+
