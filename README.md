@@ -1,6 +1,5 @@
 # ShopSense – Multi-Vendor E-Commerce Analytics Platform
 
-**Infosys Springboard Internship Project | Milestone 1 **
 
 ShopSense is a multi-vendor e-commerce analytics platform designed to help marketplace administrators and individual vendors track sales, manage inventory, and analyze business performance in real time.
 
@@ -8,7 +7,7 @@ This repository contains the complete implementation for **Milestone 1**, which 
 
 ---
 
-## 📌 Project Overview
+## Project Overview
 
 In a typical multi-vendor marketplace, managing different sellers, dynamic stock levels, and daily sales numbers across categories can get complicated quickly. ShopSense solves this by separating the concerns into a high-performance **FastAPI REST backend** paired with an interactive **Streamlit dashboard** for visualization.
 
@@ -22,7 +21,7 @@ In a typical multi-vendor marketplace, managing different sellers, dynamic stock
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 - **Backend:** Python 3.11+, FastAPI, Uvicorn
 - **Database:** MySQL 8.0, PyMySQL
@@ -34,7 +33,7 @@ In a typical multi-vendor marketplace, managing different sellers, dynamic stock
 
 ---
 
-## 🏗️ System Architecture
+## System Architecture
 
 ```
                  +--------------------------+
@@ -62,7 +61,7 @@ MySQL Ledger -> SQLAlchemy -> Pandas DataFrames -> Plotly Visuals -> Streamlit
 
 ---
 
-## 🗄️ Database Schema
+## Database Schema
 
 The database consists of 5 normalized relational tables:
 
@@ -74,7 +73,7 @@ The database consists of 5 normalized relational tables:
 
 ---
 
-## 🚀 Getting Started
+## Getting Started
 
 ### 1. Prerequisites
 - Python 3.10 or higher
@@ -125,7 +124,7 @@ python seed_data.py
 
 ---
 
-## 💻 Running the Project
+## Running the Project
 
 You will need **two terminal windows**:
 
@@ -144,7 +143,7 @@ python -m streamlit run dashboard/dashboard.py
 
 ---
 
-## 🔑 Demo Login Credentials
+## Demo Login Credentials
 
 For quick evaluation, use these pre-seeded demo accounts:
 
@@ -159,7 +158,7 @@ For quick evaluation, use these pre-seeded demo accounts:
 
 ---
 
-## 🧪 Running Automated Tests
+## Running Automated Tests
 
 Run the test suite using pytest:
 ```powershell
@@ -176,7 +175,7 @@ All 25 tests pass successfully, covering:
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 ShopSense/
@@ -202,7 +201,7 @@ ShopSense/
 
 ---
 
-## 👩‍💻 Author
+## Author
 
 **Sreya Bondili**  
 
