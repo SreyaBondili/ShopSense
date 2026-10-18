@@ -6,11 +6,16 @@ from datetime import datetime
 import os
 import sys
 
-# Add parent directory to path to allow importing app modules if needed
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+# Add parent and dashboard directories to sys.path
+_PARENT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+_DASHBOARD_DIR = os.path.abspath(os.path.dirname(__file__))
+for _p in (_PARENT_DIR, _DASHBOARD_DIR):
+    if _p not in sys.path:
+        sys.path.insert(0, _p)
+
 try:
     from dashboard.api_client import ApiClient
-except (ImportError, ModuleNotFoundError):
+except Exception:
     from api_client import ApiClient
 
 # Page configuration
