@@ -162,20 +162,25 @@ def render_auth_page():
             reg_pw = st.text_input("Password (min 6 chars)", type="password", key="reg_pw")
             reg_role = st.selectbox(
                 "Role:",
-                ["CUSTOMER", "VENDOR"],
-                format_func=lambda r: {"CUSTOMER": "Customer", "VENDOR": "Vendor"}[r],
+                ["CUSTOMER", "VENDOR", "ADMIN"],
+                format_func=lambda r: {"CUSTOMER": "Customer", "VENDOR": "Vendor", "ADMIN": "Admin"}[r],
                 key="reg_role"
             )
+            admin_code = None
+            if reg_role == "ADMIN":
+                admin_code = st.text_input("Admin Passcode", type="password", key="reg_admin_code", help="Admin Security Passcode (Admin@123)")
 
             if st.button("Create Account", type="primary", use_container_width=True):
                 if not reg_name or not reg_email or not reg_pw:
                     st.error("All fields are required.")
                 elif len(reg_pw) < 6:
                     st.error("Password must be at least 6 characters.")
+                elif reg_role == "ADMIN" and not admin_code:
+                    st.error("Admin Security Passcode is required to register an Admin account.")
                 else:
                     try:
                         with st.spinner("Creating account..."):
-                            resp = api.register(reg_name.strip(), reg_email.strip(), reg_pw, reg_role)
+                            resp = api.register(reg_name.strip(), reg_email.strip(), reg_pw, reg_role, admin_secret=admin_code)
                             st.success(f"Account for '{reg_name}' created successfully! You can now sign in.")
                     except Exception as e:
                         st.error(f"Registration error: {str(e)}")

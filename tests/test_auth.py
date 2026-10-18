@@ -103,3 +103,17 @@ def test_register_password_over_72_bytes(client):
     resp = client.post("/auth/register", json=payload)
     assert resp.status_code == 422
     assert "72 bytes" in str(resp.json()).lower()
+
+def test_register_admin_with_passcode_success(client):
+    payload = {
+        "full_name": "Sreya Admin",
+        "email": "sreya_eval_admin@example.com",
+        "password": "Password123!",
+        "role": "ADMIN",
+        "admin_secret": "Admin@123"
+    }
+    resp = client.post("/auth/register", json=payload)
+    assert resp.status_code == 201
+    data = resp.json()
+    assert data["role"] == "ADMIN"
+    assert data["email"] == "sreya_eval_admin@example.com"

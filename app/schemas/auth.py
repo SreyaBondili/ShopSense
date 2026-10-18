@@ -8,6 +8,7 @@ class UserRegisterRequest(BaseModel):
     email: EmailStr
     password: str = Field(..., min_length=6, max_length=128)
     role: UserRole = UserRole.VENDOR
+    admin_secret: Optional[str] = None
 
     @field_validator("password")
     @classmethod

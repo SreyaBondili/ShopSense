@@ -33,14 +33,17 @@ class ApiClient:
         resp = requests.post(url, json={"email": email, "password": password})
         return self._handle_response(resp)
 
-    def register(self, full_name: str, email: str, password: str, role: str) -> Dict[str, Any]:
+    def register(self, full_name: str, email: str, password: str, role: str, admin_secret: Optional[str] = None) -> Dict[str, Any]:
         url = f"{self.base_url}/auth/register"
-        resp = requests.post(url, json={
+        payload = {
             "full_name": full_name,
             "email": email,
             "password": password,
             "role": role
-        })
+        }
+        if admin_secret:
+            payload["admin_secret"] = admin_secret
+        resp = requests.post(url, json=payload)
         return self._handle_response(resp)
 
     def get_me(self, token: str) -> Dict[str, Any]:

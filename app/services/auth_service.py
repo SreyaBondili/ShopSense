@@ -7,12 +7,13 @@ from app.utils.security import hash_password, verify_password, create_access_tok
 from app.utils.validators import validate_email_format, validate_owner_name
 
 def register_user(db: Session, request: UserRegisterRequest) -> UserResponse:
-    # 0. Block public admin registration
+    # 0. Block public admin registration unless authorized with Admin Security Passcode
     if request.role == UserRole.ADMIN:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Admin accounts cannot be created through public registration."
-        )
+        if not request.admin_secret or request.admin_secret.strip() != "Admin@123":
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Admin accounts cannot be created through public registration without a valid Admin Security Passcode."
+            )
 
     # 1. Validate email format
     is_valid_email, norm_email = validate_email_format(request.email)
