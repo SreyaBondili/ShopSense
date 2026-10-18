@@ -108,3 +108,13 @@ def require_vendor(
             detail="Vendor access required"
         )
     return current_user
+
+def block_suspended_vendor(user: User) -> None:
+    """Raise 403 Forbidden if user is a VENDOR whose profile is SUSPENDED."""
+    if user and user.role == UserRole.VENDOR and user.vendor:
+        from app.models.vendor import VendorStatus
+        if user.vendor.status == VendorStatus.SUSPENDED:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Suspended vendors cannot modify marketplace data. Please contact administrator."
+            )

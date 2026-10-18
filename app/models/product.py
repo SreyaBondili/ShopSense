@@ -15,7 +15,7 @@ class Product(Base):
 
     vendor = relationship("Vendor", back_populates="products")
     inventory = relationship("Inventory", back_populates="product", uselist=False, cascade="all, delete-orphan")
-    transactions = relationship("Transaction", back_populates="product", cascade="all, delete-orphan")
+    transactions = relationship("Transaction", back_populates="product", passive_deletes=True)
 
     def __repr__(self):
         return f"<Product id={self.product_id} name={self.product_name} price={self.price}>"

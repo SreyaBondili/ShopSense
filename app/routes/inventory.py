@@ -11,12 +11,12 @@ router = APIRouter(prefix="/api/inventory", tags=["Inventory"])
 
 @router.get("", response_model=List[InventoryResponse])
 def get_inventory(
-    status: Optional[str] = Query(None, description="Filter by status (IN STOCK, LOW STOCK, OUT OF STOCK)"),
+    status_filter: Optional[str] = Query(None, alias="status", description="Filter by status (IN STOCK, LOW STOCK, OUT OF STOCK)"),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_active_user)
 ):
     """View inventory levels and warehouse status with visual status categorization."""
-    return inventory_service.get_inventory_items(db, current_user, status)
+    return inventory_service.get_inventory_items(db, current_user, status_filter)
 
 @router.get("/{product_id}", response_model=InventoryResponse)
 def get_inventory_for_product(

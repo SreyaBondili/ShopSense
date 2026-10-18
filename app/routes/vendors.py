@@ -22,12 +22,12 @@ def create_vendor(
 def get_vendors(
     search: Optional[str] = Query(None, description="Search by business, owner, or email"),
     category: Optional[str] = Query(None, description="Filter by category"),
-    status: Optional[str] = Query(None, description="Filter by status (PENDING, ACTIVE, SUSPENDED)"),
+    status_filter: Optional[str] = Query(None, alias="status", description="Filter by status (PENDING, ACTIVE, SUSPENDED)"),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_active_user)
 ):
     """Retrieve vendors (Admins view all; Vendors view own)."""
-    return vendor_service.get_vendors(db, current_user, search, category, status)
+    return vendor_service.get_vendors(db, current_user, search, category, status_filter)
 
 @router.get("/{vendor_id}", response_model=VendorResponse)
 def get_vendor(

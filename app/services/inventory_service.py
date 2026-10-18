@@ -5,6 +5,7 @@ from app.models.inventory import Inventory
 from app.models.product import Product
 from app.models.user import User, UserRole
 from app.schemas.inventory import InventoryUpdate, InventoryResponse
+from app.utils.security import block_suspended_vendor
 
 def get_inventory_items(
     db: Session,
@@ -84,6 +85,9 @@ def update_inventory_by_product_id(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Inventory for product ID {product_id} not found."
         )
+
+    # Item 8: Block suspended vendors
+    block_suspended_vendor(current_user)
 
     # Authorization check
     if current_user.role == UserRole.VENDOR:

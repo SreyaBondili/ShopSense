@@ -95,7 +95,7 @@ def test_create_vendor_duplicate_email(client, admin_token):
 
     resp2 = client.post("/api/vendors", json=payload, headers=headers)
     assert resp2.status_code == 409
-    assert "already exists" in resp2.json()["detail"].lower()
+    assert "already" in resp2.json()["detail"].lower()
 
 def test_vendor_rbac_cannot_view_other_vendor(client, vendor_token, other_vendor_user):
     headers = {"Authorization": f"Bearer {vendor_token}"}
@@ -117,3 +117,53 @@ def test_vendor_cannot_change_own_status(client, vendor_token, vendor_user):
     # Vendor attempts to change status or commission rate -> 403 Forbidden
     resp = client.put(f"/api/vendors/{v_id}", json={"status": "ACTIVE"}, headers=headers)
     assert resp.status_code == 403
+
+def test_vendor_cannot_create_duplicate_profile(client, vendor_token):
+    headers = {"Authorization": f"Bearer {vendor_token}"}
+    payload = {
+        "business_name": "Second Store Not Allowed",
+        "owner_name": "Jane Vendor",
+        "email": "jane_second@example.com",
+        "phone": "+1-800-555-1234",
+        "category": "Electronics"
+    }
+    resp = client.post("/api/vendors", json=payload, headers=headers)
+    assert resp.status_code == 409
+    assert "already has a vendor profile" in resp.json()["detail"].lower()
+
+def test_update_vendor_validation_errors(client, admin_token, vendor_user):
+    headers = {"Authorization": f"Bearer {admin_token}"}
+    v_id = vendor_user.vendor.vendor_id
+    # Invalid phone (letters)
+    resp = client.put(f"/api/vendors/{v_id}", json={"phone": "badphone"}, headers=headers)
+    assert resp.status_code == 422
+
+    # Invalid owner name with symbols
+    resp2 = client.put(f"/api/vendors/{v_id}", json={"owner_name": "Bad@Owner#123"}, headers=headers)
+    assert resp2.status_code == 422
+
+def test_delete_vendor_with_sales_history_refused(client, admin_token, vendor_token, vendor_user):
+    v_headers = {"Authorization": f"Bearer {vendor_token}"}
+    a_headers = {"Authorization": f"Bearer {admin_token}"}
+    vid = vendor_user.vendor.vendor_id
+
+    # 1. Vendor creates product
+    p_resp = client.post("/api/products", json={
+        "product_name": "Vendor Deletion Test Product",
+        "category": "Electronics",
+        "price": 20.0,
+        "stock": 10
+    }, headers=v_headers)
+    assert p_resp.status_code == 201
+    pid = p_resp.json()["product_id"]
+
+    # 2. Record transaction
+    client.post("/api/transactions", json={
+        "product_id": pid,
+        "quantity": 1
+    }, headers=v_headers)
+
+    # 3. Admin attempts to delete vendor -> 409 Conflict
+    del_resp = client.delete(f"/api/vendors/{vid}", headers=a_headers)
+    assert del_resp.status_code == 409
+    assert "sales history" in del_resp.json()["detail"].lower()

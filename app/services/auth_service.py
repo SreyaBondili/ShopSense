@@ -7,6 +7,13 @@ from app.utils.security import hash_password, verify_password, create_access_tok
 from app.utils.validators import validate_email_format, validate_owner_name
 
 def register_user(db: Session, request: UserRegisterRequest) -> UserResponse:
+    # 0. Block public admin registration
+    if request.role == UserRole.ADMIN:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Admin accounts cannot be created through public registration."
+        )
+
     # 1. Validate email format
     is_valid_email, norm_email = validate_email_format(request.email)
     if not is_valid_email:
@@ -55,14 +62,14 @@ def register_user(db: Session, request: UserRegisterRequest) -> UserResponse:
             db.commit()
             vendor_id = existing_vendor.vendor_id
         else:
-            # Auto-create linked vendor profile
+            # Auto-create linked vendor profile (starts PENDING until admin activates)
             new_vendor = Vendor(
                 business_name=f"{new_user.full_name}'s Store",
                 owner_name=new_user.full_name,
                 email=norm_email,
                 phone="0000000000",
                 category="General",
-                status=VendorStatus.ACTIVE,
+                status=VendorStatus.PENDING,
                 user_id=new_user.user_id
             )
             db.add(new_vendor)

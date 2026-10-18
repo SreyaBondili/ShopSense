@@ -50,8 +50,10 @@ def create_transaction(
                 detail="Vendors may only record transactions for their own catalog items."
             )
 
-    # 4. Fetch Inventory and check available stock
-    inventory = db.query(Inventory).filter(Inventory.product_id == product.product_id).first()
+    # 4. Fetch Inventory and check available stock (with row-level lock to prevent overselling)
+    inventory = db.query(Inventory).filter(
+        Inventory.product_id == product.product_id
+    ).with_for_update().first()
     if not inventory:
         # Create inventory record if missing
         inventory = Inventory(product_id=product.product_id, current_stock=product.stock)

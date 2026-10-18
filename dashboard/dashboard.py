@@ -162,8 +162,8 @@ def render_auth_page():
             reg_pw = st.text_input("Password (min 6 chars)", type="password", key="reg_pw")
             reg_role = st.selectbox(
                 "Role:",
-                ["CUSTOMER", "VENDOR", "ADMIN"],
-                format_func=lambda r: {"CUSTOMER": "Customer", "VENDOR": "Vendor", "ADMIN": "Admin"}[r],
+                ["CUSTOMER", "VENDOR"],
+                format_func=lambda r: {"CUSTOMER": "Customer", "VENDOR": "Vendor"}[r],
                 key="reg_role"
             )
 
@@ -642,7 +642,7 @@ def render_transactions_page():
             st.download_button(
                 label="📥 Download Transactions CSV",
                 data=csv,
-                file_name=f"shopsense_transactions_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}.csv",
+                file_name=f"shopsense_transactions_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
                 mime="text/csv",
             )
         else:

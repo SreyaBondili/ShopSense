@@ -4,8 +4,10 @@ from fastapi import HTTPException, status
 from app.models.product import Product
 from app.models.vendor import Vendor, VendorStatus
 from app.models.inventory import Inventory
+from app.models.transaction import Transaction
 from app.models.user import User, UserRole
 from app.schemas.product import ProductCreate, ProductUpdate, ProductResponse
+from app.utils.security import block_suspended_vendor
 
 def create_product(db: Session, data: ProductCreate, current_user: User) -> Product:
     # 1. Determine vendor_id
@@ -122,6 +124,8 @@ def get_product_by_id(db: Session, product_id: int, current_user: Optional[User]
     return product
 
 def update_product(db: Session, product_id: int, data: ProductUpdate, current_user: User) -> Product:
+    # Item 8: Block suspended vendors from editing products
+    block_suspended_vendor(current_user)
     product = get_product_by_id(db, product_id, current_user)
 
     update_dict = data.model_dump(exclude_unset=True)
@@ -160,6 +164,13 @@ def update_product(db: Session, product_id: int, data: ProductUpdate, current_us
 
 def delete_product(db: Session, product_id: int, current_user: User) -> dict:
     product = get_product_by_id(db, product_id, current_user)
+
+    # Item 2: Protect sales history — refuse delete if transactions exist
+    if db.query(Transaction).filter(Transaction.product_id == product_id).first():
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="This product has sales history and cannot be deleted. Set its stock to 0 instead."
+        )
 
     db.delete(product)
     db.commit()

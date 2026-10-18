@@ -112,7 +112,7 @@ def seed():
 
             # Vendor 5 - Glow Cosmetics & Spa
             ("Hydrating Vitamin C Facial Serum", "Beauty & Personal Care", Decimal("28.00"), 55, 15, vendors[4].vendor_id),
-            ("Organic Herbal Moisturizing Cream", "Beauty & Personal Care", Decimal("24.50"), 4, 10, vendors[4].vendor_id), # Low stock example
+            ("Organic Herbal Moisturizing Cream", "Beauty & Personal Care", Decimal("24.50"), 10, 10, vendors[4].vendor_id), # Normal stock
             ("Exfoliating Mineral Body Scrub", "Beauty & Personal Care", Decimal("19.99"), 0, 10, vendors[4].vendor_id), # Out of stock example
         ]
 
@@ -143,7 +143,7 @@ def seed():
 
         # 4. Seed 35+ Transactions with varying dates (last 21 days)
         print("Seeding 35+ realistic sales transactions...")
-        now = datetime.utcnow()
+        now = datetime.now()
         # Seed sales transactions distributed across days
         transactions_to_add = [
             # Day -20

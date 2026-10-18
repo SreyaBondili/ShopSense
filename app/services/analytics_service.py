@@ -59,7 +59,7 @@ def _get_scoped_dataframes(
             "amount", "transaction_date", "product_name", "category", "price", "vendor_name"
         ])
 
-    # 2. Fetch products
+    # 2. Fetch products (join Inventory for reorder_level — Item 5)
     p_query = db.query(
         Product.product_id,
         Product.product_name,
@@ -67,8 +67,10 @@ def _get_scoped_dataframes(
         Product.price,
         Product.stock,
         Product.vendor_id,
-        Vendor.business_name.label("vendor_name")
-    ).join(Vendor, Product.vendor_id == Vendor.vendor_id)
+        Vendor.business_name.label("vendor_name"),
+        Inventory.reorder_level.label("reorder_level")
+    ).join(Vendor, Product.vendor_id == Vendor.vendor_id)\
+     .outerjoin(Inventory, Inventory.product_id == Product.product_id)
 
     if effective_vendor_id is not None:
         p_query = p_query.filter(Product.vendor_id == effective_vendor_id)
@@ -82,11 +84,13 @@ def _get_scoped_dataframes(
             "price": float(r.price),
             "stock": int(r.stock),
             "vendor_id": r.vendor_id,
-            "vendor_name": r.vendor_name
+            "vendor_name": r.vendor_name,
+            "reorder_level": int(r.reorder_level) if r.reorder_level is not None else 10
         } for r in p_rows])
     else:
         df_prod = pd.DataFrame(columns=[
-            "product_id", "product_name", "category", "price", "stock", "vendor_id", "vendor_name"
+            "product_id", "product_name", "category", "price", "stock",
+            "vendor_id", "vendor_name", "reorder_level"
         ])
 
     # 3. Fetch vendors
@@ -199,16 +203,19 @@ def get_product_performance(
     merged["total_revenue"] = merged["total_revenue"].fillna(0.0).round(2)
     merged["quantity_sold"] = merged["quantity_sold"].fillna(0).astype(int)
 
-    # Calculate inventory status
-    def compute_status(stock: int) -> str:
+    # Calculate inventory status using per-product reorder_level (Item 5)
+    def compute_status(row) -> str:
+        stock = int(row.get("stock", row.get("current_stock", 0)))
+        reorder = int(row.get("reorder_level", 10))
         if stock == 0:
             return "OUT OF STOCK"
-        elif stock <= 10:
+        elif stock <= reorder:
             return "LOW STOCK"
         return "IN STOCK"
 
-    merged["inventory_status"] = merged["stock"].apply(compute_status)
+    merged["inventory_status"] = merged.apply(compute_status, axis=1)
     merged = merged.rename(columns={"stock": "current_stock"})
+    merged = merged.drop(columns=["reorder_level"], errors="ignore")
     merged = merged.sort_values(by="total_revenue", ascending=False)
 
     return merged.to_dict(orient="records")

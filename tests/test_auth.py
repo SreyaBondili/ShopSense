@@ -80,3 +80,26 @@ def test_get_current_user_profile(client, admin_token):
 def test_get_current_user_unauthorized(client):
     resp = client.get("/auth/me", headers={"Authorization": "Bearer invalid_or_expired_token"})
     assert resp.status_code == 401
+
+def test_register_admin_blocked(client):
+    payload = {
+        "full_name": "Wannabe Admin",
+        "email": "hacker_admin@example.com",
+        "password": "Password123!",
+        "role": "ADMIN"
+    }
+    resp = client.post("/auth/register", json=payload)
+    assert resp.status_code == 403
+    assert "admin accounts cannot be created through public registration" in resp.json()["detail"].lower()
+
+def test_register_password_over_72_bytes(client):
+    long_pw = "A" * 73
+    payload = {
+        "full_name": "Long Password User",
+        "email": "longpw@example.com",
+        "password": long_pw,
+        "role": "VENDOR"
+    }
+    resp = client.post("/auth/register", json=payload)
+    assert resp.status_code == 422
+    assert "72 bytes" in str(resp.json()).lower()

@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, EmailStr, Field, field_validator
 from typing import Optional
 from datetime import datetime
 from app.models.user import UserRole
@@ -8,6 +8,14 @@ class UserRegisterRequest(BaseModel):
     email: EmailStr
     password: str = Field(..., min_length=6, max_length=128)
     role: UserRole = UserRole.VENDOR
+
+    @field_validator("password")
+    @classmethod
+    def password_within_bcrypt_limit(cls, v: str) -> str:
+        """Bcrypt silently truncates at 72 bytes; reject passwords that exceed this."""
+        if len(v.encode("utf-8")) > 72:
+            raise ValueError("Password must be at most 72 bytes long")
+        return v
 
 class UserLoginRequest(BaseModel):
     email: EmailStr
