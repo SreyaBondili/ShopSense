@@ -30,8 +30,8 @@ def seed():
         # 2. Seed Users
         print("Seeding Users...")
         admin_user = User(
-            full_name="Marketplace Administrator",
-            email="admin@shopsense.com",
+            full_name="Sreya Bondili (Admin)",
+            email="bsreya1610@gmail.com",
             password_hash=hash_password("Admin@123"),
             role=UserRole.ADMIN,
             is_active=True

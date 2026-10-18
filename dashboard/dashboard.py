@@ -121,7 +121,7 @@ def render_auth_page():
             with col_admin:
                 if st.button("🔑 Admin", use_container_width=True):
                     try:
-                        resp = api.login("admin@shopsense.com", "Admin@123")
+                        resp = api.login("bsreya1610@gmail.com", "Admin@123")
                         st.session_state["token"] = resp["access_token"]
                         st.session_state["user"] = resp["email"]
                         st.session_state["user_name"] = resp["full_name"]
