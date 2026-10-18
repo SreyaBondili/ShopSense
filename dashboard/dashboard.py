@@ -116,7 +116,7 @@ def render_auth_page():
                         st.error(f"Login failed: {str(e)}")
 
             st.markdown("---")
-            st.markdown("**Quick Demo Logins:**")
+            st.markdown("**Quick Login:**")
             col_admin, col_vendor, col_cust = st.columns(3)
             with col_admin:
                 if st.button("🔑 Admin", use_container_width=True):
@@ -129,7 +129,7 @@ def render_auth_page():
                         st.session_state["vendor_id"] = resp.get("vendor_id")
                         st.rerun()
                     except Exception as e:
-                        st.error(f"Demo login failed: {str(e)}")
+                        st.error(f"Login failed: {str(e)}")
             with col_vendor:
                 if st.button("🏪 Vendor", use_container_width=True):
                     try:
@@ -141,7 +141,7 @@ def render_auth_page():
                         st.session_state["vendor_id"] = resp.get("vendor_id")
                         st.rerun()
                     except Exception as e:
-                        st.error(f"Demo login failed: {str(e)}")
+                        st.error(f"Login failed: {str(e)}")
             with col_cust:
                 if st.button("👤 Customer", use_container_width=True):
                     try:
@@ -153,7 +153,7 @@ def render_auth_page():
                         st.session_state["vendor_id"] = resp.get("vendor_id")
                         st.rerun()
                     except Exception as e:
-                        st.error(f"Demo login failed: {str(e)}")
+                        st.error(f"Login failed: {str(e)}")
 
         with tab_register:
             st.subheader("Register New Account")
