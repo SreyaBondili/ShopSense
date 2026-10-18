@@ -13,10 +13,16 @@ for _p in (_PARENT_DIR, _DASHBOARD_DIR):
     if _p not in sys.path:
         sys.path.insert(0, _p)
 
+import importlib
+
 try:
-    from dashboard.api_client import ApiClient
+    import dashboard.api_client as _api_module
+    importlib.reload(_api_module)
+    ApiClient = _api_module.ApiClient
 except Exception:
-    from api_client import ApiClient
+    import api_client as _api_module
+    importlib.reload(_api_module)
+    ApiClient = _api_module.ApiClient
 
 # Page configuration
 st.set_page_config(
@@ -172,8 +178,20 @@ def render_auth_page():
                 key="reg_role"
             )
             admin_code = None
+            reg_phone = None
+            reg_bname = None
+            reg_cat = None
+
             if reg_role == "ADMIN":
                 admin_code = st.text_input("Admin Passcode", type="password", key="reg_admin_code", help="Admin Security Passcode (Admin@123)")
+            elif reg_role == "VENDOR":
+                reg_bname = st.text_input("Business / Store Name", key="reg_bname", placeholder="e.g. Apex Electronics")
+                reg_phone = st.text_input("Phone Number", key="reg_phone", placeholder="e.g. 9876543210")
+                reg_cat = st.selectbox(
+                    "Store Category",
+                    ["Electronics", "Fashion", "Books", "Home & Kitchen", "Beauty & Personal Care", "General"],
+                    key="reg_cat"
+                )
 
             if st.button("Create Account", type="primary", use_container_width=True):
                 if not reg_name or not reg_email or not reg_pw:
@@ -182,10 +200,21 @@ def render_auth_page():
                     st.error("Password must be at least 6 characters.")
                 elif reg_role == "ADMIN" and not admin_code:
                     st.error("Admin Security Passcode is required to register an Admin account.")
+                elif reg_role == "VENDOR" and not reg_phone:
+                    st.error("Phone number is required for Vendor onboarding.")
                 else:
                     try:
                         with st.spinner("Creating account..."):
-                            resp = api.register(reg_name.strip(), reg_email.strip(), reg_pw, reg_role, admin_secret=admin_code)
+                            resp = api.register(
+                                reg_name.strip(),
+                                reg_email.strip(),
+                                reg_pw,
+                                reg_role,
+                                admin_secret=admin_code,
+                                phone=reg_phone.strip() if reg_phone else None,
+                                business_name=reg_bname.strip() if reg_bname else None,
+                                category=reg_cat.strip() if reg_cat else None
+                            )
                             st.success(f"Account for '{reg_name}' created successfully! You can now sign in.")
                     except Exception as e:
                         st.error(f"Registration error: {str(e)}")
@@ -200,7 +229,7 @@ def render_dashboard_page():
     user_name = st.session_state.get("user_name", "User")
     
     st.title(f"📊 {'Marketplace Executive Dashboard' if role == 'ADMIN' else 'Vendor Performance Portal'}")
-    st.markdown(f"Logged in as **{user_name}** ({role})")
+    st.markdown(f"Logged in as **{user_name}**")
 
     # Fetch Summary KPIs
     try:
@@ -369,7 +398,11 @@ def render_vendors_page():
                         st.success(f"Vendor '{b_name}' successfully onboarded!")
                         st.rerun()
                     except Exception as e:
-                        st.error(f"Vendor onboarding error: {str(e)}")
+                        err_msg = str(e)
+                        if "409" in err_msg or "already registered" in err_msg:
+                            st.error(f"⚠️ A vendor with that email is already registered. If they self-registered, you can find them in the list below and change their status to ACTIVE.")
+                        else:
+                            st.error(f"Vendor onboarding error: {err_msg}")
 
     # Filter and Search
     f1, f2, f3 = st.columns([2, 1, 1])
@@ -477,7 +510,11 @@ def render_products_page():
                         st.success(f"Product '{p_name}' successfully added and inventory initialized!")
                         st.rerun()
                     except Exception as e:
-                        st.error(f"Product creation failed: {e}")
+                        err_msg = str(e)
+                        if "409" in err_msg or "already exists" in err_msg:
+                            st.error(f"⚠️ A product with that name already exists in this vendor's catalog. Use a different name or update the existing product.")
+                        else:
+                            st.error(f"Product creation failed: {err_msg}")
 
     # Search & Filters
     f1, f2 = st.columns([3, 1])
@@ -816,7 +853,9 @@ def render_customer_catalog():
 
 def render_customer_orders():
     token = st.session_state["token"]
-    st.title("Orders")
+    user_name = st.session_state.get("user_name", "Customer")
+    st.title("My Orders")
+    st.markdown(f"Order history for **{user_name}**")
 
     try:
         txs = api.get_transactions(token)
@@ -828,7 +867,7 @@ def render_customer_orders():
                 hide_index=True
             )
         else:
-            st.info("No orders found.")
+            st.info("You have not placed any orders yet. Head over to the Products catalog to buy items!")
     except Exception as e:
         st.error(f"Error fetching orders: {e}")
 

@@ -48,6 +48,7 @@ def seed():
             ("Carlos Mendez", "carlos.m@example.com"),
             ("Ananya Rao", "ananya.rao@example.com"),
         ]
+        customer_users = []
         for name, email in customers_data:
             cust = User(
                 full_name=name,
@@ -57,7 +58,9 @@ def seed():
                 is_active=True
             )
             db.add(cust)
-        db.commit()
+            db.commit()
+            db.refresh(cust)
+            customer_users.append(cust)
 
         # 2c. Vendor Accounts (10 diverse vendors)
         vendor_profiles_data = [
@@ -219,10 +222,12 @@ def seed():
                     second=rng.randint(0, 59)
                 )
                 amt = prod.price * qty
+                chosen_cust = rng.choice(customer_users)
 
                 tx = Transaction(
                     product_id=prod.product_id,
                     vendor_id=prod.vendor_id,
+                    user_id=chosen_cust.user_id,
                     quantity=qty,
                     amount=amt,
                     transaction_date=tx_time

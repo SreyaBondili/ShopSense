@@ -4,7 +4,7 @@ from app.models.user import User, UserRole
 from app.models.vendor import Vendor, VendorStatus
 from app.schemas.auth import UserRegisterRequest, UserLoginRequest, TokenResponse, UserResponse
 from app.utils.security import hash_password, verify_password, create_access_token
-from app.utils.validators import validate_email_format, validate_owner_name
+from app.utils.validators import validate_email_format, validate_owner_name, validate_phone_number
 
 def register_user(db: Session, request: UserRegisterRequest) -> UserResponse:
     # 0. Block public admin registration unless authorized with Admin Security Passcode
@@ -63,13 +63,28 @@ def register_user(db: Session, request: UserRegisterRequest) -> UserResponse:
             db.commit()
             vendor_id = existing_vendor.vendor_id
         else:
+            # Determine vendor details from registration request
+            store_name = request.business_name.strip() if request.business_name and request.business_name.strip() else f"{new_user.full_name}'s Store"
+            store_cat = request.category.strip() if request.category and request.category.strip() else "General"
+
+            # Validate phone number if provided
+            phone_val = "0000000000"
+            if request.phone and request.phone.strip():
+                is_valid_phone, phone_msg = validate_phone_number(request.phone.strip())
+                if not is_valid_phone:
+                    raise HTTPException(
+                        status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                        detail=phone_msg
+                    )
+                phone_val = phone_msg
+
             # Auto-create linked vendor profile (starts PENDING until admin activates)
             new_vendor = Vendor(
-                business_name=f"{new_user.full_name}'s Store",
+                business_name=store_name,
                 owner_name=new_user.full_name,
                 email=norm_email,
-                phone="0000000000",
-                category="General",
+                phone=phone_val,
+                category=store_cat,
                 status=VendorStatus.PENDING,
                 user_id=new_user.user_id
             )

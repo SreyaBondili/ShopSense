@@ -77,6 +77,7 @@ def create_transaction(
     new_transaction = Transaction(
         product_id=product.product_id,
         vendor_id=vendor.vendor_id,
+        user_id=current_user.user_id if current_user else None,
         quantity=data.quantity,
         amount=total_amount,
         transaction_date=datetime.now()
@@ -95,11 +96,13 @@ def get_transactions(
 ) -> List[dict]:
     query = db.query(Transaction).join(Product).join(Vendor)
 
-    # Role restriction
+    # Role restriction: Vendor sees their shop sales, Customer sees ONLY their personal orders, Admin sees all
     if current_user.role == UserRole.VENDOR:
         if not current_user.vendor:
             return []
         query = query.filter(Transaction.vendor_id == current_user.vendor.vendor_id)
+    elif current_user.role == UserRole.CUSTOMER:
+        query = query.filter(Transaction.user_id == current_user.user_id)
     elif vendor_id:
         query = query.filter(Transaction.vendor_id == vendor_id)
 
@@ -116,6 +119,7 @@ def get_transactions(
             "product_name": r.product.product_name if r.product else None,
             "vendor_id": r.vendor_id,
             "vendor_name": r.vendor.business_name if r.vendor else None,
+            "user_id": r.user_id,
             "quantity": r.quantity,
             "amount": r.amount,
             "transaction_date": r.transaction_date
@@ -139,6 +143,12 @@ def get_transaction_by_id(
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="You are not authorized to view this transaction."
+            )
+    elif current_user.role == UserRole.CUSTOMER:
+        if t.user_id != current_user.user_id:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="You are not authorized to view this order."
             )
 
     return {

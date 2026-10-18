@@ -14,6 +14,7 @@ class TransactionResponse(BaseModel):
     product_name: Optional[str] = None
     vendor_id: int
     vendor_name: Optional[str] = None
+    user_id: Optional[int] = None
     quantity: int
     amount: Decimal
     transaction_date: datetime

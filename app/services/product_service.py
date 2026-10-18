@@ -40,7 +40,18 @@ def create_product(db: Session, data: ProductCreate, current_user: User) -> Prod
             detail="Cannot add products to a SUSPENDED vendor."
         )
 
-    # 3. Validate price and stock
+    # 3. Check for duplicate product name under the same vendor
+    existing_product = db.query(Product).filter(
+        Product.vendor_id == target_vendor_id,
+        Product.product_name == data.product_name.strip()
+    ).first()
+    if existing_product:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=f"A product named '{data.product_name.strip()}' already exists in this vendor's catalog."
+        )
+
+    # 4. Validate price and stock
     if data.price <= 0:
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
@@ -52,7 +63,7 @@ def create_product(db: Session, data: ProductCreate, current_user: User) -> Prod
             detail="Initial product stock cannot be negative."
         )
 
-    # 4. Create product
+    # 5. Create product
     product = Product(
         product_name=data.product_name.strip(),
         category=data.category.strip(),
