@@ -200,19 +200,31 @@ def render_dashboard_page():
         return
 
     # Top KPI Metrics
-    c1, c2, c3, c4, c5 = st.columns(5)
-    with c1:
-        st.metric("Total Revenue", f"${summary['total_revenue']:,.2f}")
-    with c2:
-        st.metric("Total Transactions", f"{summary['total_transactions']:,}")
-    with c3:
-        st.metric("Units Sold", f"{summary['total_quantity_sold']:,}")
-    with c4:
-        st.metric("Avg Order Value", f"${summary['average_transaction_value']:,.2f}")
-    with c5:
-        if role == "ADMIN":
+    if role == "ADMIN":
+        c1, c2, c3, c4, c5, c6 = st.columns(6)
+        with c1:
+            st.metric("Total Revenue", f"${summary['total_revenue']:,.2f}")
+        with c2:
+            st.metric("Total Orders", f"{summary['total_transactions']:,}")
+        with c3:
+            st.metric("Units Sold", f"{summary['total_quantity_sold']:,}")
+        with c4:
+            st.metric("Avg Order Value", f"${summary['average_transaction_value']:,.2f}")
+        with c5:
             st.metric("Total Vendors", f"{summary['total_vendors']}")
-        else:
+        with c6:
+            st.metric("Total Products", f"{summary['total_products']}")
+    else:
+        c1, c2, c3, c4, c5 = st.columns(5)
+        with c1:
+            st.metric("Total Revenue", f"${summary['total_revenue']:,.2f}")
+        with c2:
+            st.metric("Total Orders", f"{summary['total_transactions']:,}")
+        with c3:
+            st.metric("Units Sold", f"{summary['total_quantity_sold']:,}")
+        with c4:
+            st.metric("Avg Order Value", f"${summary['average_transaction_value']:,.2f}")
+        with c5:
             st.metric("Total Products", f"{summary['total_products']}")
 
     st.markdown("---")
@@ -668,15 +680,32 @@ def render_analytics_page():
 
     # Overview KPIs
     summary = api.get_summary(token)
-    m1, m2, m3, m4 = st.columns(4)
-    with m1:
-        st.metric("Total Revenue", f"${summary['total_revenue']:,.2f}")
-    with m2:
-        st.metric("Total Transactions", f"{summary['total_transactions']:,}")
-    with m3:
-        st.metric("Units Sold", f"{summary['total_quantity_sold']:,}")
-    with m4:
-        st.metric("Avg Transaction Value", f"${summary['average_transaction_value']:,.2f}")
+    if role == "ADMIN":
+        m1, m2, m3, m4, m5, m6 = st.columns(6)
+        with m1:
+            st.metric("Total Revenue", f"${summary['total_revenue']:,.2f}")
+        with m2:
+            st.metric("Total Transactions", f"{summary['total_transactions']:,}")
+        with m3:
+            st.metric("Units Sold", f"{summary['total_quantity_sold']:,}")
+        with m4:
+            st.metric("Avg Order Value", f"${summary['average_transaction_value']:,.2f}")
+        with m5:
+            st.metric("Total Vendors", f"{summary['total_vendors']}")
+        with m6:
+            st.metric("Total Products", f"{summary['total_products']}")
+    else:
+        m1, m2, m3, m4, m5 = st.columns(5)
+        with m1:
+            st.metric("Total Revenue", f"${summary['total_revenue']:,.2f}")
+        with m2:
+            st.metric("Total Transactions", f"{summary['total_transactions']:,}")
+        with m3:
+            st.metric("Units Sold", f"{summary['total_quantity_sold']:,}")
+        with m4:
+            st.metric("Avg Order Value", f"${summary['average_transaction_value']:,.2f}")
+        with m5:
+            st.metric("Total Products", f"{summary['total_products']}")
 
     st.markdown("---")
 
