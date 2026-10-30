@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { api } from '../api';
 import { Package, Plus, Search, Edit2, Trash2 } from 'lucide-react';
@@ -160,9 +159,9 @@ export default function ProductsPage({ user }) {
 
       {/* Add Product Form */}
       {showAddForm && (
-        <div className="card" style={{ border: '1px solid #6366f1' }}>
-          <div className="card-title">
-            <Package size={18} color="#6366f1" />
+        <div className="card" style={{ border: '1px solid #C7D2FE', marginBottom: '24px' }}>
+          <div className="card-title" style={{ marginBottom: '18px' }}>
+            <Package size={18} color="#6366F1" />
             <span>Add New Product to Catalog</span>
           </div>
           <form onSubmit={handleCreateProduct}>
@@ -239,7 +238,7 @@ export default function ProductsPage({ user }) {
               )}
             </div>
 
-            <button type="submit" className="btn btn-primary" style={{ marginTop: '10px' }}>
+            <button type="submit" className="btn btn-primary" style={{ marginTop: '12px' }}>
               Add Product to Catalog
             </button>
           </form>
@@ -247,7 +246,7 @@ export default function ProductsPage({ user }) {
       )}
 
       {/* Filters */}
-      <div className="card" style={{ padding: '16px' }}>
+      <div className="card" style={{ padding: '20px', marginBottom: '20px' }}>
         <form onSubmit={handleSearchSubmit} className="form-grid-2" style={{ margin: 0 }}>
           <div>
             <label className="form-label">Search products</label>
@@ -284,8 +283,8 @@ export default function ProductsPage({ user }) {
       </div>
 
       {/* Products Table */}
-      <div className="card">
-        <div className="card-title">
+      <div className="card" style={{ padding: '24px', marginBottom: '24px' }}>
+        <div className="card-title" style={{ marginBottom: '16px' }}>
           <span>Product Catalog ({products.length})</span>
         </div>
         <div className="table-responsive">
@@ -313,9 +312,9 @@ export default function ProductsPage({ user }) {
                   style={{ cursor: 'pointer' }}
                 >
                   <td><strong>#{p.product_id}</strong></td>
-                  <td style={{ fontWeight: '600', color: '#f8fafc' }}>{p.product_name}</td>
+                  <td style={{ fontWeight: '600', color: '#1E293B' }}>{p.product_name}</td>
                   <td><span className="badge badge-info">{p.category}</span></td>
-                  <td style={{ fontWeight: '700', color: '#34d399' }}>₹{Number(p.price).toFixed(2)}</td>
+                  <td style={{ fontWeight: '700', color: '#059669' }}>₹{Number(p.price).toFixed(2)}</td>
                   <td>
                     <span className={`badge ${
                       p.stock === 0 ? 'badge-danger' :
@@ -325,7 +324,7 @@ export default function ProductsPage({ user }) {
                        p.stock <= 10 ? `LOW STOCK (${p.stock})` : `IN STOCK (${p.stock})`}
                     </span>
                   </td>
-                  <td style={{ color: '#94a3b8' }}>{p.vendor_name || `Vendor #${p.vendor_id}`}</td>
+                  <td style={{ color: '#64748B' }}>{p.vendor_name || `Vendor #${p.vendor_id}`}</td>
                   <td>
                     <span className="badge badge-success">ACTIVE</span>
                   </td>
@@ -333,7 +332,7 @@ export default function ProductsPage({ user }) {
               ))}
               {products.length === 0 && (
                 <tr>
-                  <td colSpan="7" style={{ textAlign: 'center', padding: '30px', color: '#94a3b8' }}>
+                  <td colSpan="7" style={{ textAlign: 'center', padding: '30px', color: '#64748B' }}>
                     No products found matching criteria.
                   </td>
                 </tr>
@@ -345,9 +344,9 @@ export default function ProductsPage({ user }) {
 
       {/* Edit Product Details */}
       {products.length > 0 && (
-        <div className="card">
-          <div className="card-title">
-            <Edit2 size={16} color="#6366f1" />
+        <div className="card" style={{ padding: '24px' }}>
+          <div className="card-title" style={{ marginBottom: '16px' }}>
+            <Edit2 size={16} color="#6366F1" />
             <span>Edit Product Details</span>
           </div>
 

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../api';
+import AnimatedCounter from '../components/AnimatedCounter';
 import { Download, BarChart2, TrendingUp, Users, Package, Sparkles, BrainCircuit, Target, RefreshCw } from 'lucide-react';
 
 export default function AnalyticsPage({ user }) {
@@ -82,10 +83,11 @@ export default function AnalyticsPage({ user }) {
 
       {error && <div className="alert alert-error"><span>⚠️</span><span>{error}</span></div>}
 
-      {/* Navigation Sub-Tabs */}
+      {/* Navigation Sub-Tabs in Lavender & White */}
       <div style={{
-        display: 'flex', gap: '8px', background: '#0f172a', padding: '6px',
-        borderRadius: '12px', border: '1px solid #334155', marginBottom: '20px', flexWrap: 'wrap'
+        display: 'flex', gap: '8px', background: '#FFFFFF', padding: '6px',
+        borderRadius: '12px', border: '1px solid #E9EAF3', marginBottom: '20px', flexWrap: 'wrap',
+        boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
       }}>
         {[
           { id: 'overview', label: 'Executive Overview', icon: BarChart2 },
@@ -100,11 +102,12 @@ export default function AnalyticsPage({ user }) {
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
               style={{
-                display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 14px',
+                display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 16px',
                 borderRadius: '8px', border: 'none',
-                background: isActive ? '#6366f1' : 'transparent',
-                color: isActive ? '#fff' : '#94a3b8',
-                fontWeight: '600', fontSize: '13px', cursor: 'pointer'
+                background: isActive ? '#6366F1' : 'transparent',
+                color: isActive ? '#FFFFFF' : '#64748B',
+                fontWeight: '600', fontSize: '13px', cursor: 'pointer',
+                transition: 'all 0.2s ease'
               }}
             >
               <Icon size={14} />
@@ -120,35 +123,47 @@ export default function AnalyticsPage({ user }) {
           <div className="kpi-grid">
             <div className="kpi-card">
               <div className="kpi-label">Marketplace Revenue</div>
-              <div className="kpi-value" style={{ color: '#34d399' }}>
-                ₹{Number(isAdmin ? 100000.00 : summary.total_revenue || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              <div className="kpi-value" style={{ color: '#059669' }}>
+                <AnimatedCounter
+                  value={isAdmin ? 100000.00 : summary.total_revenue || 0}
+                  prefix="₹"
+                  decimals={2}
+                  duration={1300}
+                />
               </div>
-              <div style={{ fontSize: '11px', color: '#6ee7b7', marginTop: '2px' }}>₹1.00 Lakh (Target Sales Milestone)</div>
+              <div style={{ fontSize: '11px', color: '#059669', marginTop: '3px', fontWeight: '600' }}>
+                ₹1.00 Lakh (Target Sales Milestone)
+              </div>
             </div>
             <div className="kpi-card">
               <div className="kpi-label">Total Transactions</div>
-              <div className="kpi-value" style={{ color: '#60a5fa' }}>
-                {Number(summary.total_transactions || 0).toLocaleString()}
+              <div className="kpi-value" style={{ color: '#6366F1' }}>
+                <AnimatedCounter value={summary.total_transactions || 0} duration={1100} />
               </div>
             </div>
             <div className="kpi-card">
               <div className="kpi-label">Units Sold</div>
-              <div className="kpi-value" style={{ color: '#a78bfa' }}>
-                {Number(summary.total_quantity_sold || 0).toLocaleString()}
+              <div className="kpi-value" style={{ color: '#4F46E5' }}>
+                <AnimatedCounter value={summary.total_quantity_sold || 0} duration={1200} />
               </div>
             </div>
             <div className="kpi-card">
               <div className="kpi-label">Avg Order Value</div>
-              <div className="kpi-value" style={{ color: '#fcd34d' }}>
-                ₹{Number(isAdmin ? 100000 / (summary.total_transactions || 1) : summary.average_transaction_value || 0).toFixed(2)}
+              <div className="kpi-value" style={{ color: '#D97706' }}>
+                <AnimatedCounter
+                  value={isAdmin ? 100000 / (summary.total_transactions || 1) : summary.average_transaction_value || 0}
+                  prefix="₹"
+                  decimals={2}
+                  duration={1200}
+                />
               </div>
             </div>
           </div>
 
           {/* Quick Action Export Buttons */}
-          <div className="card" style={{ padding: '20px', marginTop: '20px' }}>
-            <div className="card-title">
-              <Download size={18} color="#6366f1" />
+          <div className="card" style={{ padding: '24px', marginTop: '20px' }}>
+            <div className="card-title" style={{ marginBottom: '14px' }}>
+              <Download size={18} color="#6366F1" />
               <span>Download Intelligence Reports</span>
             </div>
             <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
@@ -176,27 +191,29 @@ export default function AnalyticsPage({ user }) {
             <div className="kpi-grid" style={{ marginBottom: '20px' }}>
               <div className="kpi-card">
                 <div className="kpi-label">K-Means Silhouette Score</div>
-                <div className="kpi-value" style={{ color: '#34d399' }}>
-                  {segments.metrics.silhouette_score}
+                <div className="kpi-value" style={{ color: '#059669' }}>
+                  <AnimatedCounter value={segments.metrics.silhouette_score} decimals={3} duration={1200} />
                 </div>
-                <div style={{ fontSize: '11px', color: '#6ee7b7', marginTop: '2px' }}>
+                <div style={{ fontSize: '11px', color: '#059669', marginTop: '3px', fontWeight: '600' }}>
                   Target &ge; 0.85 Achieved (High Cluster Cohesion)
                 </div>
               </div>
               <div className="kpi-card">
                 <div className="kpi-label">Analyzed Segments</div>
-                <div className="kpi-value" style={{ color: '#60a5fa' }}>{segments.metrics.clusters} Clusters</div>
+                <div className="kpi-value" style={{ color: '#6366F1' }}>
+                  <AnimatedCounter value={segments.metrics.clusters} suffix=" Clusters" duration={1000} />
+                </div>
               </div>
               <div className="kpi-card">
                 <div className="kpi-label">Total Customer Spend</div>
-                <div className="kpi-value" style={{ color: '#a78bfa' }}>
-                  ₹{Number(customers?.total_spending || 0).toLocaleString()}
+                <div className="kpi-value" style={{ color: '#4F46E5' }}>
+                  <AnimatedCounter value={customers?.total_spending || 0} prefix="₹" duration={1200} />
                 </div>
               </div>
               <div className="kpi-card">
                 <div className="kpi-label">Customer AOV</div>
-                <div className="kpi-value" style={{ color: '#fcd34d' }}>
-                  ₹{Number(customers?.average_order_value || 0).toFixed(2)}
+                <div className="kpi-value" style={{ color: '#D97706' }}>
+                  <AnimatedCounter value={customers?.average_order_value || 0} prefix="₹" decimals={2} duration={1200} />
                 </div>
               </div>
             </div>
@@ -205,28 +222,29 @@ export default function AnalyticsPage({ user }) {
           {/* Segment Profiles Grid */}
           {segments && segments.segments && (
             <div style={{
-              display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))',
-              gap: '16px', marginBottom: '24px'
+              display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))',
+              gap: '18px', marginBottom: '24px'
             }}>
               {segments.segments.map((s, idx) => (
                 <div key={idx} style={{
-                  background: '#1e293b', borderRadius: '12px', border: '1px solid #334155', padding: '18px'
+                  background: '#FFFFFF', borderRadius: '14px', border: '1px solid #E9EAF3', padding: '20px',
+                  boxShadow: '0 2px 6px rgba(0,0,0,0.04)'
                 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                    <span style={{ fontWeight: '800', color: '#f8fafc', fontSize: '15px' }}>{s.name}</span>
+                    <span style={{ fontWeight: '800', color: '#1E293B', fontSize: '15px' }}>{s.name}</span>
                     <span className="badge badge-primary">{s.pct}%</span>
                   </div>
-                  <p style={{ fontSize: '12px', color: '#94a3b8', marginBottom: '14px', lineHeight: '1.4' }}>
+                  <p style={{ fontSize: '12px', color: '#64748B', marginBottom: '14px', lineHeight: '1.4' }}>
                     {s.description}
                   </p>
-                  <div style={{ borderTop: '1px solid #334155', paddingTop: '10px', fontSize: '12px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                  <div style={{ borderTop: '1px solid #E9EAF3', paddingTop: '10px', fontSize: '12px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                      <span style={{ color: '#64748b' }}>Avg Spend:</span>
-                      <strong style={{ color: '#34d399' }}>₹{Number(s.avg_spend).toLocaleString()}</strong>
+                      <span style={{ color: '#64748B' }}>Avg Spend:</span>
+                      <strong style={{ color: '#059669' }}>₹{Number(s.avg_spend).toLocaleString('en-IN')}</strong>
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                      <span style={{ color: '#64748b' }}>Avg Orders:</span>
-                      <strong style={{ color: '#f8fafc' }}>{s.avg_orders}</strong>
+                      <span style={{ color: '#64748B' }}>Avg Orders:</span>
+                      <strong style={{ color: '#1E293B' }}>{s.avg_orders}</strong>
                     </div>
                   </div>
                 </div>
@@ -236,9 +254,9 @@ export default function AnalyticsPage({ user }) {
 
           {/* Top Customers Table */}
           {customers && customers.top_customers && (
-            <div className="card" style={{ padding: '20px' }}>
-              <div className="card-title">
-                <Users size={18} color="#6366f1" />
+            <div className="card" style={{ padding: '24px' }}>
+              <div className="card-title" style={{ marginBottom: '16px' }}>
+                <Users size={18} color="#6366F1" />
                 <span>Top Customers by Lifetime Value</span>
               </div>
               <div className="table-container">
@@ -257,13 +275,13 @@ export default function AnalyticsPage({ user }) {
                   <tbody>
                     {customers.top_customers.map((c, i) => (
                       <tr key={i}>
-                        <td style={{ fontWeight: '600', color: '#f8fafc' }}>{c.customer_name}</td>
-                        <td style={{ color: '#94a3b8' }}>{c.email}</td>
-                        <td style={{ fontWeight: '700' }}>{c.total_orders}</td>
-                        <td style={{ fontWeight: '800', color: '#34d399' }}>₹{c.total_spent.toLocaleString()}</td>
-                        <td>₹{c.average_order_value.toFixed(2)}</td>
+                        <td style={{ fontWeight: '600', color: '#1E293B' }}>{c.customer_name}</td>
+                        <td style={{ color: '#64748B' }}>{c.email}</td>
+                        <td style={{ fontWeight: '700', color: '#1E293B' }}>{c.total_orders}</td>
+                        <td style={{ fontWeight: '800', color: '#059669' }}>₹{c.total_spent.toLocaleString('en-IN')}</td>
+                        <td style={{ color: '#1E293B' }}>₹{c.average_order_value.toFixed(2)}</td>
                         <td><span className="badge badge-secondary">{c.preferred_category}</span></td>
-                        <td style={{ fontSize: '12px', color: '#94a3b8' }}>{c.last_order_date}</td>
+                        <td style={{ fontSize: '12px', color: '#64748B' }}>{c.last_order_date}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -280,33 +298,39 @@ export default function AnalyticsPage({ user }) {
           <div className="kpi-grid" style={{ marginBottom: '20px' }}>
             <div className="kpi-card">
               <div className="kpi-label">Relevance Score</div>
-              <div className="kpi-value" style={{ color: '#34d399' }}>
-                {recEval.metrics.relevance_pct}%
+              <div className="kpi-value" style={{ color: '#059669' }}>
+                <AnimatedCounter value={recEval.metrics.relevance_pct} suffix="%" decimals={1} duration={1200} />
               </div>
-              <div style={{ fontSize: '11px', color: '#6ee7b7', marginTop: '2px' }}>
+              <div style={{ fontSize: '11px', color: '#059669', marginTop: '3px', fontWeight: '600' }}>
                 Target &ge; 75% Achieved
               </div>
             </div>
             <div className="kpi-card">
               <div className="kpi-label">Precision@5</div>
-              <div className="kpi-value" style={{ color: '#60a5fa' }}>{recEval.metrics.precision_at_k}%</div>
+              <div className="kpi-value" style={{ color: '#6366F1' }}>
+                <AnimatedCounter value={recEval.metrics.precision_at_k} suffix="%" decimals={1} duration={1100} />
+              </div>
             </div>
             <div className="kpi-card">
               <div className="kpi-label">Recall@5</div>
-              <div className="kpi-value" style={{ color: '#a78bfa' }}>{recEval.metrics.recall_at_k}%</div>
+              <div className="kpi-value" style={{ color: '#4F46E5' }}>
+                <AnimatedCounter value={recEval.metrics.recall_at_k} suffix="%" decimals={1} duration={1100} />
+              </div>
             </div>
             <div className="kpi-card">
               <div className="kpi-label">Catalog Coverage</div>
-              <div className="kpi-value" style={{ color: '#fcd34d' }}>{recEval.metrics.catalog_coverage_pct}%</div>
+              <div className="kpi-value" style={{ color: '#D97706' }}>
+                <AnimatedCounter value={recEval.metrics.catalog_coverage_pct} suffix="%" decimals={1} duration={1100} />
+              </div>
             </div>
           </div>
 
-          <div className="card" style={{ padding: '20px' }}>
-            <div className="card-title">
-              <BrainCircuit size={18} color="#818cf8" />
+          <div className="card" style={{ padding: '24px' }}>
+            <div className="card-title" style={{ marginBottom: '12px' }}>
+              <BrainCircuit size={18} color="#6366F1" />
               <span>Cosine Similarity Collaborative Filtering Architecture</span>
             </div>
-            <p style={{ color: '#94a3b8', fontSize: '13px', lineHeight: '1.5' }}>
+            <p style={{ color: '#64748B', fontSize: '13px', lineHeight: '1.6' }}>
               The recommendation engine constructs a customer-product interaction matrix from completed sales, computes user-user and item-item cosine similarity vectors, filters out already-purchased and out-of-stock products, and automatically deploys category-based cold-start fallbacks for first-time shoppers.
             </p>
           </div>
@@ -316,9 +340,9 @@ export default function AnalyticsPage({ user }) {
       {/* TAB 4: PRODUCT & VENDOR REPORTS */}
       {activeTab === 'performance' && (
         <div className="charts-grid-equal">
-          <div className="card" style={{ padding: '20px' }}>
-            <div className="card-title">
-              <Package size={18} color="#38bdf8" />
+          <div className="card" style={{ padding: '24px' }}>
+            <div className="card-title" style={{ marginBottom: '16px' }}>
+              <Package size={18} color="#6366F1" />
               <span>Product Sales Leaderboard</span>
             </div>
             <div className="table-container">
@@ -333,9 +357,9 @@ export default function AnalyticsPage({ user }) {
                 <tbody>
                   {productPerf.slice(0, 8).map((p, i) => (
                     <tr key={i}>
-                      <td style={{ fontWeight: '600', color: '#f8fafc' }}>{p.product_name}</td>
-                      <td>{p.quantity_sold}</td>
-                      <td style={{ fontWeight: '700', color: '#34d399' }}>₹{Number(p.total_revenue).toLocaleString()}</td>
+                      <td style={{ fontWeight: '600', color: '#1E293B' }}>{p.product_name}</td>
+                      <td style={{ color: '#1E293B' }}>{p.quantity_sold}</td>
+                      <td style={{ fontWeight: '700', color: '#059669' }}>₹{Number(p.total_revenue).toLocaleString('en-IN')}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -344,9 +368,9 @@ export default function AnalyticsPage({ user }) {
           </div>
 
           {isAdmin && (
-            <div className="card" style={{ padding: '20px' }}>
-              <div className="card-title">
-                <Users size={18} color="#f59e0b" />
+            <div className="card" style={{ padding: '24px' }}>
+              <div className="card-title" style={{ marginBottom: '16px' }}>
+                <Users size={18} color="#6366F1" />
                 <span>Vendor Contribution</span>
               </div>
               <div className="table-container">
@@ -361,9 +385,9 @@ export default function AnalyticsPage({ user }) {
                   <tbody>
                     {vendorPerf.slice(0, 8).map((v, i) => (
                       <tr key={i}>
-                        <td style={{ fontWeight: '600', color: '#f8fafc' }}>{v.business_name}</td>
-                        <td>{v.product_count}</td>
-                        <td style={{ fontWeight: '700', color: '#34d399' }}>₹{Number(v.total_revenue).toLocaleString()}</td>
+                        <td style={{ fontWeight: '600', color: '#1E293B' }}>{v.business_name}</td>
+                        <td style={{ color: '#1E293B' }}>{v.product_count}</td>
+                        <td style={{ fontWeight: '700', color: '#059669' }}>₹{Number(v.total_revenue).toLocaleString('en-IN')}</td>
                       </tr>
                     ))}
                   </tbody>

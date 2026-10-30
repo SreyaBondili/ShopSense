@@ -151,9 +151,9 @@ export default function VendorsPage({ user }) {
 
       {/* Onboard Form */}
       {showAddForm && (
-        <div className="card" style={{ border: '1px solid #6366f1' }}>
-          <div className="card-title">
-            <UserCheck size={18} color="#6366f1" />
+        <div className="card" style={{ border: '1px solid #C7D2FE', marginBottom: '24px' }}>
+          <div className="card-title" style={{ marginBottom: '18px' }}>
+            <UserCheck size={18} color="#6366F1" />
             <span>Onboard New Vendor</span>
           </div>
           <form onSubmit={handleCreateVendor}>
@@ -234,7 +234,7 @@ export default function VendorsPage({ user }) {
               </div>
             </div>
 
-            <button type="submit" className="btn btn-primary" style={{ marginTop: '10px' }}>
+            <button type="submit" className="btn btn-primary" style={{ marginTop: '12px' }}>
               Register & Activate Vendor
             </button>
           </form>
@@ -242,7 +242,7 @@ export default function VendorsPage({ user }) {
       )}
 
       {/* Filters */}
-      <div className="card" style={{ padding: '16px' }}>
+      <div className="card" style={{ padding: '20px', marginBottom: '20px' }}>
         <form onSubmit={handleSearchSubmit} className="form-grid-3" style={{ margin: 0 }}>
           <div>
             <label className="form-label">Search vendors</label>
@@ -292,8 +292,8 @@ export default function VendorsPage({ user }) {
       </div>
 
       {/* Vendors Table */}
-      <div className="card">
-        <div className="card-title">
+      <div className="card" style={{ padding: '24px', marginBottom: '24px' }}>
+        <div className="card-title" style={{ marginBottom: '16px' }}>
           <span>Registered Vendors ({vendors.length})</span>
         </div>
         <div className="table-responsive">
@@ -318,12 +318,12 @@ export default function VendorsPage({ user }) {
                   setNewCommission(v.commission_rate);
                 }} style={{ cursor: 'pointer' }}>
                   <td><strong>#{v.vendor_id}</strong></td>
-                  <td style={{ fontWeight: '600', color: '#f8fafc' }}>{v.business_name}</td>
-                  <td>{v.owner_name}</td>
-                  <td style={{ color: '#94a3b8' }}>{v.email}</td>
-                  <td>{v.phone}</td>
+                  <td style={{ fontWeight: '600', color: '#1E293B' }}>{v.business_name}</td>
+                  <td style={{ color: '#1E293B' }}>{v.owner_name}</td>
+                  <td style={{ color: '#64748B' }}>{v.email}</td>
+                  <td style={{ color: '#64748B' }}>{v.phone}</td>
                   <td><span className="badge badge-info">{v.category}</span></td>
-                  <td>{v.commission_rate}%</td>
+                  <td style={{ fontWeight: '600', color: '#1E293B' }}>{v.commission_rate}%</td>
                   <td>
                     <span className={`badge ${
                       v.status === 'ACTIVE' ? 'badge-success' :
@@ -336,7 +336,7 @@ export default function VendorsPage({ user }) {
               ))}
               {vendors.length === 0 && (
                 <tr>
-                  <td colSpan="8" style={{ textAlign: 'center', padding: '30px', color: '#94a3b8' }}>
+                  <td colSpan="8" style={{ textAlign: 'center', padding: '30px', color: '#64748B' }}>
                     No vendors found matching criteria.
                   </td>
                 </tr>
@@ -348,8 +348,8 @@ export default function VendorsPage({ user }) {
 
       {/* Vendor Actions Box */}
       {vendors.length > 0 && (
-        <div className="card">
-          <div className="card-title">
+        <div className="card" style={{ padding: '24px' }}>
+          <div className="card-title" style={{ marginBottom: '16px' }}>
             <span>⚙️ Vendor Actions</span>
           </div>
           <div className="form-group">

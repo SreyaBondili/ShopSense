@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { api } from '../api';
-import { LogIn, UserPlus, CheckCircle, ShoppingBag, Store, ShieldCheck, Mail, Lock, AlertTriangle } from 'lucide-react';
+import { LogIn, UserPlus, CheckCircle, ShoppingBag, Store, ShieldCheck, AlertTriangle } from 'lucide-react';
 
 export default function LoginPage({ onLoginSuccess }) {
   // Three separate login portals: 'customer', 'vendor', 'admin'
@@ -50,15 +50,7 @@ export default function LoginPage({ onLoginSuccess }) {
 
     try {
       const user = await api.login(email.trim(), password);
-
-      // Verify portal match or provide helpful feedback
-      const expectedRole = activePortal.toUpperCase();
-      if (user.role !== expectedRole) {
-        // Still allow login, but inform user
-        onLoginSuccess(user);
-      } else {
-        onLoginSuccess(user);
-      }
+      onLoginSuccess(user);
     } catch (err) {
       setError(err.message || 'Login failed. Please verify your credentials.');
     } finally {
@@ -106,34 +98,43 @@ export default function LoginPage({ onLoginSuccess }) {
     }
   };
 
-  // Portal-specific visual configurations
+  // Portal-specific visual configurations (Soft Lavender theme compliant)
   const portalConfig = {
     customer: {
       title: 'Customer Login',
       badge: 'Shopper Portal',
       subtitle: 'Browse products, manage shopping cart, and track orders',
       icon: ShoppingBag,
-      gradient: 'linear-gradient(135deg, #6366f1, #3b82f6)',
-      accentColor: '#6366f1',
-      bgGlow: 'rgba(99, 102, 241, 0.15)',
+      gradient: 'linear-gradient(135deg, #6366F1, #4F46E5)',
+      accentColor: '#6366F1',
+      bgHighlight: '#EEF2FF',
+      activeTabBg: '#EEF2FF',
+      activeColor: '#4F46E5',
+      activeBorder: '#C7D2FE'
     },
     vendor: {
       title: 'Vendor Portal Login',
       badge: 'Merchant Center',
       subtitle: 'Manage catalog products, restock inventory, and view sales performance',
       icon: Store,
-      gradient: 'linear-gradient(135deg, #f59e0b, #10b981)',
-      accentColor: '#f59e0b',
-      bgGlow: 'rgba(245, 158, 11, 0.15)',
+      gradient: 'linear-gradient(135deg, #D97706, #B45309)',
+      accentColor: '#D97706',
+      bgHighlight: '#FEF3C7',
+      activeTabBg: '#FEF3C7',
+      activeColor: '#B45309',
+      activeBorder: '#FDE68A'
     },
     admin: {
       title: 'Admin Executive Login',
       badge: 'Platform Administration',
       subtitle: 'Marketplace analytics, vendor management, and ML forecasting algorithms',
       icon: ShieldCheck,
-      gradient: 'linear-gradient(135deg, #ec4899, #8b5cf6)',
-      accentColor: '#ec4899',
-      bgGlow: 'rgba(236, 72, 153, 0.15)',
+      gradient: 'linear-gradient(135deg, #6366F1, #8B5CF6)',
+      accentColor: '#6366F1',
+      bgHighlight: '#EDE9FE',
+      activeTabBg: '#EDE9FE',
+      activeColor: '#6D28D9',
+      activeBorder: '#DDD6FE'
     }
   };
 
@@ -147,26 +148,26 @@ export default function LoginPage({ onLoginSuccess }) {
       flexDirection: 'column',
       alignItems: 'center',
       justifyContent: 'center',
-      background: 'radial-gradient(circle at 50% 15%, #1e1b4b 0%, #0f172a 70%)',
+      background: 'radial-gradient(circle at 50% 15%, #EEF2FF 0%, #F8FAFC 75%)',
       padding: '24px 16px'
     }}>
       {/* Brand Header */}
       <div style={{ textAlign: 'center', marginBottom: '20px' }}>
         <div style={{
           width: '56px', height: '56px',
-          background: 'linear-gradient(135deg, #6366f1, #ec4899)',
+          background: 'linear-gradient(135deg, #6366F1, #4F46E5)',
           borderRadius: '16px',
           display: 'inline-flex',
           alignItems: 'center',
           justifyContent: 'center',
           fontSize: '28px',
           marginBottom: '10px',
-          boxShadow: '0 10px 25px rgba(99,102,241,0.35)'
+          boxShadow: '0 8px 20px rgba(99,102,241,0.25)'
         }}>🛍️</div>
-        <h1 style={{ fontSize: '26px', fontWeight: '800', letterSpacing: '-0.5px', color: '#f8fafc' }}>
+        <h1 style={{ fontSize: '26px', fontWeight: '800', letterSpacing: '-0.5px', color: '#1E293B' }}>
           ShopSense
         </h1>
-        <p style={{ color: '#94a3b8', fontSize: '13px', marginTop: '2px' }}>
+        <p style={{ color: '#64748B', fontSize: '13px', marginTop: '3px' }}>
           Multi-Vendor E-Commerce Analytics Platform
         </p>
       </div>
@@ -178,10 +179,11 @@ export default function LoginPage({ onLoginSuccess }) {
         gap: '8px',
         maxWidth: '520px',
         width: '100%',
-        background: '#0f172a',
+        background: '#FFFFFF',
         padding: '6px',
         borderRadius: '14px',
-        border: '1px solid #334155',
+        border: '1px solid #E9EAF3',
+        boxShadow: '0 2px 6px rgba(0,0,0,0.03)',
         marginBottom: '16px'
       }}>
         <button
@@ -194,9 +196,9 @@ export default function LoginPage({ onLoginSuccess }) {
             gap: '8px',
             padding: '10px 12px',
             borderRadius: '10px',
-            border: activePortal === 'customer' ? '1px solid rgba(99,102,241,0.6)' : '1px solid transparent',
-            background: activePortal === 'customer' ? 'linear-gradient(135deg, #1e1b4b, #2e1065)' : 'transparent',
-            color: activePortal === 'customer' ? '#a5b4fc' : '#94a3b8',
+            border: activePortal === 'customer' ? '1px solid #C7D2FE' : '1px solid transparent',
+            background: activePortal === 'customer' ? '#EEF2FF' : 'transparent',
+            color: activePortal === 'customer' ? '#4F46E5' : '#64748B',
             fontWeight: '700',
             fontSize: '13px',
             cursor: 'pointer',
@@ -217,9 +219,9 @@ export default function LoginPage({ onLoginSuccess }) {
             gap: '8px',
             padding: '10px 12px',
             borderRadius: '10px',
-            border: activePortal === 'vendor' ? '1px solid rgba(245,158,11,0.6)' : '1px solid transparent',
-            background: activePortal === 'vendor' ? 'linear-gradient(135deg, #451a03, #292524)' : 'transparent',
-            color: activePortal === 'vendor' ? '#fcd34d' : '#94a3b8',
+            border: activePortal === 'vendor' ? '1px solid #FDE68A' : '1px solid transparent',
+            background: activePortal === 'vendor' ? '#FEF3C7' : 'transparent',
+            color: activePortal === 'vendor' ? '#B45309' : '#64748B',
             fontWeight: '700',
             fontSize: '13px',
             cursor: 'pointer',
@@ -240,9 +242,9 @@ export default function LoginPage({ onLoginSuccess }) {
             gap: '8px',
             padding: '10px 12px',
             borderRadius: '10px',
-            border: activePortal === 'admin' ? '1px solid rgba(236,72,153,0.6)' : '1px solid transparent',
-            background: activePortal === 'admin' ? 'linear-gradient(135deg, #500724, #1f2937)' : 'transparent',
-            color: activePortal === 'admin' ? '#f472b6' : '#94a3b8',
+            border: activePortal === 'admin' ? '1px solid #DDD6FE' : '1px solid transparent',
+            background: activePortal === 'admin' ? '#EDE9FE' : 'transparent',
+            color: activePortal === 'admin' ? '#6D28D9' : '#64748B',
             fontWeight: '700',
             fontSize: '13px',
             cursor: 'pointer',
@@ -258,44 +260,31 @@ export default function LoginPage({ onLoginSuccess }) {
       <div style={{
         width: '100%',
         maxWidth: '520px',
-        background: '#1e293b',
+        background: '#FFFFFF',
         borderRadius: '18px',
-        border: '1px solid #334155',
+        border: '1px solid #E9EAF3',
         padding: '32px',
-        boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.6)',
+        boxShadow: '0 20px 45px -10px rgba(99, 102, 241, 0.12)',
         position: 'relative',
         overflow: 'hidden'
       }}>
-        {/* Subtle decorative glow */}
-        <div style={{
-          position: 'absolute',
-          top: '-60px',
-          right: '-60px',
-          width: '150px',
-          height: '150px',
-          borderRadius: '50%',
-          background: currentCfg.bgGlow,
-          filter: 'blur(40px)',
-          pointerEvents: 'none'
-        }} />
-
         {/* Portal Header */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '18px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '20px' }}>
           <div style={{
-            width: '42px', height: '42px',
+            width: '44px', height: '44px',
             borderRadius: '12px',
             background: currentCfg.gradient,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            color: '#fff',
-            boxShadow: '0 4px 12px rgba(0,0,0,0.3)'
+            color: '#FFFFFF',
+            boxShadow: '0 4px 12px rgba(99,102,241,0.2)'
           }}>
             <PortalIcon size={20} />
           </div>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <h2 style={{ fontSize: '20px', fontWeight: '800', color: '#f8fafc', margin: 0 }}>
+              <h2 style={{ fontSize: '19px', fontWeight: '800', color: '#1E293B', margin: 0 }}>
                 {mode === 'login' ? currentCfg.title : `Register as ${activePortal.charAt(0).toUpperCase() + activePortal.slice(1)}`}
               </h2>
               <span style={{
@@ -303,14 +292,14 @@ export default function LoginPage({ onLoginSuccess }) {
                 fontWeight: '700',
                 padding: '2px 8px',
                 borderRadius: '12px',
-                background: currentCfg.bgGlow,
-                color: currentCfg.accentColor,
-                border: `1px solid ${currentCfg.accentColor}40`
+                background: currentCfg.bgHighlight,
+                color: currentCfg.activeColor,
+                border: `1px solid ${currentCfg.activeBorder}`
               }}>
                 {currentCfg.badge}
               </span>
             </div>
-            <p style={{ color: '#94a3b8', fontSize: '12px', margin: '3px 0 0 0' }}>
+            <p style={{ color: '#64748B', fontSize: '12px', margin: '3px 0 0 0' }}>
               {currentCfg.subtitle}
             </p>
           </div>
@@ -320,7 +309,7 @@ export default function LoginPage({ onLoginSuccess }) {
         <div style={{
           display: 'grid',
           gridTemplateColumns: '1fr 1fr',
-          background: '#0f172a',
+          background: '#F1F5F9',
           padding: '4px',
           borderRadius: '10px',
           marginBottom: '20px'
@@ -332,11 +321,13 @@ export default function LoginPage({ onLoginSuccess }) {
               padding: '8px',
               borderRadius: '7px',
               border: 'none',
-              background: mode === 'login' ? '#1e293b' : 'transparent',
-              color: mode === 'login' ? '#fff' : '#94a3b8',
-              fontWeight: '600',
+              background: mode === 'login' ? '#FFFFFF' : 'transparent',
+              color: mode === 'login' ? '#1E293B' : '#64748B',
+              boxShadow: mode === 'login' ? '0 1px 3px rgba(0,0,0,0.08)' : 'none',
+              fontWeight: '700',
               fontSize: '13px',
-              cursor: 'pointer'
+              cursor: 'pointer',
+              transition: 'all 0.2s ease'
             }}
           >
             🔐 Sign In
@@ -348,11 +339,13 @@ export default function LoginPage({ onLoginSuccess }) {
               padding: '8px',
               borderRadius: '7px',
               border: 'none',
-              background: mode === 'register' ? '#1e293b' : 'transparent',
-              color: mode === 'register' ? '#fff' : '#94a3b8',
-              fontWeight: '600',
+              background: mode === 'register' ? '#FFFFFF' : 'transparent',
+              color: mode === 'register' ? '#1E293B' : '#64748B',
+              boxShadow: mode === 'register' ? '0 1px 3px rgba(0,0,0,0.08)' : 'none',
+              fontWeight: '700',
               fontSize: '13px',
-              cursor: 'pointer'
+              cursor: 'pointer',
+              transition: 'all 0.2s ease'
             }}
           >
             📝 Create {activePortal.charAt(0).toUpperCase() + activePortal.slice(1)} Account
@@ -365,12 +358,12 @@ export default function LoginPage({ onLoginSuccess }) {
             display: 'flex',
             alignItems: 'center',
             gap: '8px',
-            background: 'rgba(16,185,129,0.12)',
-            border: '1px solid rgba(16,185,129,0.4)',
+            background: '#ECFDF5',
+            border: '1px solid #A7F3D0',
             borderRadius: '8px',
             padding: '10px 14px',
             marginBottom: '16px',
-            color: '#34d399',
+            color: '#059669',
             fontSize: '13px'
           }}>
             <CheckCircle size={16} style={{ flexShrink: 0 }} />
@@ -383,12 +376,12 @@ export default function LoginPage({ onLoginSuccess }) {
             display: 'flex',
             alignItems: 'center',
             gap: '8px',
-            background: 'rgba(239,68,68,0.12)',
-            border: '1px solid rgba(239,68,68,0.4)',
+            background: '#FEF2F2',
+            border: '1px solid #FECACA',
             borderRadius: '8px',
             padding: '10px 14px',
             marginBottom: '16px',
-            color: '#f87171',
+            color: '#DC2626',
             fontSize: '13px'
           }}>
             <AlertTriangle size={16} style={{ flexShrink: 0 }} />
@@ -404,7 +397,7 @@ export default function LoginPage({ onLoginSuccess }) {
             <input type="password" style={{ position: 'absolute', opacity: 0, height: 0, width: 0, pointerEvents: 'none' }} tabIndex="-1" readOnly />
 
             <div className="form-group">
-              <label className="form-label" style={{ fontSize: '13px', fontWeight: '600', color: '#cbd5e1' }}>
+              <label className="form-label" style={{ fontSize: '13px', fontWeight: '600', color: '#1E293B' }}>
                 {activePortal === 'vendor' ? 'Store Email Address' : activePortal === 'admin' ? 'Admin Email Address' : 'Email Address'}
               </label>
               <input
@@ -422,7 +415,7 @@ export default function LoginPage({ onLoginSuccess }) {
             </div>
 
             <div className="form-group" style={{ marginBottom: '24px' }}>
-              <label className="form-label" style={{ fontSize: '13px', fontWeight: '600', color: '#cbd5e1' }}>
+              <label className="form-label" style={{ fontSize: '13px', fontWeight: '600', color: '#1E293B' }}>
                 Password
               </label>
               <input
@@ -446,7 +439,7 @@ export default function LoginPage({ onLoginSuccess }) {
                 width: '100%',
                 padding: '12px',
                 background: currentCfg.gradient,
-                boxShadow: `0 4px 14px ${currentCfg.accentColor}40`,
+                boxShadow: `0 4px 14px ${currentCfg.accentColor}30`,
                 fontSize: '14px',
                 fontWeight: '700'
               }}

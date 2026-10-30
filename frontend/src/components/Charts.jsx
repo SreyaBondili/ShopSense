@@ -6,7 +6,7 @@ export const AreaChart = ({ data, height = 240 }) => {
 
   if (!data || data.length === 0) {
     return (
-      <div style={{ color: '#94a3b8', padding: '40px', textAlign: 'center' }}>
+      <div style={{ color: '#64748B', padding: '40px', textAlign: 'center' }}>
         No sales trend data recorded yet.
       </div>
     );
@@ -31,12 +31,10 @@ export const AreaChart = ({ data, height = 240 }) => {
   const usableHeight = chartHeight - paddingTop - paddingBottom;
 
   // Scale function with gentle square-root damping for high outliers
-  // This guarantees low and moderate sales days produce high, clearly visible peaks (40% - 85% height)
   const getY = (val) => {
     if (val <= 0) return chartHeight - paddingBottom;
-    // Damped power ratio so variance is prominently visible
     const ratio = Math.min(1.0, val / effectiveMax);
-    const scaledRatio = Math.pow(ratio, 0.72); // Boosts lower/mid peaks for visual clarity
+    const scaledRatio = Math.pow(ratio, 0.72);
     return chartHeight - paddingBottom - (scaledRatio * usableHeight);
   };
 
@@ -88,12 +86,12 @@ export const AreaChart = ({ data, height = 240 }) => {
       >
         <defs>
           <linearGradient id="curveGradient" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#6366f1" stopOpacity="0.45" />
-            <stop offset="50%" stopColor="#818cf8" stopOpacity="0.18" />
-            <stop offset="100%" stopColor="#6366f1" stopOpacity="0.01" />
+            <stop offset="0%" stopColor="#6366F1" stopOpacity="0.25" />
+            <stop offset="60%" stopColor="#E0E7FF" stopOpacity="0.15" />
+            <stop offset="100%" stopColor="#FFFFFF" stopOpacity="0.0" />
           </linearGradient>
           <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
-            <feDropShadow dx="0" dy="3" stdDeviation="3" floodColor="#6366f1" floodOpacity="0.5" />
+            <feDropShadow dx="0" dy="2" stdDeviation="2.5" floodColor="#6366F1" floodOpacity="0.25" />
           </filter>
         </defs>
 
@@ -105,14 +103,14 @@ export const AreaChart = ({ data, height = 240 }) => {
               y1={tick.y}
               x2={chartWidth - paddingRight}
               y2={tick.y}
-              stroke="#334155"
+              stroke="#E9EAF3"
               strokeDasharray={i === 0 ? "none" : "3 3"}
-              strokeOpacity={i === 0 ? 0.8 : 0.5}
+              strokeOpacity={i === 0 ? 1 : 0.8}
             />
             <text
               x={paddingLeft - 10}
               y={tick.y + 4}
-              fill="#94a3b8"
+              fill="#64748B"
               fontSize="10"
               fontWeight="600"
               textAnchor="end"
@@ -125,11 +123,11 @@ export const AreaChart = ({ data, height = 240 }) => {
         {/* Gradient Area Fill */}
         <path d={areaD} fill="url(#curveGradient)" />
 
-        {/* Smooth Neon Line */}
+        {/* Smooth Lavender Line */}
         <path
           d={pathD}
           fill="none"
-          stroke="#818cf8"
+          stroke="#6366F1"
           strokeWidth="3"
           strokeLinecap="round"
           strokeLinejoin="round"
@@ -155,8 +153,8 @@ export const AreaChart = ({ data, height = 240 }) => {
                   cx={c.x}
                   cy={c.y}
                   r="7"
-                  fill="#6366f1"
-                  fillOpacity="0.25"
+                  fill="#6366F1"
+                  fillOpacity="0.18"
                 />
               )}
 
@@ -165,8 +163,8 @@ export const AreaChart = ({ data, height = 240 }) => {
                 cx={c.x}
                 cy={c.y}
                 r={isHovered ? 6 : isPeak ? 4.5 : 3}
-                fill={isHovered ? '#34d399' : isPeak ? '#a855f7' : '#818cf8'}
-                stroke="#1e293b"
+                fill={isHovered ? '#059669' : isPeak ? '#6366F1' : '#4F46E5'}
+                stroke="#FFFFFF"
                 strokeWidth="2"
               />
 
@@ -175,7 +173,7 @@ export const AreaChart = ({ data, height = 240 }) => {
                 <text
                   x={c.x}
                   y={c.y - 10}
-                  fill="#c084fc"
+                  fill="#4F46E5"
                   fontSize="9"
                   fontWeight="800"
                   textAnchor="middle"
@@ -190,15 +188,15 @@ export const AreaChart = ({ data, height = 240 }) => {
         {/* X-axis date labels */}
         {data.length > 0 && (
           <>
-            <text x={paddingLeft} y={chartHeight - 10} fill="#94a3b8" fontSize="10" textAnchor="start">
+            <text x={paddingLeft} y={chartHeight - 10} fill="#64748B" fontSize="10" textAnchor="start">
               {data[0].date}
             </text>
             {data.length > 2 && (
-              <text x={chartWidth / 2} y={chartHeight - 10} fill="#94a3b8" fontSize="10" textAnchor="middle">
+              <text x={chartWidth / 2} y={chartHeight - 10} fill="#64748B" fontSize="10" textAnchor="middle">
                 {data[Math.floor(data.length / 2)].date}
               </text>
             )}
-            <text x={chartWidth - paddingRight} y={chartHeight - 10} fill="#94a3b8" fontSize="10" textAnchor="end">
+            <text x={chartWidth - paddingRight} y={chartHeight - 10} fill="#64748B" fontSize="10" textAnchor="end">
               {data[data.length - 1].date}
             </text>
           </>
@@ -211,21 +209,21 @@ export const AreaChart = ({ data, height = 240 }) => {
           position: 'absolute',
           top: Math.max(10, hoveredPoint.y - 50),
           left: Math.min(chartWidth - 140, Math.max(20, hoveredPoint.x - 60)),
-          background: 'rgba(15, 23, 42, 0.95)',
-          border: '1px solid #6366f1',
+          background: '#FFFFFF',
+          border: '1px solid #E9EAF3',
           borderRadius: '8px',
-          padding: '6px 10px',
-          color: '#fff',
+          padding: '8px 12px',
+          color: '#1E293B',
           fontSize: '11px',
           pointerEvents: 'none',
-          boxShadow: '0 8px 16px rgba(0,0,0,0.5)',
+          boxShadow: '0 10px 25px -5px rgba(99, 102, 241, 0.15)',
           zIndex: 10
         }}>
-          <div style={{ color: '#94a3b8', fontSize: '10px' }}>{hoveredPoint.data.date}</div>
-          <div style={{ color: '#34d399', fontWeight: '800', fontSize: '13px' }}>
+          <div style={{ color: '#64748B', fontSize: '10px', marginBottom: '2px' }}>{hoveredPoint.data.date}</div>
+          <div style={{ color: '#059669', fontWeight: '800', fontSize: '13px' }}>
             ₹{Number(hoveredPoint.data.revenue || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
           </div>
-          <div style={{ color: '#818cf8', fontSize: '10px' }}>
+          <div style={{ color: '#6366F1', fontSize: '10px', marginTop: '2px', fontWeight: '500' }}>
             {hoveredPoint.data.transactions_count || 1} orders placed
           </div>
         </div>
@@ -237,10 +235,10 @@ export const AreaChart = ({ data, height = 240 }) => {
 // 2. Category Distribution Donut Chart
 export const DonutChart = ({ data, size = 200 }) => {
   if (!data || data.length === 0) {
-    return <div style={{ color: '#94a3b8', padding: '40px', textAlign: 'center' }}>No category data available.</div>;
+    return <div style={{ color: '#64748B', padding: '40px', textAlign: 'center' }}>No category data available.</div>;
   }
 
-  const colors = ['#6366f1', '#ec4899', '#10b981', '#f59e0b', '#3b82f6', '#8b5cf6', '#14b8a6', '#f43f5e'];
+  const colors = ['#6366F1', '#818CF8', '#059669', '#D97706', '#3B82F6', '#8B5CF6', '#14B8A6', '#EC4899'];
   const total = data.reduce((acc, d) => acc + (Number(d.revenue) || 0), 0) || 1;
 
   let currentAngle = 0;
@@ -295,8 +293,8 @@ export const DonutChart = ({ data, size = 200 }) => {
             <title>{`${s.category}: ₹${s.revenue.toFixed(2)} (${s.pct}%)`}</title>
           </path>
         ))}
-        <text x="100" y="98" textAnchor="middle" fill="#94a3b8" fontSize="10">TOTAL</text>
-        <text x="100" y="112" textAnchor="middle" fill="#fff" fontSize="12" fontWeight="700">
+        <text x="100" y="96" textAnchor="middle" fill="#64748B" fontSize="10" fontWeight="600">TOTAL</text>
+        <text x="100" y="112" textAnchor="middle" fill="#1E293B" fontSize="13" fontWeight="800">
           ₹{total >= 1000 ? `${(total/1000).toFixed(1)}k` : total.toFixed(0)}
         </text>
       </svg>
@@ -305,8 +303,8 @@ export const DonutChart = ({ data, size = 200 }) => {
         {slices.map((s, idx) => (
           <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <span style={{ width: '10px', height: '10px', borderRadius: '3px', background: s.color, display: 'inline-block' }}></span>
-            <span style={{ color: '#e2e8f0', minWidth: '80px' }}>{s.category}</span>
-            <span style={{ color: '#94a3b8', fontWeight: '600' }}>{s.pct}%</span>
+            <span style={{ color: '#1E293B', minWidth: '85px', fontWeight: '500' }}>{s.category}</span>
+            <span style={{ color: '#64748B', fontWeight: '600' }}>{s.pct}%</span>
           </div>
         ))}
       </div>
@@ -317,7 +315,7 @@ export const DonutChart = ({ data, size = 200 }) => {
 // 3. Simple Bar Chart for Vendor Comparison
 export const BarChart = ({ data, xKey = 'business_name', yKey = 'total_revenue', height = 200 }) => {
   if (!data || data.length === 0) {
-    return <div style={{ color: '#94a3b8', padding: '40px', textAlign: 'center' }}>No comparison data available.</div>;
+    return <div style={{ color: '#64748B', padding: '40px', textAlign: 'center' }}>No comparison data available.</div>;
   }
 
   const values = data.map(d => Number(d[yKey]) || 0);
@@ -330,14 +328,14 @@ export const BarChart = ({ data, xKey = 'business_name', yKey = 'total_revenue',
         const pct = Math.min(100, Math.max(5, (val / maxVal) * 100));
         return (
           <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '12px', fontSize: '12px' }}>
-            <span style={{ width: '130px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', color: '#cbd5e1' }} title={item[xKey]}>
+            <span style={{ width: '130px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', color: '#1E293B', fontWeight: '500' }} title={item[xKey]}>
               {item[xKey]}
             </span>
-            <div style={{ flex: 1, background: '#334155', borderRadius: '4px', height: '18px', overflow: 'hidden' }}>
-              <div style={{ width: `${pct}%`, height: '100%', background: 'linear-gradient(90deg, #6366f1, #8b5cf6)', borderRadius: '4px' }}></div>
+            <div style={{ flex: 1, background: '#E9EAF3', borderRadius: '4px', height: '18px', overflow: 'hidden' }}>
+              <div style={{ width: `${pct}%`, height: '100%', background: 'linear-gradient(90deg, #6366F1, #818CF8)', borderRadius: '4px' }}></div>
             </div>
-            <span style={{ minWidth: '70px', textAlign: 'right', fontWeight: '700', color: '#34d399' }}>
-              ₹{val.toLocaleString()}
+            <span style={{ minWidth: '70px', textAlign: 'right', fontWeight: '700', color: '#059669' }}>
+              ₹{val.toLocaleString('en-IN')}
             </span>
           </div>
         );

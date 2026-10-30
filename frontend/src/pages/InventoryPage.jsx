@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../api';
+import AnimatedCounter from '../components/AnimatedCounter';
 import {
   ClipboardList, Warehouse, RefreshCw, AlertTriangle, CheckCircle2,
   XCircle, TrendingUp, Sparkles, Download, Layers, ShieldAlert, Cpu
@@ -113,30 +114,39 @@ export default function InventoryPage({ user }) {
       {error && <div className="alert alert-error"><span>⚠️</span><span>{error}</span></div>}
       {success && <div className="alert alert-success"><span>✅</span><span>{success}</span></div>}
 
-      {/* KPI Cards */}
+      {/* KPI Cards with Animated Numbers */}
       <div className="kpi-grid">
         <div className="kpi-card">
           <div className="kpi-label">Tracked Items</div>
-          <div className="kpi-value" style={{ color: '#f8fafc' }}>{totalItems}</div>
+          <div className="kpi-value" style={{ color: '#1E293B' }}>
+            <AnimatedCounter value={totalItems} duration={1000} />
+          </div>
         </div>
         <div className="kpi-card">
           <div className="kpi-label">In Stock</div>
-          <div className="kpi-value" style={{ color: '#34d399' }}>{inStockCount}</div>
+          <div className="kpi-value" style={{ color: '#059669' }}>
+            <AnimatedCounter value={inStockCount} duration={1100} />
+          </div>
         </div>
         <div className="kpi-card">
           <div className="kpi-label">Low Stock Alerts</div>
-          <div className="kpi-value" style={{ color: '#fbbf24' }}>{lowStockCount}</div>
+          <div className="kpi-value" style={{ color: '#D97706' }}>
+            <AnimatedCounter value={lowStockCount} duration={1100} />
+          </div>
         </div>
         <div className="kpi-card">
           <div className="kpi-label">Out of Stock</div>
-          <div className="kpi-value" style={{ color: '#f87171' }}>{outOfStockCount}</div>
+          <div className="kpi-value" style={{ color: '#DC2626' }}>
+            <AnimatedCounter value={outOfStockCount} duration={1000} />
+          </div>
         </div>
       </div>
 
-      {/* Navigation Sub-Tabs */}
+      {/* Navigation Sub-Tabs in Lavender & White */}
       <div style={{
-        display: 'flex', gap: '8px', background: '#0f172a', padding: '6px',
-        borderRadius: '12px', border: '1px solid #334155', marginBottom: '20px', flexWrap: 'wrap'
+        display: 'flex', gap: '8px', background: '#FFFFFF', padding: '6px',
+        borderRadius: '12px', border: '1px solid #E9EAF3', marginBottom: '20px', flexWrap: 'wrap',
+        boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
       }}>
         {[
           { id: 'stock', label: 'Stock & Warehouse', icon: Warehouse },
@@ -152,11 +162,12 @@ export default function InventoryPage({ user }) {
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
               style={{
-                display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 14px',
+                display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 16px',
                 borderRadius: '8px', border: 'none',
-                background: isActive ? '#6366f1' : 'transparent',
-                color: isActive ? '#fff' : '#94a3b8',
-                fontWeight: '600', fontSize: '13px', cursor: 'pointer'
+                background: isActive ? '#6366F1' : 'transparent',
+                color: isActive ? '#FFFFFF' : '#64748B',
+                fontWeight: '600', fontSize: '13px', cursor: 'pointer',
+                transition: 'all 0.2s ease'
               }}
             >
               <Icon size={14} />
@@ -170,10 +181,10 @@ export default function InventoryPage({ user }) {
       {activeTab === 'stock' && (
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: '24px', alignItems: 'start' }}>
           <div>
-            <div className="card" style={{ padding: '16px', marginBottom: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div style={{ fontWeight: '700', fontSize: '14px' }}>Inventory Catalog</div>
+            <div className="card" style={{ padding: '16px 20px', marginBottom: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div style={{ fontWeight: '700', fontSize: '14px', color: '#1E293B' }}>Inventory Catalog</div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <span style={{ fontSize: '12px', color: '#94a3b8' }}>Filter:</span>
+                <span style={{ fontSize: '12px', color: '#64748B' }}>Filter:</span>
                 <select
                   className="form-select"
                   value={statusFilter}
@@ -203,12 +214,12 @@ export default function InventoryPage({ user }) {
                   {inventory.map(item => (
                     <tr key={item.inventory_id}>
                       <td>
-                        <div style={{ fontWeight: '600', color: '#f8fafc' }}>{item.product_name}</div>
-                        <div style={{ fontSize: '11px', color: '#64748b' }}>by {item.vendor_name}</div>
+                        <div style={{ fontWeight: '600', color: '#1E293B' }}>{item.product_name}</div>
+                        <div style={{ fontSize: '11px', color: '#64748B' }}>by {item.vendor_name}</div>
                       </td>
-                      <td>{item.warehouse}</td>
-                      <td style={{ fontWeight: '700' }}>{item.current_stock}</td>
-                      <td>{item.reorder_level}</td>
+                      <td style={{ color: '#64748B' }}>{item.warehouse}</td>
+                      <td style={{ fontWeight: '700', color: '#1E293B' }}>{item.current_stock}</td>
+                      <td style={{ color: '#64748B' }}>{item.reorder_level}</td>
                       <td>
                         <span className={`badge ${
                           item.status === 'IN STOCK' ? 'badge-success' : item.status === 'LOW STOCK' ? 'badge-warning' : 'badge-danger'
@@ -224,9 +235,9 @@ export default function InventoryPage({ user }) {
           </div>
 
           {/* Quick Restock Card */}
-          <div className="card" style={{ padding: '20px' }}>
-            <div className="card-title">
-              <Warehouse size={18} color="#6366f1" />
+          <div className="card" style={{ padding: '24px' }}>
+            <div className="card-title" style={{ marginBottom: '18px' }}>
+              <Warehouse size={18} color="#6366F1" />
               <span>Update Stock / Reorder</span>
             </div>
             <form onSubmit={handleUpdateInventory}>
@@ -298,12 +309,12 @@ export default function InventoryPage({ user }) {
 
       {/* TAB 2: LOW-STOCK ALERT SYSTEM */}
       {activeTab === 'alerts' && (
-        <div className="card" style={{ padding: '20px' }}>
-          <div className="card-title">
-            <ShieldAlert size={18} color="#f87171" />
+        <div className="card" style={{ padding: '24px' }}>
+          <div className="card-title" style={{ marginBottom: '10px' }}>
+            <ShieldAlert size={18} color="#DC2626" />
             <span>Low-Stock & Out-of-Stock Alert Matrix</span>
           </div>
-          <p style={{ color: '#94a3b8', fontSize: '13px', marginBottom: '16px' }}>
+          <p style={{ color: '#64748B', fontSize: '13px', marginBottom: '18px' }}>
             Products flagged where <code>Current Stock &le; Reorder Level</code>. Actionable priority alerts for warehouse restock.
           </p>
 
@@ -324,20 +335,20 @@ export default function InventoryPage({ user }) {
               <tbody>
                 {alerts.map((a, idx) => (
                   <tr key={idx}>
-                    <td style={{ fontWeight: '600', color: '#f8fafc' }}>{a.product_name}</td>
-                    <td>{a.vendor_name}</td>
-                    <td>{a.warehouse}</td>
-                    <td style={{ fontWeight: '700', color: a.current_stock === 0 ? '#f87171' : '#fbbf24' }}>
+                    <td style={{ fontWeight: '600', color: '#1E293B' }}>{a.product_name}</td>
+                    <td style={{ color: '#64748B' }}>{a.vendor_name}</td>
+                    <td style={{ color: '#64748B' }}>{a.warehouse}</td>
+                    <td style={{ fontWeight: '700', color: a.current_stock === 0 ? '#DC2626' : '#D97706' }}>
                       {a.current_stock}
                     </td>
-                    <td>{a.reorder_level}</td>
-                    <td style={{ fontWeight: '700', color: '#f87171' }}>+{a.shortage} units</td>
+                    <td style={{ color: '#64748B' }}>{a.reorder_level}</td>
+                    <td style={{ fontWeight: '700', color: '#DC2626' }}>+{a.shortage} units</td>
                     <td>
                       <span className={`badge ${a.status === 'OUT OF STOCK' ? 'badge-danger' : 'badge-warning'}`}>
                         {a.status}
                       </span>
                     </td>
-                    <td style={{ fontSize: '12px', color: '#cbd5e1' }}>{a.recommended_action}</td>
+                    <td style={{ fontSize: '12px', color: '#1E293B' }}>{a.recommended_action}</td>
                   </tr>
                 ))}
               </tbody>
@@ -348,12 +359,12 @@ export default function InventoryPage({ user }) {
 
       {/* TAB 3: REPLENISHMENT RECOMMENDATIONS */}
       {activeTab === 'replenishment' && (
-        <div className="card" style={{ padding: '20px' }}>
-          <div className="card-title">
-            <Sparkles size={18} color="#6366f1" />
+        <div className="card" style={{ padding: '24px' }}>
+          <div className="card-title" style={{ marginBottom: '10px' }}>
+            <Sparkles size={18} color="#6366F1" />
             <span>Smart Replenishment Engine</span>
           </div>
-          <p style={{ color: '#94a3b8', fontSize: '13px', marginBottom: '16px' }}>
+          <p style={{ color: '#64748B', fontSize: '13px', marginBottom: '18px' }}>
             Formula: <code>Suggested Reorder = Target Stock - Current Stock</code> (Safety Buffer + 5-Day Lead Demand).
           </p>
 
@@ -375,19 +386,19 @@ export default function InventoryPage({ user }) {
               <tbody>
                 {replenishment.map((r, idx) => (
                   <tr key={idx}>
-                    <td style={{ fontWeight: '600', color: '#f8fafc' }}>{r.product_name}</td>
-                    <td>{r.vendor_name}</td>
-                    <td>{r.current_stock}</td>
-                    <td>{r.daily_demand}/day</td>
-                    <td>{r.target_stock}</td>
-                    <td style={{ fontWeight: '800', color: '#34d399' }}>{r.suggested_reorder_quantity} units</td>
-                    <td>₹{r.estimated_cost.toLocaleString()}</td>
+                    <td style={{ fontWeight: '600', color: '#1E293B' }}>{r.product_name}</td>
+                    <td style={{ color: '#64748B' }}>{r.vendor_name}</td>
+                    <td style={{ color: '#1E293B' }}>{r.current_stock}</td>
+                    <td style={{ color: '#64748B' }}>{r.daily_demand}/day</td>
+                    <td style={{ color: '#64748B' }}>{r.target_stock}</td>
+                    <td style={{ fontWeight: '800', color: '#059669' }}>{r.suggested_reorder_quantity} units</td>
+                    <td style={{ fontWeight: '600', color: '#1E293B' }}>₹{r.estimated_cost.toLocaleString('en-IN')}</td>
                     <td>
                       <span className={`badge ${r.priority === 'HIGH' ? 'badge-danger' : r.priority === 'MEDIUM' ? 'badge-warning' : 'badge-secondary'}`}>
                         {r.priority}
                       </span>
                     </td>
-                    <td style={{ fontSize: '12px', color: '#94a3b8' }}>{r.reason}</td>
+                    <td style={{ fontSize: '12px', color: '#64748B' }}>{r.reason}</td>
                   </tr>
                 ))}
               </tbody>
@@ -402,23 +413,29 @@ export default function InventoryPage({ user }) {
           <div className="kpi-grid" style={{ marginBottom: '20px' }}>
             <div className="kpi-card">
               <div className="kpi-label">Overall Turnover Rate</div>
-              <div className="kpi-value" style={{ color: '#34d399' }}>{turnover.overall_turnover_rate}x</div>
-              <div style={{ fontSize: '11px', color: '#94a3b8', marginTop: '2px' }}>COGS / Avg Inventory Value</div>
+              <div className="kpi-value" style={{ color: '#059669' }}>
+                <AnimatedCounter value={turnover.overall_turnover_rate} suffix="x" decimals={2} duration={1200} />
+              </div>
+              <div style={{ fontSize: '11px', color: '#64748B', marginTop: '2px' }}>COGS / Avg Inventory Value</div>
             </div>
             <div className="kpi-card">
               <div className="kpi-label">Cost of Goods Sold (COGS)</div>
-              <div className="kpi-value" style={{ color: '#60a5fa' }}>₹{turnover.total_cogs.toLocaleString()}</div>
+              <div className="kpi-value" style={{ color: '#6366F1' }}>
+                <AnimatedCounter value={turnover.total_cogs} prefix="₹" duration={1200} />
+              </div>
             </div>
             <div className="kpi-card">
               <div className="kpi-label">Total Inventory Valuation</div>
-              <div className="kpi-value" style={{ color: '#a78bfa' }}>₹{turnover.total_inventory_value.toLocaleString()}</div>
+              <div className="kpi-value" style={{ color: '#8B5CF6' }}>
+                <AnimatedCounter value={turnover.total_inventory_value} prefix="₹" duration={1200} />
+              </div>
             </div>
           </div>
 
           <div className="charts-grid-equal">
-            <div className="card" style={{ padding: '20px' }}>
+            <div className="card" style={{ padding: '24px' }}>
               <div className="card-title">
-                <TrendingUp size={18} color="#34d399" />
+                <TrendingUp size={18} color="#059669" />
                 <span>Fastest Moving (High Turnover)</span>
               </div>
               <div className="table-container">
@@ -433,9 +450,9 @@ export default function InventoryPage({ user }) {
                   <tbody>
                     {turnover.high_turnover_products.map((p, i) => (
                       <tr key={i}>
-                        <td style={{ fontWeight: '600' }}>{p.product_name}</td>
-                        <td>{p.current_stock}</td>
-                        <td style={{ fontWeight: '800', color: '#34d399' }}>{p.turnover_rate}x</td>
+                        <td style={{ fontWeight: '600', color: '#1E293B' }}>{p.product_name}</td>
+                        <td style={{ color: '#64748B' }}>{p.current_stock}</td>
+                        <td style={{ fontWeight: '800', color: '#059669' }}>{p.turnover_rate}x</td>
                       </tr>
                     ))}
                   </tbody>
@@ -443,9 +460,9 @@ export default function InventoryPage({ user }) {
               </div>
             </div>
 
-            <div className="card" style={{ padding: '20px' }}>
+            <div className="card" style={{ padding: '24px' }}>
               <div className="card-title">
-                <AlertTriangle size={18} color="#f59e0b" />
+                <AlertTriangle size={18} color="#D97706" />
                 <span>Slow Moving (Dead Stock Risk)</span>
               </div>
               <div className="table-container">
@@ -460,9 +477,9 @@ export default function InventoryPage({ user }) {
                   <tbody>
                     {turnover.low_turnover_products.map((p, i) => (
                       <tr key={i}>
-                        <td style={{ fontWeight: '600' }}>{p.product_name}</td>
-                        <td>{p.current_stock}</td>
-                        <td style={{ fontWeight: '800', color: '#fbbf24' }}>{p.turnover_rate}x</td>
+                        <td style={{ fontWeight: '600', color: '#1E293B' }}>{p.product_name}</td>
+                        <td style={{ color: '#64748B' }}>{p.current_stock}</td>
+                        <td style={{ fontWeight: '800', color: '#D97706' }}>{p.turnover_rate}x</td>
                       </tr>
                     ))}
                   </tbody>
@@ -475,10 +492,10 @@ export default function InventoryPage({ user }) {
 
       {/* TAB 5: DEMAND FORECASTING (RANDOM FOREST) */}
       {activeTab === 'forecast' && (
-        <div className="card" style={{ padding: '20px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '10px' }}>
+        <div className="card" style={{ padding: '24px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px', flexWrap: 'wrap', gap: '10px' }}>
             <div className="card-title" style={{ margin: 0 }}>
-              <Cpu size={18} color="#818cf8" />
+              <Cpu size={18} color="#6366F1" />
               <span>Random Forest Demand Forecasting (14-Day Horizon)</span>
             </div>
             {forecast && forecast.forecast && forecast.forecast.length > 0 && (
@@ -489,15 +506,15 @@ export default function InventoryPage({ user }) {
           </div>
 
           {!forecast ? (
-            <div style={{ textAlign: 'center', padding: '40px', color: '#94a3b8' }}>
-              <RefreshCw size={24} style={{ animation: 'spin 1.5s linear infinite', margin: '0 auto 12px auto', display: 'block' }} />
+            <div style={{ textAlign: 'center', padding: '50px', color: '#64748B' }}>
+              <RefreshCw size={24} style={{ animation: 'spin 1.5s linear infinite', margin: '0 auto 12px auto', display: 'block', color: '#6366F1' }} />
               <div>Training Random Forest Regressor & generating 14-day predictions...</div>
             </div>
           ) : forecast.status === 'insufficient_data' ? (
-            <div style={{ padding: '30px', textAlign: 'center', color: '#fbbf24' }}>
+            <div style={{ padding: '30px', textAlign: 'center', color: '#D97706' }}>
               <AlertTriangle size={32} style={{ margin: '0 auto 12px auto', display: 'block' }} />
               <div style={{ fontWeight: '700', fontSize: '16px', marginBottom: '6px' }}>Insufficient Sales History</div>
-              <p style={{ color: '#94a3b8', fontSize: '13px' }}>{forecast.message}</p>
+              <p style={{ color: '#64748B', fontSize: '13px' }}>{forecast.message}</p>
             </div>
           ) : (
             <>
@@ -506,16 +523,22 @@ export default function InventoryPage({ user }) {
                 <div className="kpi-grid" style={{ marginBottom: '20px' }}>
                   <div className="kpi-card">
                     <div className="kpi-label">Model Accuracy</div>
-                    <div className="kpi-value" style={{ color: '#34d399' }}>{forecast.metrics.accuracy_pct}%</div>
-                    <div style={{ fontSize: '11px', color: '#6ee7b7', marginTop: '2px' }}>Target &ge; 80% Achieved</div>
+                    <div className="kpi-value" style={{ color: '#059669' }}>
+                      <AnimatedCounter value={forecast.metrics.accuracy_pct} suffix="%" decimals={1} duration={1200} />
+                    </div>
+                    <div style={{ fontSize: '11px', color: '#059669', marginTop: '2px', fontWeight: '600' }}>Target &ge; 80% Achieved</div>
                   </div>
                   <div className="kpi-card">
                     <div className="kpi-label">Mean Absolute Error (MAE)</div>
-                    <div className="kpi-value" style={{ color: '#60a5fa' }}>{forecast.metrics.mae} units</div>
+                    <div className="kpi-value" style={{ color: '#6366F1' }}>
+                      <AnimatedCounter value={forecast.metrics.mae} suffix=" units" decimals={2} duration={1100} />
+                    </div>
                   </div>
                   <div className="kpi-card">
                     <div className="kpi-label">Root Mean Squared Error</div>
-                    <div className="kpi-value" style={{ color: '#a78bfa' }}>{forecast.metrics.rmse} units</div>
+                    <div className="kpi-value" style={{ color: '#8B5CF6' }}>
+                      <AnimatedCounter value={forecast.metrics.rmse} suffix=" units" decimals={2} duration={1100} />
+                    </div>
                   </div>
                 </div>
               )}
@@ -534,11 +557,11 @@ export default function InventoryPage({ user }) {
                   <tbody>
                     {forecast.forecast && forecast.forecast.map((f, i) => (
                       <tr key={i}>
-                        <td style={{ fontWeight: '600', color: '#f8fafc' }}>{f.date}</td>
-                        <td style={{ fontWeight: '800', color: '#34d399' }}>{f.predicted_demand} units</td>
-                        <td>{f.confidence_lower}</td>
-                        <td>{f.confidence_upper}</td>
-                        <td style={{ fontSize: '12px', color: '#94a3b8' }}>
+                        <td style={{ fontWeight: '600', color: '#1E293B' }}>{f.date}</td>
+                        <td style={{ fontWeight: '800', color: '#059669' }}>{f.predicted_demand} units</td>
+                        <td style={{ color: '#64748B' }}>{f.confidence_lower}</td>
+                        <td style={{ color: '#64748B' }}>{f.confidence_upper}</td>
+                        <td style={{ fontSize: '12px', color: '#64748B' }}>
                           {f.predicted_demand > 30 ? 'High-capacity fulfillment wave' : 'Standard dispatch buffer'}
                         </td>
                       </tr>

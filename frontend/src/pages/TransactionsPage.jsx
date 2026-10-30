@@ -83,9 +83,9 @@ export default function TransactionsPage({ user }) {
 
       {/* Manual Order Creation Form */}
       {showOrderForm && (
-        <div className="card" style={{ border: '1px solid #6366f1' }}>
-          <div className="card-title">
-            <CreditCard size={18} color="#6366f1" />
+        <div className="card" style={{ border: '1px solid #C7D2FE', marginBottom: '24px' }}>
+          <div className="card-title" style={{ marginBottom: '18px' }}>
+            <CreditCard size={18} color="#6366F1" />
             <span>Record New Sale / Order</span>
           </div>
 
@@ -119,11 +119,11 @@ export default function TransactionsPage({ user }) {
                     required
                   />
                 </div>
-                <div style={{ padding: '10px 16px', background: '#0f172a', borderRadius: '8px', border: '1px solid #334155' }}>
-                  <div style={{ fontSize: '11px', color: '#94a3b8', textTransform: 'uppercase', fontWeight: '600' }}>
+                <div style={{ padding: '12px 18px', background: '#F8FAFC', borderRadius: '10px', border: '1px solid #E9EAF3' }}>
+                  <div style={{ fontSize: '11px', color: '#64748B', textTransform: 'uppercase', fontWeight: '600' }}>
                     Total Transaction Value
                   </div>
-                  <div style={{ fontSize: '20px', fontWeight: '800', color: '#34d399' }}>
+                  <div style={{ fontSize: '20px', fontWeight: '800', color: '#059669', marginTop: '2px' }}>
                     ₹{estimatedTotal}
                   </div>
                 </div>
@@ -134,7 +134,7 @@ export default function TransactionsPage({ user }) {
               </button>
             </form>
           ) : (
-            <div style={{ color: '#fbbf24', padding: '20px', textAlign: 'center' }}>
+            <div style={{ color: '#D97706', padding: '20px', textAlign: 'center' }}>
               All products are currently out of stock. Please restock items via the Inventory tab.
             </div>
           )}
@@ -142,8 +142,8 @@ export default function TransactionsPage({ user }) {
       )}
 
       {/* Transactions Table */}
-      <div className="card">
-        <div className="card-title">
+      <div className="card" style={{ padding: '24px' }}>
+        <div className="card-title" style={{ marginBottom: '16px' }}>
           <span>Sales History ({transactions.length} Total Transactions)</span>
         </div>
         <div className="table-responsive">
@@ -162,18 +162,18 @@ export default function TransactionsPage({ user }) {
               {transactions.map(t => (
                 <tr key={t.transaction_id}>
                   <td><strong>#{t.transaction_id}</strong></td>
-                  <td style={{ fontWeight: '600', color: '#f8fafc' }}>{t.product_name}</td>
+                  <td style={{ fontWeight: '600', color: '#1E293B' }}>{t.product_name}</td>
                   <td><span className="badge badge-info">{t.vendor_name || `Vendor #${t.vendor_id}`}</span></td>
-                  <td style={{ fontWeight: '700' }}>{t.quantity}</td>
-                  <td style={{ fontWeight: '700', color: '#34d399' }}>₹{Number(t.amount).toFixed(2)}</td>
-                  <td style={{ color: '#94a3b8', fontSize: '12px' }}>
+                  <td style={{ fontWeight: '700', color: '#1E293B' }}>{t.quantity}</td>
+                  <td style={{ fontWeight: '700', color: '#059669' }}>₹{Number(t.amount).toFixed(2)}</td>
+                  <td style={{ color: '#64748B', fontSize: '12px' }}>
                     {new Date(t.transaction_date).toLocaleString()}
                   </td>
                 </tr>
               ))}
               {transactions.length === 0 && (
                 <tr>
-                  <td colSpan="6" style={{ textAlign: 'center', padding: '30px', color: '#94a3b8' }}>
+                  <td colSpan="6" style={{ textAlign: 'center', padding: '30px', color: '#64748B' }}>
                     No transaction records found.
                   </td>
                 </tr>
