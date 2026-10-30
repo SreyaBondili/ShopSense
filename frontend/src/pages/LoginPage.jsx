@@ -1,16 +1,16 @@
 import React, { useState } from 'react';
 import { api } from '../api';
 import {
-  Store, ShieldCheck, User, Mail, Lock, Eye, EyeOff,
-  ArrowRight, CheckCircle, AlertCircle, Sparkles, UserPlus, LogIn
+  ShieldCheck, Store, User, Mail, Lock, Eye, EyeOff,
+  ArrowRight, CheckCircle, AlertTriangle, Sparkles, UserPlus, LogIn
 } from 'lucide-react';
 
 export default function LoginPage({ onLoginSuccess }) {
-  // Three portal roles matching reference screenshot: 'admin', 'vendor', 'customer'
+  // Three portal roles in the requested format: 'admin', 'vendor', 'customer'
   const [activePortal, setActivePortal] = useState('admin');
   const [mode, setMode] = useState('login'); // 'login' or 'register'
 
-  // Form input states with default credentials pre-filled for convenience
+  // Form input states
   const [email, setEmail] = useState('bsreya1610@gmail.com');
   const [password, setPassword] = useState('Admin@123');
   const [showPassword, setShowPassword] = useState(false);
@@ -18,7 +18,7 @@ export default function LoginPage({ onLoginSuccess }) {
   const [successMsg, setSuccessMsg] = useState('');
   const [loading, setLoading] = useState(false);
 
-  // Vendor selector for quick switching between vendors
+  // Vendor selector for quick switching
   const [selectedVendorEmail, setSelectedVendorEmail] = useState('janani@gmail.com');
 
   // Registration data
@@ -28,7 +28,7 @@ export default function LoginPage({ onLoginSuccess }) {
   };
   const [regData, setRegData] = useState(blankReg);
 
-  // Switch between Admin, Vendor, Customer tabs
+  // Switch between Admin, Vendor, Customer tabs in purple theme
   const handlePortalSwitch = (portal) => {
     setActivePortal(portal);
     setError('');
@@ -116,7 +116,7 @@ export default function LoginPage({ onLoginSuccess }) {
     }
   };
 
-  // Portal metadata
+  // Portal metadata in Soft Lavender & Purple palette
   const portalInfo = {
     admin: {
       roleLabel: 'Admin',
@@ -126,9 +126,9 @@ export default function LoginPage({ onLoginSuccess }) {
       placeholderEmail: 'admin@shopsense.com',
       oneClickText: '1-Click Admin Access',
       icon: ShieldCheck,
-      bannerBg: '#ECFDF5',
-      bannerBorder: '#A7F3D0',
-      bannerText: '#047857',
+      bannerBg: '#EEF2FF',
+      bannerBorder: '#C7D2FE',
+      bannerText: '#4338CA',
     },
     vendor: {
       roleLabel: 'Vendor',
@@ -138,9 +138,9 @@ export default function LoginPage({ onLoginSuccess }) {
       placeholderEmail: 'vendor@shopsense.com',
       oneClickText: '1-Click Vendor Access',
       icon: Store,
-      bannerBg: '#F0FDFA',
-      bannerBorder: '#99F6E4',
-      bannerText: '#0F766E',
+      bannerBg: '#EEF2FF',
+      bannerBorder: '#C7D2FE',
+      bannerText: '#4338CA',
     },
     customer: {
       roleLabel: 'Customer',
@@ -150,9 +150,9 @@ export default function LoginPage({ onLoginSuccess }) {
       placeholderEmail: 'customer@shopsense.com',
       oneClickText: '1-Click Customer Access',
       icon: User,
-      bannerBg: '#F0FDF4',
-      bannerBorder: '#BBF7D0',
-      bannerText: '#15803D',
+      bannerBg: '#EEF2FF',
+      bannerBorder: '#C7D2FE',
+      bannerText: '#4338CA',
     }
   };
 
@@ -165,7 +165,7 @@ export default function LoginPage({ onLoginSuccess }) {
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      background: 'linear-gradient(135deg, #E6EFE9 0%, #DDE8E2 50%, #D5E2DC 100%)',
+      background: 'radial-gradient(circle at 50% 15%, #EEF2FF 0%, #F8FAFC 75%)',
       padding: '24px 16px',
       fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
     }}>
@@ -175,12 +175,12 @@ export default function LoginPage({ onLoginSuccess }) {
         maxWidth: '460px',
         background: '#FFFFFF',
         borderRadius: '24px',
-        boxShadow: '0 20px 60px rgba(0, 0, 0, 0.08)',
-        border: '1px solid rgba(255, 255, 255, 0.9)',
+        boxShadow: '0 20px 45px -10px rgba(99, 102, 241, 0.14)',
+        border: '1px solid #E9EAF3',
         padding: '36px 36px 32px 36px',
         boxSizing: 'border-box'
       }}>
-        {/* Brand Header */}
+        {/* Brand Header with Purple Gradient Icon */}
         <div style={{ textAlign: 'center', marginBottom: '22px' }}>
           <div style={{
             display: 'inline-flex',
@@ -190,14 +190,14 @@ export default function LoginPage({ onLoginSuccess }) {
             marginBottom: '6px'
           }}>
             <div style={{
-              width: '38px',
-              height: '38px',
-              borderRadius: '10px',
-              background: 'linear-gradient(135deg, #14B8A6, #0EA5E9)',
+              width: '42px',
+              height: '42px',
+              borderRadius: '12px',
+              background: 'linear-gradient(135deg, #6366F1, #4F46E5)',
               display: 'inline-flex',
               alignItems: 'center',
               justifyContent: 'center',
-              boxShadow: '0 4px 10px rgba(14, 165, 233, 0.25)',
+              boxShadow: '0 4px 14px rgba(99, 102, 241, 0.3)',
               color: '#FFFFFF'
             }}>
               <Store size={22} />
@@ -213,8 +213,8 @@ export default function LoginPage({ onLoginSuccess }) {
             </h1>
           </div>
           <p style={{
-            color: '#E11D48',
-            fontSize: '12px',
+            color: '#6366F1',
+            fontSize: '12.5px',
             fontWeight: '600',
             margin: 0,
             letterSpacing: '0.2px'
@@ -223,7 +223,7 @@ export default function LoginPage({ onLoginSuccess }) {
           </p>
         </div>
 
-        {/* 3 Portal Role Selection Tabs (Pills) */}
+        {/* 3 Portal Role Selection Tabs (Format from user reference, in Purple Palette) */}
         <div style={{
           display: 'grid',
           gridTemplateColumns: '1fr 1fr 1fr',
@@ -253,38 +253,38 @@ export default function LoginPage({ onLoginSuccess }) {
                   padding: '9px 10px',
                   borderRadius: '10px',
                   border: 'none',
-                  background: isActive ? '#1E293B' : 'transparent',
+                  background: isActive ? '#6366F1' : 'transparent',
                   color: isActive ? '#FFFFFF' : '#64748B',
                   fontWeight: isActive ? '700' : '600',
                   fontSize: '13px',
                   cursor: 'pointer',
                   transition: 'all 0.2s ease',
-                  boxShadow: isActive ? '0 2px 6px rgba(15, 23, 42, 0.15)' : 'none'
+                  boxShadow: isActive ? '0 2px 8px rgba(99, 102, 241, 0.3)' : 'none'
                 }}
               >
-                <Icon size={15} color={isActive ? '#38BDF8' : '#0D9488'} />
+                <Icon size={15} color={isActive ? '#FFFFFF' : '#6366F1'} />
                 <span>{tab.label}</span>
               </button>
             );
           })}
         </div>
 
-        {/* Role Information Banner */}
+        {/* Role Information Banner in Soft Lavender */}
         <div style={{
           display: 'flex',
           alignItems: 'center',
           gap: '8px',
-          background: currentPortal.bannerBg,
-          border: `1px solid ${currentPortal.bannerBorder}`,
+          background: '#EEF2FF',
+          border: '1px solid #C7D2FE',
           borderRadius: '10px',
           padding: '9px 12px',
           marginBottom: '20px',
-          color: currentPortal.bannerText,
+          color: '#4338CA',
           fontSize: '12px',
           fontWeight: '500',
           lineHeight: '1.4'
         }}>
-          <CheckCircle size={15} style={{ flexShrink: 0 }} />
+          <CheckCircle size={15} color="#6366F1" style={{ flexShrink: 0 }} />
           <span>
             <strong>{currentPortal.portalName}:</strong> {currentPortal.description}
           </span>
@@ -297,7 +297,7 @@ export default function LoginPage({ onLoginSuccess }) {
               display: 'block',
               fontSize: '11px',
               fontWeight: '700',
-              color: '#0F766E',
+              color: '#4F46E5',
               marginBottom: '6px',
               textTransform: 'uppercase',
               letterSpacing: '0.5px'
@@ -332,7 +332,7 @@ export default function LoginPage({ onLoginSuccess }) {
           </div>
         )}
 
-        {/* Success / Error Banners */}
+        {/* Feedback Messages */}
         {successMsg && (
           <div style={{
             display: 'flex', alignItems: 'center', gap: '8px',
@@ -352,7 +352,7 @@ export default function LoginPage({ onLoginSuccess }) {
             borderRadius: '10px', padding: '10px 12px', marginBottom: '16px',
             color: '#DC2626', fontSize: '13px', fontWeight: '500'
           }}>
-            <AlertCircle size={16} style={{ flexShrink: 0 }} />
+            <AlertTriangle size={16} style={{ flexShrink: 0 }} />
             <span>{error}</span>
           </div>
         )}
@@ -366,7 +366,7 @@ export default function LoginPage({ onLoginSuccess }) {
                 display: 'block',
                 fontSize: '11px',
                 fontWeight: '700',
-                color: '#E11D48',
+                color: '#4F46E5',
                 marginBottom: '6px',
                 letterSpacing: '0.5px'
               }}>
@@ -375,7 +375,7 @@ export default function LoginPage({ onLoginSuccess }) {
               <div style={{ position: 'relative' }}>
                 <Mail
                   size={16}
-                  color="#0D9488"
+                  color="#6366F1"
                   style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }}
                 />
                 <input
@@ -404,7 +404,7 @@ export default function LoginPage({ onLoginSuccess }) {
                 display: 'block',
                 fontSize: '11px',
                 fontWeight: '700',
-                color: '#E11D48',
+                color: '#4F46E5',
                 marginBottom: '6px',
                 letterSpacing: '0.5px'
               }}>
@@ -413,7 +413,7 @@ export default function LoginPage({ onLoginSuccess }) {
               <div style={{ position: 'relative' }}>
                 <Lock
                   size={16}
-                  color="#0D9488"
+                  color="#6366F1"
                   style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }}
                 />
                 <input
@@ -453,7 +453,7 @@ export default function LoginPage({ onLoginSuccess }) {
               </div>
             </div>
 
-            {/* MAIN ACTION BUTTON: Sign In as ... -> */}
+            {/* MAIN ACTION BUTTON: Purple Gradient with Arrow */}
             <button
               type="submit"
               disabled={loading}
@@ -462,7 +462,7 @@ export default function LoginPage({ onLoginSuccess }) {
                 padding: '13px 20px',
                 borderRadius: '10px',
                 border: 'none',
-                background: 'linear-gradient(90deg, #14B8A6 0%, #0EA5E9 100%)',
+                background: 'linear-gradient(135deg, #6366F1 0%, #4F46E5 100%)',
                 color: '#FFFFFF',
                 fontSize: '14.5px',
                 fontWeight: '700',
@@ -471,7 +471,7 @@ export default function LoginPage({ onLoginSuccess }) {
                 alignItems: 'center',
                 justifyContent: 'center',
                 gap: '8px',
-                boxShadow: '0 4px 14px rgba(14, 165, 233, 0.3)',
+                boxShadow: '0 4px 14px rgba(99, 102, 241, 0.35)',
                 transition: 'all 0.2s ease',
                 marginBottom: '12px'
               }}
@@ -480,7 +480,7 @@ export default function LoginPage({ onLoginSuccess }) {
               <ArrowRight size={16} />
             </button>
 
-            {/* 1-CLICK QUICK DEMO ACCESS BUTTON */}
+            {/* 1-CLICK QUICK ACCESS BUTTON (Soft Lavender Card) */}
             <button
               type="button"
               onClick={handleOneClickAccess}
@@ -489,9 +489,9 @@ export default function LoginPage({ onLoginSuccess }) {
                 width: '100%',
                 padding: '11px 16px',
                 borderRadius: '10px',
-                border: '1px solid #CBD5E1',
+                border: '1px solid #C7D2FE',
                 background: '#FFFFFF',
-                color: '#1E293B',
+                color: '#4F46E5',
                 fontSize: '13px',
                 fontWeight: '600',
                 cursor: 'pointer',
@@ -501,10 +501,16 @@ export default function LoginPage({ onLoginSuccess }) {
                 gap: '8px',
                 transition: 'all 0.2s ease'
               }}
-              onMouseEnter={e => e.currentTarget.style.background = '#F8FAFC'}
-              onMouseLeave={e => e.currentTarget.style.background = '#FFFFFF'}
+              onMouseEnter={e => {
+                e.currentTarget.style.background = '#EEF2FF';
+                e.currentTarget.style.borderColor = '#6366F1';
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.background = '#FFFFFF';
+                e.currentTarget.style.borderColor = '#C7D2FE';
+              }}
             >
-              <PortalIcon size={15} color="#0D9488" />
+              <PortalIcon size={15} color="#6366F1" />
               <span>{currentPortal.oneClickText}</span>
             </button>
           </form>
@@ -622,12 +628,13 @@ export default function LoginPage({ onLoginSuccess }) {
                 padding: '13px 20px',
                 borderRadius: '10px',
                 border: 'none',
-                background: 'linear-gradient(90deg, #14B8A6 0%, #0EA5E9 100%)',
+                background: 'linear-gradient(135deg, #6366F1 0%, #4F46E5 100%)',
                 color: '#FFFFFF',
                 fontSize: '14px',
                 fontWeight: '700',
                 cursor: 'pointer',
-                marginBottom: '12px'
+                marginBottom: '12px',
+                boxShadow: '0 4px 14px rgba(99, 102, 241, 0.35)'
               }}
             >
               {loading ? 'Registering...' : `Register as ${currentPortal.roleLabel}`}
@@ -653,7 +660,7 @@ export default function LoginPage({ onLoginSuccess }) {
                 style={{
                   background: 'none',
                   border: 'none',
-                  color: '#0D9488',
+                  color: '#6366F1',
                   fontWeight: '700',
                   cursor: 'pointer',
                   padding: 0
@@ -671,7 +678,7 @@ export default function LoginPage({ onLoginSuccess }) {
                 style={{
                   background: 'none',
                   border: 'none',
-                  color: '#0D9488',
+                  color: '#6366F1',
                   fontWeight: '700',
                   cursor: 'pointer',
                   padding: 0
