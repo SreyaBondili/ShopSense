@@ -1,6 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../api';
-import { UserCheck, Plus, Search, ShieldAlert, CheckCircle, Ban, Trash2 } from 'lucide-react';
+import AnimatedCounter from '../components/AnimatedCounter';
+import {
+  UserCheck, Plus, Search, ShieldAlert, CheckCircle, Ban, Trash2,
+  Building2, Users, Percent, X
+} from 'lucide-react';
 
 export default function VendorsPage({ user }) {
   const [vendors, setVendors] = useState([]);
@@ -128,6 +132,14 @@ export default function VendorsPage({ user }) {
     }
   };
 
+  // Metrics
+  const totalVendors = vendors.length;
+  const activeVendors = vendors.filter(v => v.status === 'ACTIVE').length;
+  const pendingVendors = vendors.filter(v => v.status === 'PENDING').length;
+  const avgCommission = totalVendors > 0
+    ? (vendors.reduce((s, v) => s + Number(v.commission_rate || 0), 0) / totalVendors).toFixed(1)
+    : 0;
+
   return (
     <div>
       <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -141,7 +153,7 @@ export default function VendorsPage({ user }) {
           className="btn btn-primary"
           onClick={() => setShowAddForm(!showAddForm)}
         >
-          <Plus size={16} />
+          {showAddForm ? <X size={16} /> : <Plus size={16} />}
           {showAddForm ? 'Close Form' : 'Onboard New Vendor'}
         </button>
       </div>
@@ -149,17 +161,54 @@ export default function VendorsPage({ user }) {
       {error && <div className="alert alert-error"><span>⚠️</span><span>{error}</span></div>}
       {success && <div className="alert alert-success"><span>✅</span><span>{success}</span></div>}
 
-      {/* Onboard Form */}
-      {showAddForm && (
-        <div className="card" style={{ border: '1px solid #C7D2FE', marginBottom: '24px' }}>
-          <div className="card-title" style={{ marginBottom: '18px' }}>
-            <UserCheck size={18} color="#6366F1" />
-            <span>Onboard New Vendor</span>
+      {/* KPI Cards */}
+      <div className="kpi-grid">
+        <div className="kpi-card">
+          <div className="kpi-label">Total Registered Vendors</div>
+          <div className="kpi-value" style={{ color: '#1E293B' }}>
+            <AnimatedCounter value={totalVendors} duration={1000} />
           </div>
+        </div>
+        <div className="kpi-card">
+          <div className="kpi-label">Active Sellers</div>
+          <div className="kpi-value" style={{ color: '#059669' }}>
+            <AnimatedCounter value={activeVendors} duration={1100} />
+          </div>
+        </div>
+        <div className="kpi-card">
+          <div className="kpi-label">Pending Approval</div>
+          <div className="kpi-value" style={{ color: '#D97706' }}>
+            <AnimatedCounter value={pendingVendors} duration={1100} />
+          </div>
+        </div>
+        <div className="kpi-card">
+          <div className="kpi-label">Avg Commission Rate</div>
+          <div className="kpi-value" style={{ color: '#6366F1' }}>
+            {avgCommission}%
+          </div>
+        </div>
+      </div>
+
+      {/* Onboard Form — Polished Multi-Column Horizontal Layout */}
+      {showAddForm && (
+        <div className="card" style={{ border: '1px solid #C7D2FE', marginBottom: '24px', background: '#FFFFFF', boxShadow: '0 4px 12px rgba(99, 102, 241, 0.08)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px', paddingBottom: '12px', borderBottom: '1px solid #E9EAF3' }}>
+            <div className="card-title" style={{ margin: 0 }}>
+              <UserCheck size={18} color="#6366F1" />
+              <span>Onboard New Vendor</span>
+            </div>
+            <button
+              onClick={() => setShowAddForm(false)}
+              style={{ background: 'none', border: 'none', color: '#64748B', cursor: 'pointer', padding: '4px' }}
+            >
+              <X size={18} />
+            </button>
+          </div>
+
           <form onSubmit={handleCreateVendor}>
-            <div className="form-grid-3">
+            <div className="form-grid-3" style={{ marginBottom: '16px' }}>
               <div>
-                <label className="form-label">Business Name *</label>
+                <label className="form-label">Business / Store Name *</label>
                 <input
                   type="text"
                   className="form-input"
@@ -170,7 +219,7 @@ export default function VendorsPage({ user }) {
                 />
               </div>
               <div>
-                <label className="form-label">Owner Name *</label>
+                <label className="form-label">Owner Full Name *</label>
                 <input
                   type="text"
                   className="form-input"
@@ -181,32 +230,7 @@ export default function VendorsPage({ user }) {
                 />
               </div>
               <div>
-                <label className="form-label">Vendor Email *</label>
-                <input
-                  type="email"
-                  className="form-input"
-                  placeholder="vendor@example.com"
-                  value={newVendor.email}
-                  onChange={e => setNewVendor({ ...newVendor, email: e.target.value })}
-                  required
-                />
-              </div>
-            </div>
-
-            <div className="form-grid-3">
-              <div>
-                <label className="form-label">Phone Number *</label>
-                <input
-                  type="text"
-                  className="form-input"
-                  placeholder="10-15 digits"
-                  value={newVendor.phone}
-                  onChange={e => setNewVendor({ ...newVendor, phone: e.target.value })}
-                  required
-                />
-              </div>
-              <div>
-                <label className="form-label">Category *</label>
+                <label className="form-label">Primary Product Category *</label>
                 <select
                   className="form-select"
                   value={newVendor.category}
@@ -221,11 +245,38 @@ export default function VendorsPage({ user }) {
                   <option value="Other">Other</option>
                 </select>
               </div>
+            </div>
+
+            <div className="form-grid-3" style={{ marginBottom: '20px' }}>
               <div>
-                <label className="form-label">Commission Rate (%)</label>
+                <label className="form-label">Vendor Email Address *</label>
+                <input
+                  type="email"
+                  className="form-input"
+                  placeholder="vendor@example.com"
+                  value={newVendor.email}
+                  onChange={e => setNewVendor({ ...newVendor, email: e.target.value })}
+                  required
+                />
+              </div>
+              <div>
+                <label className="form-label">Direct Phone Number *</label>
+                <input
+                  type="text"
+                  className="form-input"
+                  placeholder="10-15 digits"
+                  value={newVendor.phone}
+                  onChange={e => setNewVendor({ ...newVendor, phone: e.target.value })}
+                  required
+                />
+              </div>
+              <div>
+                <label className="form-label">Platform Commission Rate (%) *</label>
                 <input
                   type="number"
                   step="0.5"
+                  min="1"
+                  max="50"
                   className="form-input"
                   value={newVendor.commission_rate}
                   onChange={e => setNewVendor({ ...newVendor, commission_rate: e.target.value })}
@@ -234,18 +285,27 @@ export default function VendorsPage({ user }) {
               </div>
             </div>
 
-            <button type="submit" className="btn btn-primary" style={{ marginTop: '12px' }}>
-              Register & Activate Vendor
-            </button>
+            <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', borderTop: '1px solid #E9EAF3', paddingTop: '16px' }}>
+              <button
+                type="button"
+                className="btn btn-secondary"
+                onClick={() => setShowAddForm(false)}
+              >
+                Cancel
+              </button>
+              <button type="submit" className="btn btn-primary">
+                <CheckCircle size={16} /> Register & Activate Vendor
+              </button>
+            </div>
           </form>
         </div>
       )}
 
-      {/* Filters */}
-      <div className="card" style={{ padding: '20px', marginBottom: '20px' }}>
+      {/* Filter Bar */}
+      <div className="card" style={{ padding: '16px 20px', marginBottom: '20px' }}>
         <form onSubmit={handleSearchSubmit} className="form-grid-3" style={{ margin: 0 }}>
           <div>
-            <label className="form-label">Search vendors</label>
+            <label className="form-label">Search Sellers</label>
             <div style={{ display: 'flex', gap: '8px' }}>
               <input
                 type="text"
@@ -276,7 +336,7 @@ export default function VendorsPage({ user }) {
             </select>
           </div>
           <div>
-            <label className="form-label">Status Filter</label>
+            <label className="form-label">Account Status</label>
             <select
               className="form-select"
               value={statusFilter}
@@ -293,11 +353,12 @@ export default function VendorsPage({ user }) {
 
       {/* Vendors Table */}
       <div className="card" style={{ padding: '24px', marginBottom: '24px' }}>
-        <div className="card-title" style={{ marginBottom: '16px' }}>
+        <div className="card-title" style={{ marginBottom: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <span>Registered Vendors ({vendors.length})</span>
+          <span style={{ fontSize: '12px', color: '#64748B', fontWeight: 'normal' }}>Click row to configure</span>
         </div>
-        <div className="table-responsive">
-          <table>
+        <div className="table-container">
+          <table className="table">
             <thead>
               <tr>
                 <th>ID</th>
@@ -311,32 +372,46 @@ export default function VendorsPage({ user }) {
               </tr>
             </thead>
             <tbody>
-              {vendors.map(v => (
-                <tr key={v.vendor_id} onClick={() => {
-                  setSelectedVendorId(v.vendor_id);
-                  setNewStatus(v.status);
-                  setNewCommission(v.commission_rate);
-                }} style={{ cursor: 'pointer' }}>
-                  <td><strong>#{v.vendor_id}</strong></td>
-                  <td style={{ fontWeight: '600', color: '#1E293B' }}>{v.business_name}</td>
-                  <td style={{ color: '#1E293B' }}>{v.owner_name}</td>
-                  <td style={{ color: '#64748B' }}>{v.email}</td>
-                  <td style={{ color: '#64748B' }}>{v.phone}</td>
-                  <td><span className="badge badge-info">{v.category}</span></td>
-                  <td style={{ fontWeight: '600', color: '#1E293B' }}>{v.commission_rate}%</td>
-                  <td>
-                    <span className={`badge ${
-                      v.status === 'ACTIVE' ? 'badge-success' :
-                      v.status === 'PENDING' ? 'badge-warning' : 'badge-danger'
-                    }`}>
-                      {v.status}
-                    </span>
-                  </td>
-                </tr>
-              ))}
+              {vendors.map(v => {
+                const isSelected = String(selectedVendorId) === String(v.vendor_id);
+                return (
+                  <tr
+                    key={v.vendor_id}
+                    onClick={() => {
+                      setSelectedVendorId(v.vendor_id);
+                      setNewStatus(v.status);
+                      setNewCommission(v.commission_rate);
+                    }}
+                    style={{
+                      cursor: 'pointer',
+                      background: isSelected ? '#F1F5F9' : undefined
+                    }}
+                  >
+                    <td><strong>#{v.vendor_id}</strong></td>
+                    <td style={{ fontWeight: '600', color: '#1E293B' }}>{v.business_name}</td>
+                    <td style={{ color: '#1E293B' }}>{v.owner_name}</td>
+                    <td style={{ color: '#64748B' }}>{v.email}</td>
+                    <td style={{ color: '#64748B' }}>{v.phone}</td>
+                    <td>
+                      <span className="badge" style={{ background: '#EEF2FF', color: '#6366F1', border: '1px solid #C7D2FE' }}>
+                        {v.category}
+                      </span>
+                    </td>
+                    <td style={{ fontWeight: '600', color: '#1E293B' }}>{v.commission_rate}%</td>
+                    <td>
+                      <span className={`badge ${
+                        v.status === 'ACTIVE' ? 'badge-success' :
+                        v.status === 'PENDING' ? 'badge-warning' : 'badge-danger'
+                      }`}>
+                        {v.status}
+                      </span>
+                    </td>
+                  </tr>
+                );
+              })}
               {vendors.length === 0 && (
                 <tr>
-                  <td colSpan="8" style={{ textAlign: 'center', padding: '30px', color: '#64748B' }}>
+                  <td colSpan="8" style={{ textAlign: 'center', padding: '40px', color: '#64748B' }}>
                     No vendors found matching criteria.
                   </td>
                 </tr>
@@ -350,35 +425,35 @@ export default function VendorsPage({ user }) {
       {vendors.length > 0 && (
         <div className="card" style={{ padding: '24px' }}>
           <div className="card-title" style={{ marginBottom: '16px' }}>
-            <span>⚙️ Vendor Actions</span>
+            <span>⚙️ Vendor Account Actions</span>
           </div>
-          <div className="form-group">
-            <label className="form-label">Select Vendor to Manage</label>
-            <select
-              className="form-select"
-              value={selectedVendorId}
-              onChange={e => {
-                const id = Number(e.target.value);
-                setSelectedVendorId(id);
-                const found = vendors.find(v => v.vendor_id === id);
-                if (found) {
-                  setNewStatus(found.status);
-                  setNewCommission(found.commission_rate);
-                }
-              }}
-            >
-              {vendors.map(v => (
-                <option key={v.vendor_id} value={v.vendor_id}>
-                  Vendor #{v.vendor_id} - {v.business_name} ({v.owner_name})
-                </option>
-              ))}
-            </select>
-          </div>
+          <div className="form-grid-3" style={{ alignItems: 'end' }}>
+            <div className="form-group" style={{ margin: 0 }}>
+              <label className="form-label">Selected Vendor</label>
+              <select
+                className="form-select"
+                value={selectedVendorId}
+                onChange={e => {
+                  const id = e.target.value;
+                  setSelectedVendorId(id);
+                  const v = vendors.find(item => String(item.vendor_id) === String(id));
+                  if (v) {
+                    setNewStatus(v.status);
+                    setNewCommission(v.commission_rate);
+                  }
+                }}
+              >
+                {vendors.map(v => (
+                  <option key={v.vendor_id} value={v.vendor_id}>
+                    {v.business_name} (ID: #{v.vendor_id} - {v.status})
+                  </option>
+                ))}
+              </select>
+            </div>
 
-          <div className="form-grid-3" style={{ alignItems: 'flex-end' }}>
-            <div>
-              <label className="form-label">Change Status</label>
-              <div style={{ display: 'flex', gap: '8px' }}>
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <div style={{ flex: 1 }}>
+                <label className="form-label">Set Status</label>
                 <select
                   className="form-select"
                   value={newStatus}
@@ -388,32 +463,43 @@ export default function VendorsPage({ user }) {
                   <option value="PENDING">PENDING</option>
                   <option value="SUSPENDED">SUSPENDED</option>
                 </select>
-                <button type="button" className="btn btn-secondary" onClick={handleUpdateStatus}>
-                  Update Status
-                </button>
               </div>
+              <button
+                className="btn btn-secondary"
+                onClick={handleUpdateStatus}
+                style={{ alignSelf: 'flex-end', whiteSpace: 'nowrap' }}
+              >
+                Update Status
+              </button>
             </div>
 
-            <div>
-              <label className="form-label">Update Commission (%)</label>
-              <div style={{ display: 'flex', gap: '8px' }}>
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <div style={{ flex: 1 }}>
+                <label className="form-label">Commission %</label>
                 <input
                   type="number"
                   step="0.5"
+                  min="0"
+                  max="100"
                   className="form-input"
                   value={newCommission}
                   onChange={e => setNewCommission(e.target.value)}
                 />
-                <button type="button" className="btn btn-secondary" onClick={handleUpdateCommission}>
-                  Save Commission
-                </button>
               </div>
-            </div>
-
-            <div>
-              <label className="form-label">Danger Zone</label>
-              <button type="button" className="btn btn-danger" style={{ width: '100%' }} onClick={handleDeleteVendor}>
-                <Trash2 size={16} /> Delete Vendor
+              <button
+                className="btn btn-secondary"
+                onClick={handleUpdateCommission}
+                style={{ alignSelf: 'flex-end', whiteSpace: 'nowrap' }}
+              >
+                Save %
+              </button>
+              <button
+                className="btn btn-danger"
+                onClick={handleDeleteVendor}
+                style={{ alignSelf: 'flex-end' }}
+                title="Delete Vendor"
+              >
+                <Trash2 size={15} />
               </button>
             </div>
           </div>

@@ -387,21 +387,27 @@ body {
 }
 
 /* Tables */
-.table-container {
+.table-container,
+.table-responsive {
   overflow-x: auto;
   border-radius: 12px;
   border: 1px solid var(--border-color);
   background: #FFFFFF;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 
-.table {
+.table,
+.table-responsive table,
+.table-container table {
   width: 100%;
   border-collapse: collapse;
   text-align: left;
   font-size: 13px;
 }
 
-.table th {
+.table th,
+.table-responsive table th,
+.table-container table th {
   background: #F8FAFC;
   padding: 14px 18px;
   font-weight: 700;
@@ -412,17 +418,24 @@ body {
   letter-spacing: 0.5px;
 }
 
-.table td {
+.table td,
+.table-responsive table td,
+.table-container table td {
   padding: 14px 18px;
   border-bottom: 1px solid var(--border-color);
   color: var(--text-primary);
+  vertical-align: middle;
 }
 
-.table tr:last-child td {
+.table tr:last-child td,
+.table-responsive table tr:last-child td,
+.table-container table tr:last-child td {
   border-bottom: none;
 }
 
-.table tr:hover td {
+.table tr:hover td,
+.table-responsive table tr:hover td,
+.table-container table tr:hover td {
   background: #F8FAFC;
 }
 
@@ -464,8 +477,37 @@ body {
 
 .form-grid-2 {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(2, 1fr);
   gap: 16px;
+}
+
+.form-grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.form-grid-4 {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+@media (max-width: 992px) {
+  .form-grid-3 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .form-grid-4 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .form-grid-2,
+  .form-grid-3,
+  .form-grid-4 {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* Badges */
