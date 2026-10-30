@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { api } from '../api';
 import {
   ShieldCheck, Store, User, Mail, Lock, Eye, EyeOff,
-  ArrowRight, CheckCircle, AlertTriangle, Sparkles, UserPlus, LogIn
+  ArrowRight, CheckCircle, AlertTriangle
 } from 'lucide-react';
 
 export default function LoginPage({ onLoginSuccess }) {
@@ -17,9 +17,6 @@ export default function LoginPage({ onLoginSuccess }) {
   const [error, setError] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
   const [loading, setLoading] = useState(false);
-
-  // Vendor selector for quick switching
-  const [selectedVendorEmail, setSelectedVendorEmail] = useState('janani@gmail.com');
 
   // Registration data
   const blankReg = {
@@ -36,20 +33,10 @@ export default function LoginPage({ onLoginSuccess }) {
     if (portal === 'admin') {
       setEmail('bsreya1610@gmail.com');
       setPassword('Admin@123');
-    } else if (portal === 'vendor') {
-      setEmail('janani@gmail.com');
-      setPassword('Vendor@123');
-      setSelectedVendorEmail('janani@gmail.com');
     } else {
-      setEmail('customer@shopsense.com');
-      setPassword('Customer@123');
+      setEmail('');
+      setPassword('');
     }
-  };
-
-  const handleVendorSelect = (vEmail) => {
-    setSelectedVendorEmail(vEmail);
-    setEmail(vEmail);
-    setPassword('Vendor@123');
   };
 
   const executeLogin = async (loginEmail, loginPass) => {
@@ -78,10 +65,6 @@ export default function LoginPage({ onLoginSuccess }) {
   const handleOneClickAccess = () => {
     if (activePortal === 'admin') {
       executeLogin('bsreya1610@gmail.com', 'Admin@123');
-    } else if (activePortal === 'vendor') {
-      executeLogin(email || 'janani@gmail.com', 'Vendor@123');
-    } else {
-      executeLogin('customer@shopsense.com', 'Customer@123');
     }
   };
 
@@ -106,8 +89,6 @@ export default function LoginPage({ onLoginSuccess }) {
       await api.register(payload);
       setRegData(blankReg);
       setMode('login');
-      setEmail(payload.email);
-      setPassword(payload.password);
       setSuccessMsg(`✓ Account created! Please sign in with your credentials.`);
     } catch (err) {
       setError(err.message || 'Registration failed.');
@@ -120,44 +101,25 @@ export default function LoginPage({ onLoginSuccess }) {
   const portalInfo = {
     admin: {
       roleLabel: 'Admin',
-      portalName: 'Administrator Portal',
-      description: 'Full marketplace control & intelligence.',
       emailLabel: 'ADMIN EMAIL ADDRESS',
       placeholderEmail: 'admin@shopsense.com',
-      oneClickText: '1-Click Admin Access',
       icon: ShieldCheck,
-      bannerBg: '#EEF2FF',
-      bannerBorder: '#C7D2FE',
-      bannerText: '#4338CA',
     },
     vendor: {
       roleLabel: 'Vendor',
-      portalName: 'Vendor Portal',
-      description: 'Manage catalog, inventory & sales analytics.',
       emailLabel: 'VENDOR EMAIL ADDRESS',
       placeholderEmail: 'vendor@shopsense.com',
-      oneClickText: '1-Click Vendor Access',
       icon: Store,
-      bannerBg: '#EEF2FF',
-      bannerBorder: '#C7D2FE',
-      bannerText: '#4338CA',
     },
     customer: {
       roleLabel: 'Customer',
-      portalName: 'Customer Portal',
-      description: 'Browse products, place orders & track shipments.',
       emailLabel: 'CUSTOMER EMAIL ADDRESS',
       placeholderEmail: 'customer@shopsense.com',
-      oneClickText: '1-Click Customer Access',
       icon: User,
-      bannerBg: '#EEF2FF',
-      bannerBorder: '#C7D2FE',
-      bannerText: '#4338CA',
     }
   };
 
   const currentPortal = portalInfo[activePortal];
-  const PortalIcon = currentPortal.icon;
 
   return (
     <div style={{
@@ -269,68 +231,7 @@ export default function LoginPage({ onLoginSuccess }) {
           })}
         </div>
 
-        {/* Role Information Banner in Soft Lavender */}
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '8px',
-          background: '#EEF2FF',
-          border: '1px solid #C7D2FE',
-          borderRadius: '10px',
-          padding: '9px 12px',
-          marginBottom: '20px',
-          color: '#4338CA',
-          fontSize: '12px',
-          fontWeight: '500',
-          lineHeight: '1.4'
-        }}>
-          <CheckCircle size={15} color="#6366F1" style={{ flexShrink: 0 }} />
-          <span>
-            <strong>{currentPortal.portalName}:</strong> {currentPortal.description}
-          </span>
-        </div>
 
-        {/* Vendor Selector Dropdown (When on Vendor tab) */}
-        {activePortal === 'vendor' && mode === 'login' && (
-          <div style={{ marginBottom: '16px' }}>
-            <label style={{
-              display: 'block',
-              fontSize: '11px',
-              fontWeight: '700',
-              color: '#4F46E5',
-              marginBottom: '6px',
-              textTransform: 'uppercase',
-              letterSpacing: '0.5px'
-            }}>
-              Choose Registered Vendor
-            </label>
-            <select
-              className="form-select"
-              value={selectedVendorEmail}
-              onChange={e => handleVendorSelect(e.target.value)}
-              style={{
-                width: '100%',
-                padding: '9px 12px',
-                borderRadius: '10px',
-                border: '1px solid #CBD5E1',
-                fontSize: '13px',
-                color: '#1E293B',
-                background: '#F8FAFC'
-              }}
-            >
-              <option value="janani@gmail.com">Janani Stores (janani@gmail.com) - 4 Products</option>
-              <option value="techworld@example.com">Apex Electronics (John Doe) - 4 Products</option>
-              <option value="trendsfashion@example.com">Aura Fashion Hub (Sarah Miller) - 4 Products</option>
-              <option value="ammu@gmail.com">Akshi matrices (Akshi) - 3 Products</option>
-              <option value="bhanu@gmail.com">chimayi max (bhanu) - 3 Products</option>
-              <option value="kiran@gmail.com">baggy jeans (kiran) - 3 Products</option>
-              <option value="mehi@gmail.com">mahi galaxy (mahi) - 3 Products</option>
-              <option value="bookoasis@example.com">Book Haven Store (Robert Clark) - 4 Products</option>
-              <option value="homecomforts@example.com">Urban Home Comforts (Emma Watson) - 4 Products</option>
-              <option value="glowbeauty@example.com">Glow Cosmetics & Spa (Priya Sharma) - 4 Products</option>
-            </select>
-          </div>
-        )}
 
         {/* Feedback Messages */}
         {successMsg && (
@@ -480,39 +381,41 @@ export default function LoginPage({ onLoginSuccess }) {
               <ArrowRight size={16} />
             </button>
 
-            {/* 1-CLICK QUICK ACCESS BUTTON (Soft Lavender Card) */}
-            <button
-              type="button"
-              onClick={handleOneClickAccess}
-              disabled={loading}
-              style={{
-                width: '100%',
-                padding: '11px 16px',
-                borderRadius: '10px',
-                border: '1px solid #C7D2FE',
-                background: '#FFFFFF',
-                color: '#4F46E5',
-                fontSize: '13px',
-                fontWeight: '600',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '8px',
-                transition: 'all 0.2s ease'
-              }}
-              onMouseEnter={e => {
-                e.currentTarget.style.background = '#EEF2FF';
-                e.currentTarget.style.borderColor = '#6366F1';
-              }}
-              onMouseLeave={e => {
-                e.currentTarget.style.background = '#FFFFFF';
-                e.currentTarget.style.borderColor = '#C7D2FE';
-              }}
-            >
-              <PortalIcon size={15} color="#6366F1" />
-              <span>{currentPortal.oneClickText}</span>
-            </button>
+            {/* 1-CLICK QUICK ACCESS BUTTON (Soft Lavender Card) - ADMIN ONLY */}
+            {activePortal === 'admin' && (
+              <button
+                type="button"
+                onClick={handleOneClickAccess}
+                disabled={loading}
+                style={{
+                  width: '100%',
+                  padding: '11px 16px',
+                  borderRadius: '10px',
+                  border: '1px solid #C7D2FE',
+                  background: '#FFFFFF',
+                  color: '#4F46E5',
+                  fontSize: '13px',
+                  fontWeight: '600',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px',
+                  transition: 'all 0.2s ease'
+                }}
+                onMouseEnter={e => {
+                  e.currentTarget.style.background = '#EEF2FF';
+                  e.currentTarget.style.borderColor = '#6366F1';
+                }}
+                onMouseLeave={e => {
+                  e.currentTarget.style.background = '#FFFFFF';
+                  e.currentTarget.style.borderColor = '#C7D2FE';
+                }}
+              >
+                <ShieldCheck size={15} color="#6366F1" />
+                <span>1-Click Admin Access</span>
+              </button>
+            )}
           </form>
         )}
 

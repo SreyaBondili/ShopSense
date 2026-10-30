@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../api';
 import AnimatedCounter from '../components/AnimatedCounter';
-import { getProductImageUrl } from '../productImages';
 import { Package, Plus, Search, Edit2, Trash2, X, CheckCircle, Tag, Layers, DollarSign } from 'lucide-react';
 
 export default function ProductsPage({ user }) {
@@ -348,7 +347,6 @@ export default function ProductsPage({ user }) {
           <table className="table">
             <thead>
               <tr>
-                <th style={{ width: '60px' }}>IMAGE</th>
                 <th>PRODUCT</th>
                 <th>CATEGORY</th>
                 <th>UNIT PRICE</th>
@@ -359,7 +357,6 @@ export default function ProductsPage({ user }) {
             </thead>
             <tbody>
               {products.map(p => {
-                const imgUrl = getProductImageUrl(p.product_name, p.category);
                 const isSelected = String(selectedProdId) === String(p.product_id);
                 const isOut = p.stock === 0;
                 const isLow = p.stock > 0 && p.stock <= 10;
@@ -376,19 +373,6 @@ export default function ProductsPage({ user }) {
                       background: isSelected ? '#F1F5F9' : undefined
                     }}
                   >
-                    <td>
-                      <img
-                        src={imgUrl}
-                        alt={p.product_name}
-                        style={{
-                          width: '42px', height: '42px', objectFit: 'cover',
-                          borderRadius: '8px', border: '1px solid #E2E8F0'
-                        }}
-                        onError={e => {
-                          e.target.src = 'https://images.unsplash.com/photo-1472851294608-062f824d29cc?w=400&h=300&fit=crop';
-                        }}
-                      />
-                    </td>
                     <td>
                       <div style={{ fontWeight: '700', color: '#1E293B', fontSize: '13.5px' }}>
                         {p.product_name}

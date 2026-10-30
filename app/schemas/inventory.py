@@ -11,6 +11,8 @@ class InventoryResponse(BaseModel):
     inventory_id: int
     product_id: int
     product_name: Optional[str] = None
+    category: Optional[str] = None
+    price: Optional[float] = None
     vendor_id: Optional[int] = None
     vendor_name: Optional[str] = None
     current_stock: int
