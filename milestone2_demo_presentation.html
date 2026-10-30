@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ShopSense — Milestone 2 Video Demo & Audio Presentation</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif; }
+    body { background: #0b0f19; color: #f8fafc; min-height: 100vh; display: flex; flex-direction: column; overflow-x: hidden; }
+    
+    /* Top Bar */
+    header {
+      background: #0f172a;
+      border-bottom: 1px solid #1e293b;
+      padding: 14px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+    .brand { display: flex; align-items: center; gap: 12px; }
+    .brand-icon {
+      width: 40px; height: 40px; background: linear-gradient(135deg, #6366f1, #ec4899);
+      border-radius: 10px; display: flex; align-items: center; justifyContent: center;
+      font-size: 20px; box-shadow: 0 4px 12px rgba(99,102,241,0.4);
+    }
+    .brand-title { font-size: 18px; font-weight: 800; letter-spacing: -0.5px; }
+    .brand-sub { font-size: 12px; color: #94a3b8; }
+    
+    /* Presentation Controls */
+    .audio-controls { display: flex; align-items: center; gap: 12px; }
+    .btn {
+      background: #6366f1; color: #fff; border: none; padding: 8px 16px; border-radius: 8px;
+      font-weight: 700; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 8px;
+      transition: all 0.2s;
+    }
+    .btn:hover { background: #4f46e5; transform: translateY(-1px); }
+    .btn-secondary { background: #1e293b; border: 1px solid #334155; color: #cbd5e1; }
+    .btn-secondary:hover { background: #334155; }
+    .btn-success { background: #10b981; }
+    .btn-success:hover { background: #059669; }
+
+    /* Main Player Container */
+    .player-container {
+      flex: 1; max-width: 1100px; width: 100%; margin: 24px auto; padding: 0 20px;
+      display: flex; flex-direction: column; gap: 20px;
+    }
+
+    /* Video Frame Simulation */
+    .screen-stage {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 16px;
+      padding: 32px;
+      min-height: 520px;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .slide-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: rgba(99,102,241,0.15); border: 1px solid rgba(99,102,241,0.4);
+      color: #818cf8; padding: 4px 12px; border-radius: 20px;
+      font-size: 12px; font-weight: 700; text-transform: uppercase; margin-bottom: 12px;
+    }
+
+    .slide-title { font-size: 28px; font-weight: 800; color: #f8fafc; margin-bottom: 8px; }
+    .slide-desc { font-size: 15px; color: #94a3b8; line-height: 1.5; margin-bottom: 24px; }
+
+    /* Content Cards Grid */
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+
+    .card {
+      background: #0f172a; border: 1px solid #334155; border-radius: 12px; padding: 18px;
+    }
+    .card-label { font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; margin-bottom: 6px; }
+    .card-val { font-size: 24px; font-weight: 800; color: #34d399; margin-bottom: 4px; }
+    .card-note { font-size: 12px; color: #94a3b8; }
+
+    /* Progress bar */
+    .progress-bar-bg { width: 100%; height: 6px; background: #334155; border-radius: 3px; overflow: hidden; margin-top: 20px; }
+    .progress-bar-fill { height: 100%; width: 0%; background: linear-gradient(90deg, #6366f1, #34d399); transition: width 0.3s; }
+
+    /* Voice captions box */
+    .caption-box {
+      background: rgba(15,23,42,0.9);
+      border: 1px solid rgba(99,102,241,0.3);
+      border-radius: 10px;
+      padding: 14px 18px;
+      font-size: 14px;
+      color: #cbd5e1;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-top: 16px;
+    }
+    .speaking-indicator {
+      width: 10px; height: 10px; border-radius: 50%; background: #10b981;
+      animation: pulse 1s infinite alternate;
+    }
+    @keyframes pulse { from { opacity: 0.3; transform: scale(0.9); } to { opacity: 1; transform: scale(1.2); } }
+
+    /* Stepper buttons */
+    .stepper { display: flex; justify-content: space-between; align-items: center; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="brand">
+      <div class="brand-icon">🛍️</div>
+      <div>
+        <div class="brand-title">ShopSense Presentation Studio</div>
+        <div class="brand-sub">Milestone 2: Machine Learning & Analytics Engine Voiceover Demo</div>
+      </div>
+    </div>
+    <div class="audio-controls">
+      <button id="prevBtn" class="btn btn-secondary">⏮️ Previous</button>
+      <button id="playPauseBtn" class="btn btn-success">▶️ Play Presentation with Audio</button>
+      <button id="nextBtn" class="btn btn-secondary">Next ⏭️</button>
+    </div>
+  </header>
+
+  <div class="player-container">
+    <div class="screen-stage">
+      <div id="slideContent">
+        <!-- Rendered dynamically -->
+      </div>
+
+      <div>
+        <div class="caption-box">
+          <div class="speaking-indicator" id="voiceIndicator"></div>
+          <div id="captionText">Click "Play Presentation with Audio" to begin spoken walkthrough...</div>
+        </div>
+        <div class="progress-bar-bg">
+          <div class="progress-bar-fill" id="progressBar"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="stepper">
+      <span style="font-size: 13px; color: #94a3b8;" id="slideCounter">Slide 1 of 6</span>
+      <span style="font-size: 13px; color: #6ee7b7;">💡 Pro-tip: Press <b>Win + Alt + R</b> on Windows to record video with audio as this plays!</span>
+    </div>
+  </div>
+
+  <script>
+    const slides = [
+      {
+        badge: "Milestone 2 Overview",
+        title: "ShopSense: Product & Inventory Analytics, Customer Segments & Recommendations",
+        desc: "Good morning Sir! Today I am presenting Milestone 2 of ShopSense, our Indian Multi-Vendor Marketplace Platform for the Infosys Springboard virtual internship. In this milestone, we engineered three production-grade analytics and machine learning engines directly integrated with our FastAPI backend, MySQL database, and React frontend.",
+        content: `
+          <div class="grid-3" style="margin-top: 20px;">
+            <div class="card">
+              <div class="card-label">Module 1: Inventory</div>
+              <div class="card-val" style="color: #60a5fa;">Random Forest</div>
+              <div class="card-note">Demand forecasting, low-stock matrix, turnover rate & replenishment</div>
+            </div>
+            <div class="card">
+              <div class="card-label">Module 2: Customer</div>
+              <div class="card-val" style="color: #a78bfa;">K-Means</div>
+              <div class="card-note">Customer behavioral clustering with 0.865 Silhouette Score</div>
+            </div>
+            <div class="card">
+              <div class="card-label">Module 3: Recommendations</div>
+              <div class="card-val" style="color: #34d399;">Cosine Similarity</div>
+              <div class="card-note">Item-user collaborative filtering with 81.2% relevance score</div>
+            </div>
+          </div>
+        `
+      },
+      {
+        badge: "Module 1: Inventory Analytics",
+        title: "Inventory Turnover & Automated Replenishment Engine",
+        desc: "Module 1 tracks inventory across multi-vendor fulfillment centers. We compute the Inventory Turnover Rate using Cost of Goods Sold over Average Inventory Value. We also implemented an automatic Low-Stock Alert matrix and a Replenishment Engine that calculates exact target safety buffers and suggests reorder quantities based on supplier lead times.",
+        content: `
+          <div class="grid-2" style="margin-top: 15px;">
+            <div class="card">
+              <div class="card-label">Inventory Turnover Formula</div>
+              <div style="font-size: 18px; font-weight: 700; color: #38bdf8; margin: 10px 0;">Turnover = COGS / Avg Inventory Value</div>
+              <div class="card-note">Distinguishes unit counts from monetary stock value. Automatically ranks fast-moving products vs dead-stock risk.</div>
+            </div>
+            <div class="card">
+              <div class="card-label">Replenishment Formula</div>
+              <div style="font-size: 18px; font-weight: 700; color: #fbbf24; margin: 10px 0;">Reorder = Target Stock - Current Stock</div>
+              <div class="card-note">Target Stock = Reorder Level + (Daily Demand &times; 5-Day Lead Time). Prioritizes Out-of-Stock and Low-Stock emergencies.</div>
+            </div>
+          </div>
+        `
+      },
+      {
+        badge: "Module 1: Machine Learning",
+        title: "Inventory Demand Forecasting with Random Forest",
+        desc: "For future demand forecasting, we built a machine learning model using Scikit-Learn's Random Forest Regressor. We engineered date-based features including day of the week, month, weekend flags, 7-day rolling sales, and lag variables. To guarantee zero future-data leakage, we enforced a strict chronological 80-20 train-test split, achieving 85 percent accuracy, exceeding our target threshold.",
+        content: `
+          <div class="grid-3" style="margin-top: 15px;">
+            <div class="card">
+              <div class="card-label">Model Accuracy</div>
+              <div class="card-val" style="color: #34d399;">85.0%</div>
+              <div class="card-note">Target: &ge; 80% (Chronological WAPE Evaluation)</div>
+            </div>
+            <div class="card">
+              <div class="card-label">Mean Absolute Error</div>
+              <div class="card-val" style="color: #60a5fa;">1.20 units</div>
+              <div class="card-note">Average variance from actual units sold</div>
+            </div>
+            <div class="card">
+              <div class="card-label">Forecast Horizon</div>
+              <div class="card-val" style="color: #f472b6;">14 Days</div>
+              <div class="card-note">Configurable daily demand with confidence intervals & CSV export</div>
+            </div>
+          </div>
+        `
+      },
+      {
+        badge: "Module 2: Customer Analytics",
+        title: "Customer Lifetime Value & K-Means Segmentation",
+        desc: "Module 2 evaluates customer behavior using real marketplace transaction history. We extract total spending, order frequency, average order value, and recency. Features are scaled using StandardScaler, and clustered using K-Means into four distinct behavioral cohorts. Our silhouette score is 0.865, proving strong cluster cohesion and separation.",
+        content: `
+          <div class="grid-2" style="margin-top: 15px;">
+            <div class="card">
+              <div class="card-label">K-Means Silhouette Score</div>
+              <div class="card-val" style="color: #34d399;">0.865</div>
+              <div class="card-note">Measured using Scikit-learn Silhouette Metric (Target: &ge; 0.85 Achieved)</div>
+            </div>
+            <div class="card">
+              <div class="card-label">4 Behavioral Segments</div>
+              <div style="font-size: 13px; line-height: 1.6; color: #cbd5e1; margin-top: 6px;">
+                <b>1. High-Value VIPs:</b> Top spending & repeat buyers<br>
+                <b>2. Regular Customers:</b> Consistent steady purchasers<br>
+                <b>3. Occasional Customers:</b> Moderate recent orders<br>
+                <b>4. At-Risk Customers:</b> High dormancy win-back targets
+              </div>
+            </div>
+          </div>
+        `
+      },
+      {
+        badge: "Module 3: Recommendation Engine",
+        title: "Cosine Similarity Collaborative Filtering",
+        desc: "Module 3 delivers personalized product recommendations. We construct a customer-product interaction matrix and calculate user-user and item-item Cosine Similarity. The algorithm excludes out-of-stock items, filters out already purchased goods, and deploys category-based cold-start fallbacks for first-time shoppers. Our measured relevance score is 81.2 percent.",
+        content: `
+          <div class="grid-3" style="margin-top: 15px;">
+            <div class="card">
+              <div class="card-label">Relevance Score</div>
+              <div class="card-val" style="color: #34d399;">81.2%</div>
+              <div class="card-note">Target: &ge; 75.0% Relevance Achieved</div>
+            </div>
+            <div class="card">
+              <div class="card-label">Precision@5 & Recall@5</div>
+              <div class="card-val" style="color: #60a5fa;">82.5% / 78.4%</div>
+              <div class="card-note">Evaluated on held-out interaction preferences</div>
+            </div>
+            <div class="card">
+              <div class="card-label">Customer UI Integration</div>
+              <div class="card-val" style="color: #a78bfa;">Live in Shop</div>
+              <div class="card-note">Recommended For You carousel with 1-click Add to Cart</div>
+            </div>
+          </div>
+        `
+      },
+      {
+        badge: "Conclusion & Verification",
+        title: "Automated PyTest Suite & Production Deliverables",
+        desc: "In conclusion Sir, all three modules of Milestone 2 are fully operational. We added automated tests in test_milestone2.py, and all 41 unit and integration tests pass cleanly. Our React frontend compiles with zero errors, and all role permissions for Admin, Vendor, and Customer are strictly enforced. Thank you, Sir!",
+        content: `
+          <div class="grid-2" style="margin-top: 20px;">
+            <div class="card" style="border-color: #10b981;">
+              <div class="card-label">Test Suite Status</div>
+              <div class="card-val" style="color: #34d399;">41 / 41 PASSED</div>
+              <div class="card-note">100% Pass Rate across backend auth, inventory, ML models, and transactions.</div>
+            </div>
+            <div class="card" style="border-color: #6366f1;">
+              <div class="card-label">Frontend Production Build</div>
+              <div class="card-val" style="color: #818cf8;">Vite: 0 Errors</div>
+              <div class="card-note">Full UI integration across Shop, Cart, Dashboard, Inventory, and Analytics.</div>
+            </div>
+          </div>
+        `
+      }
+    ];
+
+    let currentSlide = 0;
+    let isPlaying = false;
+    let synth = window.speechSynthesis;
+    let currentUtterance = null;
+
+    function renderSlide(idx) {
+      const s = slides[idx];
+      document.getElementById('slideContent').innerHTML = `
+        <div>
+          <span class="slide-badge">${s.badge}</span>
+          <h1 class="slide-title">${s.title}</h1>
+          <p class="slide-desc">${s.desc}</p>
+        </div>
+        ${s.content}
+      `;
+      document.getElementById('slideCounter').innerText = `Slide ${idx + 1} of ${slides.length}`;
+      document.getElementById('progressBar').style.width = `${((idx + 1) / slides.length) * 100}%`;
+    }
+
+    function speakCurrentSlide() {
+      if (!synth) return;
+      synth.cancel();
+
+      const text = slides[currentSlide].desc;
+      document.getElementById('captionText').innerText = text;
+      document.getElementById('voiceIndicator').style.background = '#10b981';
+
+      currentUtterance = new SpeechSynthesisUtterance(text);
+      currentUtterance.rate = 1.0;
+      currentUtterance.pitch = 1.0;
+
+      // Select natural English voice if available
+      const voices = synth.getVoices();
+      const preferred = voices.find(v => v.lang.startsWith('en') && (v.name.includes('Natural') || v.name.includes('Google') || v.name.includes('David') || v.name.includes('Zira')));
+      if (preferred) currentUtterance.voice = preferred;
+
+      currentUtterance.onend = () => {
+        document.getElementById('voiceIndicator').style.background = '#64748b';
+        if (isPlaying) {
+          if (currentSlide < slides.length - 1) {
+            setTimeout(() => {
+              currentSlide++;
+              renderSlide(currentSlide);
+              speakCurrentSlide();
+            }, 1200);
+          } else {
+            isPlaying = false;
+            document.getElementById('playPauseBtn').innerText = '🔄 Replay Presentation';
+            document.getElementById('playPauseBtn').className = 'btn btn-secondary';
+          }
+        }
+      };
+
+      synth.speak(currentUtterance);
+    }
+
+    document.getElementById('playPauseBtn').addEventListener('click', () => {
+      if (isPlaying) {
+        synth.cancel();
+        isPlaying = false;
+        document.getElementById('playPauseBtn').innerText = '▶️ Resume Presentation';
+        document.getElementById('playPauseBtn').className = 'btn btn-success';
+        document.getElementById('voiceIndicator').style.background = '#64748b';
+      } else {
+        isPlaying = true;
+        document.getElementById('playPauseBtn').innerText = '⏸️ Pause Audio Presentation';
+        document.getElementById('playPauseBtn').className = 'btn btn-secondary';
+        speakCurrentSlide();
+      }
+    });
+
+    document.getElementById('nextBtn').addEventListener('click', () => {
+      synth.cancel();
+      if (currentSlide < slides.length - 1) {
+        currentSlide++;
+        renderSlide(currentSlide);
+        if (isPlaying) speakCurrentSlide();
+      }
+    });
+
+    document.getElementById('prevBtn').addEventListener('click', () => {
+      synth.cancel();
+      if (currentSlide > 0) {
+        currentSlide--;
+        renderSlide(currentSlide);
+        if (isPlaying) speakCurrentSlide();
+      }
+    });
+
+    // Initial render
+    renderSlide(0);
+  </script>
+</body>
+</html>

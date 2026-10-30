@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
-from typing import List, Optional
+from typing import List, Optional, Dict, Any
 from app.database import get_db
 from app.schemas.analytics import (
     MarketplaceSummary,
@@ -9,7 +9,7 @@ from app.schemas.analytics import (
     RevenueTrendItem,
     CategoryPerformanceItem,
 )
-from app.services import analytics_service
+from app.services import analytics_service, customer_analytics_service
 from app.utils.security import get_current_active_user
 from app.models.user import User
 
@@ -23,6 +23,22 @@ def get_analytics_summary(
 ):
     """Get high-level summary KPIs (Total Revenue, Transactions, Quantity Sold, ATV)."""
     return analytics_service.get_summary(db, current_user, vendor_id)
+
+@router.get("/customers")
+def get_customer_behavior_metrics(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user)
+):
+    """Module 2.A: Customer purchasing behavior, lifetime spending, and frequency."""
+    return customer_analytics_service.get_customer_behavior_analytics(db, current_user)
+
+@router.get("/segments")
+def get_customer_segments(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user)
+):
+    """Module 2.B: Customer Segmentation using K-Means with Silhouette Score evaluation."""
+    return customer_analytics_service.get_customer_segmentation(db, current_user)
 
 @router.get("/vendor-performance", response_model=List[VendorPerformanceItem])
 def get_vendor_performance_metrics(

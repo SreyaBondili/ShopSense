@@ -12,6 +12,7 @@ from app.routes import (
     inventory_router,
     transactions_router,
     analytics_router,
+    recommendations_router,
 )
 
 app = FastAPI(
@@ -64,6 +65,7 @@ app.include_router(products_router)
 app.include_router(inventory_router)
 app.include_router(transactions_router)
 app.include_router(analytics_router)
+app.include_router(recommendations_router)
 
 @app.get("/", tags=["System"])
 def root():
