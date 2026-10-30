@@ -1,70 +1,94 @@
 import React, { useState } from 'react';
 import { api } from '../api';
-import { LogIn, UserPlus, CheckCircle, ShoppingBag, Store, ShieldCheck, AlertTriangle } from 'lucide-react';
+import {
+  Store, ShieldCheck, User, Mail, Lock, Eye, EyeOff,
+  ArrowRight, CheckCircle, AlertCircle, Sparkles, UserPlus, LogIn
+} from 'lucide-react';
 
 export default function LoginPage({ onLoginSuccess }) {
-  // Three separate login portals: 'customer', 'vendor', 'admin'
-  const [activePortal, setActivePortal] = useState('customer');
-  // 'login' or 'register' within the selected portal
-  const [mode, setMode] = useState('login');
+  // Three portal roles matching reference screenshot: 'admin', 'vendor', 'customer'
+  const [activePortal, setActivePortal] = useState('admin');
+  const [mode, setMode] = useState('login'); // 'login' or 'register'
 
-  // Input states strictly initialized to empty string
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  // Form input states with default credentials pre-filled for convenience
+  const [email, setEmail] = useState('bsreya1610@gmail.com');
+  const [password, setPassword] = useState('Admin@123');
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
   const [loading, setLoading] = useState(false);
 
+  // Vendor selector for quick switching between vendors
+  const [selectedVendorEmail, setSelectedVendorEmail] = useState('janani@gmail.com');
+
+  // Registration data
   const blankReg = {
     full_name: '', email: '', password: '',
     admin_secret: '', phone: '', business_name: '', category: 'Electronics'
   };
   const [regData, setRegData] = useState(blankReg);
 
-  // Clear fields whenever switching portals or mode to ensure zero residual data
-  const switchPortal = (portal) => {
+  // Switch between Admin, Vendor, Customer tabs
+  const handlePortalSwitch = (portal) => {
     setActivePortal(portal);
-    setMode('login');
     setError('');
     setSuccessMsg('');
-    setEmail('');
-    setPassword('');
-    setRegData(blankReg);
+    if (portal === 'admin') {
+      setEmail('bsreya1610@gmail.com');
+      setPassword('Admin@123');
+    } else if (portal === 'vendor') {
+      setEmail('janani@gmail.com');
+      setPassword('Vendor@123');
+      setSelectedVendorEmail('janani@gmail.com');
+    } else {
+      setEmail('customer@shopsense.com');
+      setPassword('Customer@123');
+    }
   };
 
-  const switchMode = (newMode) => {
-    setMode(newMode);
-    setError('');
-    setSuccessMsg('');
-    setEmail('');
-    setPassword('');
-    setRegData(blankReg);
+  const handleVendorSelect = (vEmail) => {
+    setSelectedVendorEmail(vEmail);
+    setEmail(vEmail);
+    setPassword('Vendor@123');
   };
 
-  // Login handler
-  const handleLogin = async (e) => {
-    e.preventDefault();
+  const executeLogin = async (loginEmail, loginPass) => {
     setError('');
     setSuccessMsg('');
     setLoading(true);
-
     try {
-      const user = await api.login(email.trim(), password);
+      const user = await api.login(loginEmail.trim(), loginPass);
       onLoginSuccess(user);
     } catch (err) {
-      setError(err.message || 'Login failed. Please verify your credentials.');
+      setError(err.message || 'Login failed. Please check credentials.');
     } finally {
       setLoading(false);
     }
   };
 
-  // Register handler
-  const handleRegister = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
+    if (mode === 'login') {
+      executeLogin(email, password);
+    } else {
+      handleRegister();
+    }
+  };
+
+  const handleOneClickAccess = () => {
+    if (activePortal === 'admin') {
+      executeLogin('bsreya1610@gmail.com', 'Admin@123');
+    } else if (activePortal === 'vendor') {
+      executeLogin(email || 'janani@gmail.com', 'Vendor@123');
+    } else {
+      executeLogin('customer@shopsense.com', 'Customer@123');
+    }
+  };
+
+  const handleRegister = async () => {
     setError('');
     setSuccessMsg('');
     setLoading(true);
-
     try {
       const targetRole = activePortal.toUpperCase();
       const payload = {
@@ -73,24 +97,18 @@ export default function LoginPage({ onLoginSuccess }) {
         password: regData.password,
         role: targetRole,
       };
-
-      if (targetRole === 'ADMIN') {
-        payload.admin_secret = regData.admin_secret;
-      }
+      if (targetRole === 'ADMIN') payload.admin_secret = regData.admin_secret;
       if (targetRole === 'VENDOR') {
         payload.phone = regData.phone;
         payload.business_name = regData.business_name;
         payload.category = regData.category;
       }
-
       await api.register(payload);
-      
-      // Reset registration data completely
       setRegData(blankReg);
-      setEmail('');
-      setPassword('');
       setMode('login');
-      setSuccessMsg(`✓ ${activePortal.charAt(0).toUpperCase() + activePortal.slice(1)} account created! Please sign in.`);
+      setEmail(payload.email);
+      setPassword(payload.password);
+      setSuccessMsg(`✓ Account created! Please sign in with your credentials.`);
     } catch (err) {
       setError(err.message || 'Registration failed.');
     } finally {
@@ -98,273 +116,229 @@ export default function LoginPage({ onLoginSuccess }) {
     }
   };
 
-  // Portal-specific visual configurations (Soft Lavender theme compliant)
-  const portalConfig = {
-    customer: {
-      title: 'Customer Login',
-      badge: 'Shopper Portal',
-      subtitle: 'Browse products, manage shopping cart, and track orders',
-      icon: ShoppingBag,
-      gradient: 'linear-gradient(135deg, #6366F1, #4F46E5)',
-      accentColor: '#6366F1',
-      bgHighlight: '#EEF2FF',
-      activeTabBg: '#EEF2FF',
-      activeColor: '#4F46E5',
-      activeBorder: '#C7D2FE'
+  // Portal metadata
+  const portalInfo = {
+    admin: {
+      roleLabel: 'Admin',
+      portalName: 'Administrator Portal',
+      description: 'Full marketplace control & intelligence.',
+      emailLabel: 'ADMIN EMAIL ADDRESS',
+      placeholderEmail: 'admin@shopsense.com',
+      oneClickText: '1-Click Admin Access',
+      icon: ShieldCheck,
+      bannerBg: '#ECFDF5',
+      bannerBorder: '#A7F3D0',
+      bannerText: '#047857',
     },
     vendor: {
-      title: 'Vendor Portal Login',
-      badge: 'Merchant Center',
-      subtitle: 'Manage catalog products, restock inventory, and view sales performance',
+      roleLabel: 'Vendor',
+      portalName: 'Vendor Portal',
+      description: 'Manage catalog, inventory & sales analytics.',
+      emailLabel: 'VENDOR EMAIL ADDRESS',
+      placeholderEmail: 'vendor@shopsense.com',
+      oneClickText: '1-Click Vendor Access',
       icon: Store,
-      gradient: 'linear-gradient(135deg, #D97706, #B45309)',
-      accentColor: '#D97706',
-      bgHighlight: '#FEF3C7',
-      activeTabBg: '#FEF3C7',
-      activeColor: '#B45309',
-      activeBorder: '#FDE68A'
+      bannerBg: '#F0FDFA',
+      bannerBorder: '#99F6E4',
+      bannerText: '#0F766E',
     },
-    admin: {
-      title: 'Admin Executive Login',
-      badge: 'Platform Administration',
-      subtitle: 'Marketplace analytics, vendor management, and ML forecasting algorithms',
-      icon: ShieldCheck,
-      gradient: 'linear-gradient(135deg, #6366F1, #8B5CF6)',
-      accentColor: '#6366F1',
-      bgHighlight: '#EDE9FE',
-      activeTabBg: '#EDE9FE',
-      activeColor: '#6D28D9',
-      activeBorder: '#DDD6FE'
+    customer: {
+      roleLabel: 'Customer',
+      portalName: 'Customer Portal',
+      description: 'Browse products, place orders & track shipments.',
+      emailLabel: 'CUSTOMER EMAIL ADDRESS',
+      placeholderEmail: 'customer@shopsense.com',
+      oneClickText: '1-Click Customer Access',
+      icon: User,
+      bannerBg: '#F0FDF4',
+      bannerBorder: '#BBF7D0',
+      bannerText: '#15803D',
     }
   };
 
-  const currentCfg = portalConfig[activePortal];
-  const PortalIcon = currentCfg.icon;
+  const currentPortal = portalInfo[activePortal];
+  const PortalIcon = currentPortal.icon;
 
   return (
     <div style={{
       minHeight: '100vh',
       display: 'flex',
-      flexDirection: 'column',
       alignItems: 'center',
       justifyContent: 'center',
-      background: 'radial-gradient(circle at 50% 15%, #EEF2FF 0%, #F8FAFC 75%)',
-      padding: '24px 16px'
+      background: 'linear-gradient(135deg, #E6EFE9 0%, #DDE8E2 50%, #D5E2DC 100%)',
+      padding: '24px 16px',
+      fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
     }}>
-      {/* Brand Header */}
-      <div style={{ textAlign: 'center', marginBottom: '20px' }}>
-        <div style={{
-          width: '56px', height: '56px',
-          background: 'linear-gradient(135deg, #6366F1, #4F46E5)',
-          borderRadius: '16px',
-          display: 'inline-flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          fontSize: '28px',
-          marginBottom: '10px',
-          boxShadow: '0 8px 20px rgba(99,102,241,0.25)'
-        }}>🛍️</div>
-        <h1 style={{ fontSize: '26px', fontWeight: '800', letterSpacing: '-0.5px', color: '#1E293B' }}>
-          ShopSense
-        </h1>
-        <p style={{ color: '#64748B', fontSize: '13px', marginTop: '3px' }}>
-          Multi-Vendor E-Commerce Analytics Platform
-        </p>
-      </div>
-
-      {/* 1. THREE DEDICATED LOGIN PORTAL TABS */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(3, 1fr)',
-        gap: '8px',
-        maxWidth: '520px',
-        width: '100%',
-        background: '#FFFFFF',
-        padding: '6px',
-        borderRadius: '14px',
-        border: '1px solid #E9EAF3',
-        boxShadow: '0 2px 6px rgba(0,0,0,0.03)',
-        marginBottom: '16px'
-      }}>
-        <button
-          type="button"
-          onClick={() => switchPortal('customer')}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '8px',
-            padding: '10px 12px',
-            borderRadius: '10px',
-            border: activePortal === 'customer' ? '1px solid #C7D2FE' : '1px solid transparent',
-            background: activePortal === 'customer' ? '#EEF2FF' : 'transparent',
-            color: activePortal === 'customer' ? '#4F46E5' : '#64748B',
-            fontWeight: '700',
-            fontSize: '13px',
-            cursor: 'pointer',
-            transition: 'all 0.2s ease'
-          }}
-        >
-          <ShoppingBag size={15} />
-          <span>Customer</span>
-        </button>
-
-        <button
-          type="button"
-          onClick={() => switchPortal('vendor')}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '8px',
-            padding: '10px 12px',
-            borderRadius: '10px',
-            border: activePortal === 'vendor' ? '1px solid #FDE68A' : '1px solid transparent',
-            background: activePortal === 'vendor' ? '#FEF3C7' : 'transparent',
-            color: activePortal === 'vendor' ? '#B45309' : '#64748B',
-            fontWeight: '700',
-            fontSize: '13px',
-            cursor: 'pointer',
-            transition: 'all 0.2s ease'
-          }}
-        >
-          <Store size={15} />
-          <span>Vendor</span>
-        </button>
-
-        <button
-          type="button"
-          onClick={() => switchPortal('admin')}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '8px',
-            padding: '10px 12px',
-            borderRadius: '10px',
-            border: activePortal === 'admin' ? '1px solid #DDD6FE' : '1px solid transparent',
-            background: activePortal === 'admin' ? '#EDE9FE' : 'transparent',
-            color: activePortal === 'admin' ? '#6D28D9' : '#64748B',
-            fontWeight: '700',
-            fontSize: '13px',
-            cursor: 'pointer',
-            transition: 'all 0.2s ease'
-          }}
-        >
-          <ShieldCheck size={15} />
-          <span>Admin</span>
-        </button>
-      </div>
-
-      {/* Main Authentication Card */}
+      {/* Centered White Card Container */}
       <div style={{
         width: '100%',
-        maxWidth: '520px',
+        maxWidth: '460px',
         background: '#FFFFFF',
-        borderRadius: '18px',
-        border: '1px solid #E9EAF3',
-        padding: '32px',
-        boxShadow: '0 20px 45px -10px rgba(99, 102, 241, 0.12)',
-        position: 'relative',
-        overflow: 'hidden'
+        borderRadius: '24px',
+        boxShadow: '0 20px 60px rgba(0, 0, 0, 0.08)',
+        border: '1px solid rgba(255, 255, 255, 0.9)',
+        padding: '36px 36px 32px 36px',
+        boxSizing: 'border-box'
       }}>
-        {/* Portal Header */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '20px' }}>
+        {/* Brand Header */}
+        <div style={{ textAlign: 'center', marginBottom: '22px' }}>
           <div style={{
-            width: '44px', height: '44px',
-            borderRadius: '12px',
-            background: currentCfg.gradient,
-            display: 'flex',
+            display: 'inline-flex',
             alignItems: 'center',
             justifyContent: 'center',
-            color: '#FFFFFF',
-            boxShadow: '0 4px 12px rgba(99,102,241,0.2)'
+            gap: '8px',
+            marginBottom: '6px'
           }}>
-            <PortalIcon size={20} />
-          </div>
-          <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <h2 style={{ fontSize: '19px', fontWeight: '800', color: '#1E293B', margin: 0 }}>
-                {mode === 'login' ? currentCfg.title : `Register as ${activePortal.charAt(0).toUpperCase() + activePortal.slice(1)}`}
-              </h2>
-              <span style={{
-                fontSize: '11px',
-                fontWeight: '700',
-                padding: '2px 8px',
-                borderRadius: '12px',
-                background: currentCfg.bgHighlight,
-                color: currentCfg.activeColor,
-                border: `1px solid ${currentCfg.activeBorder}`
-              }}>
-                {currentCfg.badge}
-              </span>
+            <div style={{
+              width: '38px',
+              height: '38px',
+              borderRadius: '10px',
+              background: 'linear-gradient(135deg, #14B8A6, #0EA5E9)',
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              boxShadow: '0 4px 10px rgba(14, 165, 233, 0.25)',
+              color: '#FFFFFF'
+            }}>
+              <Store size={22} />
             </div>
-            <p style={{ color: '#64748B', fontSize: '12px', margin: '3px 0 0 0' }}>
-              {currentCfg.subtitle}
-            </p>
+            <h1 style={{
+              fontSize: '26px',
+              fontWeight: '800',
+              letterSpacing: '-0.5px',
+              color: '#1E293B',
+              margin: 0
+            }}>
+              ShopSense
+            </h1>
           </div>
+          <p style={{
+            color: '#E11D48',
+            fontSize: '12px',
+            fontWeight: '600',
+            margin: 0,
+            letterSpacing: '0.2px'
+          }}>
+            Multi-Vendor E-Commerce Analytics Platform
+          </p>
         </div>
 
-        {/* Mode Switcher (Sign In vs Create Account) */}
+        {/* 3 Portal Role Selection Tabs (Pills) */}
         <div style={{
           display: 'grid',
-          gridTemplateColumns: '1fr 1fr',
+          gridTemplateColumns: '1fr 1fr 1fr',
+          gap: '6px',
           background: '#F1F5F9',
           padding: '4px',
-          borderRadius: '10px',
-          marginBottom: '20px'
+          borderRadius: '14px',
+          marginBottom: '16px'
         }}>
-          <button
-            type="button"
-            onClick={() => switchMode('login')}
-            style={{
-              padding: '8px',
-              borderRadius: '7px',
-              border: 'none',
-              background: mode === 'login' ? '#FFFFFF' : 'transparent',
-              color: mode === 'login' ? '#1E293B' : '#64748B',
-              boxShadow: mode === 'login' ? '0 1px 3px rgba(0,0,0,0.08)' : 'none',
-              fontWeight: '700',
-              fontSize: '13px',
-              cursor: 'pointer',
-              transition: 'all 0.2s ease'
-            }}
-          >
-            🔐 Sign In
-          </button>
-          <button
-            type="button"
-            onClick={() => switchMode('register')}
-            style={{
-              padding: '8px',
-              borderRadius: '7px',
-              border: 'none',
-              background: mode === 'register' ? '#FFFFFF' : 'transparent',
-              color: mode === 'register' ? '#1E293B' : '#64748B',
-              boxShadow: mode === 'register' ? '0 1px 3px rgba(0,0,0,0.08)' : 'none',
-              fontWeight: '700',
-              fontSize: '13px',
-              cursor: 'pointer',
-              transition: 'all 0.2s ease'
-            }}
-          >
-            📝 Create {activePortal.charAt(0).toUpperCase() + activePortal.slice(1)} Account
-          </button>
+          {[
+            { id: 'admin', label: 'Admin', icon: ShieldCheck },
+            { id: 'vendor', label: 'Vendor', icon: Store },
+            { id: 'customer', label: 'Customer', icon: User },
+          ].map(tab => {
+            const Icon = tab.icon;
+            const isActive = activePortal === tab.id;
+            return (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => handlePortalSwitch(tab.id)}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '6px',
+                  padding: '9px 10px',
+                  borderRadius: '10px',
+                  border: 'none',
+                  background: isActive ? '#1E293B' : 'transparent',
+                  color: isActive ? '#FFFFFF' : '#64748B',
+                  fontWeight: isActive ? '700' : '600',
+                  fontSize: '13px',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                  boxShadow: isActive ? '0 2px 6px rgba(15, 23, 42, 0.15)' : 'none'
+                }}
+              >
+                <Icon size={15} color={isActive ? '#38BDF8' : '#0D9488'} />
+                <span>{tab.label}</span>
+              </button>
+            );
+          })}
         </div>
 
-        {/* In-App Feedback Messages */}
+        {/* Role Information Banner */}
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px',
+          background: currentPortal.bannerBg,
+          border: `1px solid ${currentPortal.bannerBorder}`,
+          borderRadius: '10px',
+          padding: '9px 12px',
+          marginBottom: '20px',
+          color: currentPortal.bannerText,
+          fontSize: '12px',
+          fontWeight: '500',
+          lineHeight: '1.4'
+        }}>
+          <CheckCircle size={15} style={{ flexShrink: 0 }} />
+          <span>
+            <strong>{currentPortal.portalName}:</strong> {currentPortal.description}
+          </span>
+        </div>
+
+        {/* Vendor Selector Dropdown (When on Vendor tab) */}
+        {activePortal === 'vendor' && mode === 'login' && (
+          <div style={{ marginBottom: '16px' }}>
+            <label style={{
+              display: 'block',
+              fontSize: '11px',
+              fontWeight: '700',
+              color: '#0F766E',
+              marginBottom: '6px',
+              textTransform: 'uppercase',
+              letterSpacing: '0.5px'
+            }}>
+              Choose Registered Vendor
+            </label>
+            <select
+              className="form-select"
+              value={selectedVendorEmail}
+              onChange={e => handleVendorSelect(e.target.value)}
+              style={{
+                width: '100%',
+                padding: '9px 12px',
+                borderRadius: '10px',
+                border: '1px solid #CBD5E1',
+                fontSize: '13px',
+                color: '#1E293B',
+                background: '#F8FAFC'
+              }}
+            >
+              <option value="janani@gmail.com">Janani Stores (janani@gmail.com) - 4 Products</option>
+              <option value="techworld@example.com">Apex Electronics (John Doe) - 4 Products</option>
+              <option value="trendsfashion@example.com">Aura Fashion Hub (Sarah Miller) - 4 Products</option>
+              <option value="ammu@gmail.com">Akshi matrices (Akshi) - 3 Products</option>
+              <option value="bhanu@gmail.com">chimayi max (bhanu) - 3 Products</option>
+              <option value="kiran@gmail.com">baggy jeans (kiran) - 3 Products</option>
+              <option value="mehi@gmail.com">mahi galaxy (mahi) - 3 Products</option>
+              <option value="bookoasis@example.com">Book Haven Store (Robert Clark) - 4 Products</option>
+              <option value="homecomforts@example.com">Urban Home Comforts (Emma Watson) - 4 Products</option>
+              <option value="glowbeauty@example.com">Glow Cosmetics & Spa (Priya Sharma) - 4 Products</option>
+            </select>
+          </div>
+        )}
+
+        {/* Success / Error Banners */}
         {successMsg && (
           <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-            background: '#ECFDF5',
-            border: '1px solid #A7F3D0',
-            borderRadius: '8px',
-            padding: '10px 14px',
-            marginBottom: '16px',
-            color: '#059669',
-            fontSize: '13px'
+            display: 'flex', alignItems: 'center', gap: '8px',
+            background: 'rgba(5, 150, 105, 0.1)', border: '1px solid rgba(5, 150, 105, 0.3)',
+            borderRadius: '10px', padding: '10px 12px', marginBottom: '16px',
+            color: '#059669', fontSize: '13px', fontWeight: '500'
           }}>
             <CheckCircle size={16} style={{ flexShrink: 0 }} />
             <span>{successMsg}</span>
@@ -373,198 +347,260 @@ export default function LoginPage({ onLoginSuccess }) {
 
         {error && (
           <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-            background: '#FEF2F2',
-            border: '1px solid #FECACA',
-            borderRadius: '8px',
-            padding: '10px 14px',
-            marginBottom: '16px',
-            color: '#DC2626',
-            fontSize: '13px'
+            display: 'flex', alignItems: 'center', gap: '8px',
+            background: 'rgba(220, 38, 38, 0.08)', border: '1px solid rgba(220, 38, 38, 0.25)',
+            borderRadius: '10px', padding: '10px 12px', marginBottom: '16px',
+            color: '#DC2626', fontSize: '13px', fontWeight: '500'
           }}>
-            <AlertTriangle size={16} style={{ flexShrink: 0 }} />
+            <AlertCircle size={16} style={{ flexShrink: 0 }} />
             <span>{error}</span>
           </div>
         )}
 
         {/* LOGIN FORM */}
         {mode === 'login' && (
-          <form onSubmit={handleLogin} autoComplete="off">
-            {/* Hidden dummy inputs to capture aggressive browser autofill */}
-            <input type="text" style={{ position: 'absolute', opacity: 0, height: 0, width: 0, pointerEvents: 'none' }} tabIndex="-1" readOnly />
-            <input type="password" style={{ position: 'absolute', opacity: 0, height: 0, width: 0, pointerEvents: 'none' }} tabIndex="-1" readOnly />
-
-            <div className="form-group">
-              <label className="form-label" style={{ fontSize: '13px', fontWeight: '600', color: '#1E293B' }}>
-                {activePortal === 'vendor' ? 'Store Email Address' : activePortal === 'admin' ? 'Admin Email Address' : 'Email Address'}
+          <form onSubmit={handleSubmit}>
+            {/* EMAIL INPUT */}
+            <div style={{ marginBottom: '16px' }}>
+              <label style={{
+                display: 'block',
+                fontSize: '11px',
+                fontWeight: '700',
+                color: '#E11D48',
+                marginBottom: '6px',
+                letterSpacing: '0.5px'
+              }}>
+                {currentPortal.emailLabel}
               </label>
-              <input
-                type="email"
-                name={`ss_auth_${activePortal}_email`}
-                className="form-input"
-                placeholder="Enter your email address"
-                value={email}
-                onChange={e => setEmail(e.target.value)}
-                autoComplete="new-password"
-                readOnly
-                onFocus={(e) => e.target.removeAttribute('readonly')}
-                required
-              />
+              <div style={{ position: 'relative' }}>
+                <Mail
+                  size={16}
+                  color="#0D9488"
+                  style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }}
+                />
+                <input
+                  type="email"
+                  className="form-input"
+                  placeholder={currentPortal.placeholderEmail}
+                  value={email}
+                  onChange={e => setEmail(e.target.value)}
+                  required
+                  style={{
+                    width: '100%',
+                    padding: '11px 12px 11px 36px',
+                    borderRadius: '10px',
+                    border: '1px solid #CBD5E1',
+                    fontSize: '13.5px',
+                    color: '#1E293B',
+                    boxSizing: 'border-box'
+                  }}
+                />
+              </div>
             </div>
 
-            <div className="form-group" style={{ marginBottom: '24px' }}>
-              <label className="form-label" style={{ fontSize: '13px', fontWeight: '600', color: '#1E293B' }}>
-                Password
+            {/* PASSWORD INPUT */}
+            <div style={{ marginBottom: '20px' }}>
+              <label style={{
+                display: 'block',
+                fontSize: '11px',
+                fontWeight: '700',
+                color: '#E11D48',
+                marginBottom: '6px',
+                letterSpacing: '0.5px'
+              }}>
+                PASSWORD
               </label>
-              <input
-                type="password"
-                name={`ss_auth_${activePortal}_pass`}
-                className="form-input"
-                placeholder="Enter your password"
-                value={password}
-                onChange={e => setPassword(e.target.value)}
-                autoComplete="new-password"
-                readOnly
-                onFocus={(e) => e.target.removeAttribute('readonly')}
-                required
-              />
+              <div style={{ position: 'relative' }}>
+                <Lock
+                  size={16}
+                  color="#0D9488"
+                  style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }}
+                />
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  className="form-input"
+                  placeholder="Enter your password"
+                  value={password}
+                  onChange={e => setPassword(e.target.value)}
+                  required
+                  style={{
+                    width: '100%',
+                    padding: '11px 36px 11px 36px',
+                    borderRadius: '10px',
+                    border: '1px solid #CBD5E1',
+                    fontSize: '13.5px',
+                    color: '#1E293B',
+                    boxSizing: 'border-box'
+                  }}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  style={{
+                    position: 'absolute',
+                    right: '12px',
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    background: 'none',
+                    border: 'none',
+                    color: '#94A3B8',
+                    cursor: 'pointer',
+                    padding: 0
+                  }}
+                >
+                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
+              </div>
             </div>
 
+            {/* MAIN ACTION BUTTON: Sign In as ... -> */}
             <button
               type="submit"
-              className="btn btn-primary"
+              disabled={loading}
               style={{
                 width: '100%',
-                padding: '12px',
-                background: currentCfg.gradient,
-                boxShadow: `0 4px 14px ${currentCfg.accentColor}30`,
-                fontSize: '14px',
-                fontWeight: '700'
+                padding: '13px 20px',
+                borderRadius: '10px',
+                border: 'none',
+                background: 'linear-gradient(90deg, #14B8A6 0%, #0EA5E9 100%)',
+                color: '#FFFFFF',
+                fontSize: '14.5px',
+                fontWeight: '700',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px',
+                boxShadow: '0 4px 14px rgba(14, 165, 233, 0.3)',
+                transition: 'all 0.2s ease',
+                marginBottom: '12px'
               }}
-              disabled={loading}
             >
-              <LogIn size={16} />
-              {loading ? 'Authenticating...' : `Sign In to ${activePortal.charAt(0).toUpperCase() + activePortal.slice(1)} Portal`}
+              <span>{loading ? 'Authenticating...' : `Sign In as ${currentPortal.roleLabel}`}</span>
+              <ArrowRight size={16} />
+            </button>
+
+            {/* 1-CLICK QUICK DEMO ACCESS BUTTON */}
+            <button
+              type="button"
+              onClick={handleOneClickAccess}
+              disabled={loading}
+              style={{
+                width: '100%',
+                padding: '11px 16px',
+                borderRadius: '10px',
+                border: '1px solid #CBD5E1',
+                background: '#FFFFFF',
+                color: '#1E293B',
+                fontSize: '13px',
+                fontWeight: '600',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px',
+                transition: 'all 0.2s ease'
+              }}
+              onMouseEnter={e => e.currentTarget.style.background = '#F8FAFC'}
+              onMouseLeave={e => e.currentTarget.style.background = '#FFFFFF'}
+            >
+              <PortalIcon size={15} color="#0D9488" />
+              <span>{currentPortal.oneClickText}</span>
             </button>
           </form>
         )}
 
-        {/* REGISTRATION FORM */}
+        {/* REGISTER FORM */}
         {mode === 'register' && (
-          <form onSubmit={handleRegister} autoComplete="off">
-            {/* Hidden dummy inputs to absorb browser autofill */}
-            <input type="text" style={{ position: 'absolute', opacity: 0, height: 0, width: 0, pointerEvents: 'none' }} tabIndex="-1" readOnly />
-            <input type="password" style={{ position: 'absolute', opacity: 0, height: 0, width: 0, pointerEvents: 'none' }} tabIndex="-1" readOnly />
-
-            <div className="form-group">
-              <label className="form-label">Full Name</label>
+          <form onSubmit={handleSubmit}>
+            <div style={{ marginBottom: '14px' }}>
+              <label className="form-label">Full Name *</label>
               <input
                 type="text"
-                name="reg_fullname_field"
                 className="form-input"
                 placeholder="Enter your full name"
                 value={regData.full_name}
                 onChange={e => setRegData({ ...regData, full_name: e.target.value })}
-                autoComplete="new-password"
-                readOnly
-                onFocus={(e) => e.target.removeAttribute('readonly')}
                 required
+                style={{ width: '100%', padding: '10px 12px', borderRadius: '10px', border: '1px solid #CBD5E1' }}
               />
             </div>
 
-            <div className="form-group">
-              <label className="form-label">Email Address</label>
+            <div style={{ marginBottom: '14px' }}>
+              <label className="form-label">Email Address *</label>
               <input
                 type="email"
-                name="reg_email_field"
                 className="form-input"
-                placeholder="Enter your email address"
+                placeholder="Enter email address"
                 value={regData.email}
                 onChange={e => setRegData({ ...regData, email: e.target.value })}
-                autoComplete="new-password"
-                readOnly
-                onFocus={(e) => e.target.removeAttribute('readonly')}
                 required
+                style={{ width: '100%', padding: '10px 12px', borderRadius: '10px', border: '1px solid #CBD5E1' }}
               />
             </div>
 
-            <div className="form-group">
-              <label className="form-label">Password</label>
+            <div style={{ marginBottom: '14px' }}>
+              <label className="form-label">Password *</label>
               <input
                 type="password"
-                name="reg_password_field"
                 className="form-input"
-                placeholder="Create a password (min. 6 characters)"
+                placeholder="Create password (min 6 characters)"
                 value={regData.password}
                 onChange={e => setRegData({ ...regData, password: e.target.value })}
-                autoComplete="new-password"
-                readOnly
-                onFocus={(e) => e.target.removeAttribute('readonly')}
                 required
+                style={{ width: '100%', padding: '10px 12px', borderRadius: '10px', border: '1px solid #CBD5E1' }}
               />
             </div>
 
-            {/* Admin Specific Passcode */}
             {activePortal === 'admin' && (
-              <div className="form-group">
-                <label className="form-label">Admin Security Passcode</label>
+              <div style={{ marginBottom: '14px' }}>
+                <label className="form-label">Admin Passcode *</label>
                 <input
                   type="password"
-                  name="reg_admin_secret_field"
                   className="form-input"
-                  placeholder="Enter administrator passcode"
+                  placeholder="Enter admin passcode"
                   value={regData.admin_secret}
                   onChange={e => setRegData({ ...regData, admin_secret: e.target.value })}
-                  autoComplete="new-password"
-                  readOnly
-                  onFocus={(e) => e.target.removeAttribute('readonly')}
                   required
+                  style={{ width: '100%', padding: '10px 12px', borderRadius: '10px', border: '1px solid #CBD5E1' }}
                 />
               </div>
             )}
 
-            {/* Vendor Specific Details */}
             {activePortal === 'vendor' && (
               <>
-                <div className="form-group">
-                  <label className="form-label">Business / Store Name</label>
+                <div style={{ marginBottom: '14px' }}>
+                  <label className="form-label">Store / Business Name *</label>
                   <input
                     type="text"
-                    name="reg_business_name_field"
                     className="form-input"
-                    placeholder="e.g. Apex Electronics"
+                    placeholder="e.g. Janani Boutique"
                     value={regData.business_name}
                     onChange={e => setRegData({ ...regData, business_name: e.target.value })}
-                    autoComplete="new-password"
-                    readOnly
-                    onFocus={(e) => e.target.removeAttribute('readonly')}
                     required
+                    style={{ width: '100%', padding: '10px 12px', borderRadius: '10px', border: '1px solid #CBD5E1' }}
                   />
                 </div>
-                <div className="form-grid-2">
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '14px' }}>
                   <div>
-                    <label className="form-label">Phone Number</label>
+                    <label className="form-label">Phone *</label>
                     <input
                       type="text"
-                      name="reg_phone_field"
                       className="form-input"
-                      placeholder="10-15 digits"
+                      placeholder="Phone number"
                       value={regData.phone}
                       onChange={e => setRegData({ ...regData, phone: e.target.value })}
-                      autoComplete="new-password"
-                      readOnly
-                      onFocus={(e) => e.target.removeAttribute('readonly')}
                       required
+                      style={{ width: '100%', padding: '10px 12px', borderRadius: '10px', border: '1px solid #CBD5E1' }}
                     />
                   </div>
                   <div>
-                    <label className="form-label">Store Category</label>
+                    <label className="form-label">Category *</label>
                     <select
                       className="form-select"
                       value={regData.category}
                       onChange={e => setRegData({ ...regData, category: e.target.value })}
+                      style={{ width: '100%', padding: '10px 12px', borderRadius: '10px', border: '1px solid #CBD5E1' }}
                     >
                       <option value="Electronics">Electronics</option>
                       <option value="Fashion">Fashion</option>
@@ -572,7 +608,6 @@ export default function LoginPage({ onLoginSuccess }) {
                       <option value="Home & Kitchen">Home & Kitchen</option>
                       <option value="Beauty & Personal Care">Beauty & Personal Care</option>
                       <option value="Sports & Fitness">Sports & Fitness</option>
-                      <option value="Other">Other</option>
                     </select>
                   </div>
                 </div>
@@ -581,22 +616,72 @@ export default function LoginPage({ onLoginSuccess }) {
 
             <button
               type="submit"
-              className="btn btn-primary"
+              disabled={loading}
               style={{
                 width: '100%',
-                padding: '12px',
-                marginTop: '10px',
-                background: currentCfg.gradient,
+                padding: '13px 20px',
+                borderRadius: '10px',
+                border: 'none',
+                background: 'linear-gradient(90deg, #14B8A6 0%, #0EA5E9 100%)',
+                color: '#FFFFFF',
                 fontSize: '14px',
-                fontWeight: '700'
+                fontWeight: '700',
+                cursor: 'pointer',
+                marginBottom: '12px'
               }}
-              disabled={loading}
             >
-              <UserPlus size={16} />
-              {loading ? 'Registering...' : `Complete ${activePortal.charAt(0).toUpperCase() + activePortal.slice(1)} Registration`}
+              {loading ? 'Registering...' : `Register as ${currentPortal.roleLabel}`}
             </button>
           </form>
         )}
+
+        {/* Toggle between Login and Register Mode */}
+        <div style={{
+          textAlign: 'center',
+          marginTop: '18px',
+          paddingTop: '16px',
+          borderTop: '1px solid #F1F5F9',
+          fontSize: '12.5px',
+          color: '#64748B'
+        }}>
+          {mode === 'login' ? (
+            <span>
+              Don't have an account?{' '}
+              <button
+                type="button"
+                onClick={() => { setMode('register'); setError(''); setSuccessMsg(''); }}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: '#0D9488',
+                  fontWeight: '700',
+                  cursor: 'pointer',
+                  padding: 0
+                }}
+              >
+                Register Here
+              </button>
+            </span>
+          ) : (
+            <span>
+              Already registered?{' '}
+              <button
+                type="button"
+                onClick={() => { setMode('login'); setError(''); setSuccessMsg(''); }}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: '#0D9488',
+                  fontWeight: '700',
+                  cursor: 'pointer',
+                  padding: 0
+                }}
+              >
+                Back to Sign In
+              </button>
+            </span>
+          )}
+        </div>
       </div>
     </div>
   );

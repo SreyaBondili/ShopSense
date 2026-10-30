@@ -72,6 +72,26 @@ const EXACT_PRODUCT_MAP = {
   'Lightweight Breathable Running Shoes': 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500&q=80',
   'snickers': 'https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?w=500&q=80',
   'All-Terrain Running Sneakers': 'https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?w=500&q=80',
+  'All-Terrain Breathable Running Sneakers': 'https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?w=500&q=80',
+  'Non-Slip High-Density Exercise Foam Roller': 'https://images.unsplash.com/photo-1518611012118-696072aa579a?w=500&q=80',
+  'Speed Jump Rope with Ball Bearings': 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=500&q=80',
+  'Stainless Steel Insulated Sports Shaker Bottle': 'https://images.unsplash.com/photo-1570554886111-e80fcca6a029?w=500&q=80',
+  'Adjustable Resistance Hand Grip Strengthener': 'https://images.unsplash.com/photo-1584735935682-2f2b69dff9d2?w=500&q=80',
+  'Breathable Shock-Absorbing Cycling Gloves': 'https://images.unsplash.com/photo-1581655353564-df123a1eb820?w=500&q=80',
+
+  // Janani Stores, Akshi, Chimayi, Baggy Jeans specific products
+  'Handcrafted Ceramic Coffee Mug': 'https://images.unsplash.com/photo-1514228742587-6b1558fcca3d?w=500&q=80',
+  'Floral Print Pure Cotton Kurti': 'https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?w=500&q=80',
+  'Eco-Friendly Canvas Tote Bag': 'https://images.unsplash.com/photo-1544816155-12df9643f363?w=500&q=80',
+  'Braided 100W Fast-Charging USB-C Cable': 'https://images.unsplash.com/photo-1609091839311-d5365f9ff1c5?w=500&q=80',
+  'Anti-Glare Blue Light Computer Glasses': 'https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=500&q=80',
+  'Multi-Angle Aluminum Phone & Tablet Stand': 'https://images.unsplash.com/photo-1586105251261-72a756497a11?w=500&q=80',
+  'Set of 4 Scented Botanical Soy Wax Candles': 'https://images.unsplash.com/photo-1603006905003-be475563bc59?w=500&q=80',
+  'Soft Microfiber Quick-Dry Bath Mat': 'https://images.unsplash.com/photo-1584100936595-c0654b55a2e6?w=500&q=80',
+  'Glass Water Carafe with Natural Wood Ball Lid': 'https://images.unsplash.com/photo-1544787219-7f47ccb76574?w=500&q=80',
+  'High-Rise Vintage Wide-Leg Baggy Jeans': 'https://images.unsplash.com/photo-1541099649105-f69ad21f3246?w=500&q=80',
+  'Oversized Streetwear Heavyweight Acid Wash Tee': 'https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?w=500&q=80',
+  'Relaxed Fit Tactical Cargo Pants with Pockets': 'https://images.unsplash.com/photo-1624378439575-d8705ad7ae80?w=500&q=80',
 };
 
 // Granular keyword map with distinct URLs
