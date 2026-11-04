@@ -133,6 +133,8 @@ def update_inventory_by_product_id(
         "inventory_id": inventory.inventory_id,
         "product_id": inventory.product_id,
         "product_name": inventory.product.product_name if inventory.product else None,
+        "category": inventory.product.category if inventory.product else None,
+        "price": float(inventory.product.price) if (inventory.product and inventory.product.price is not None) else 0.0,
         "vendor_id": inventory.product.vendor_id if inventory.product else None,
         "vendor_name": inventory.product.vendor.business_name if (inventory.product and inventory.product.vendor) else None,
         "current_stock": inventory.current_stock,

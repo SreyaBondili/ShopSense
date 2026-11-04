@@ -1,0 +1,60 @@
+inventory_id,product_id,current_stock,reorder_level,warehouse,updated_at,vendor_id
+82,83,55,10,Central Distribution Hub,2026-11-02 16:05:28,36
+83,84,34,10,Central Distribution Hub,2026-10-22 19:24:32,36
+84,85,28,8,West Coast Logistics,2026-10-18 19:25:06,36
+85,86,18,5,Central Distribution Hub,2026-10-18 19:25:06,36
+86,87,78,20,East Coast Fulfillment,2026-10-22 19:24:38,37
+87,88,55,15,East Coast Fulfillment,2026-10-18 19:25:06,37
+88,89,38,10,Central Distribution Hub,2026-10-18 19:25:06,37
+89,90,25,8,East Coast Fulfillment,2026-10-18 19:25:06,37
+90,91,65,15,Central Distribution Hub,2026-10-18 19:25:06,38
+91,92,44,10,Central Distribution Hub,2026-10-30 18:07:30,38
+92,93,32,8,Southern Logistics Center,2026-10-18 19:25:06,38
+93,94,22,6,Central Distribution Hub,2026-10-18 19:25:06,38
+94,95,22,5,West Coast Logistics,2026-10-18 19:25:06,39
+95,96,29,8,Central Distribution Hub,2026-10-30 00:04:06,39
+96,97,6,10,Central Distribution Hub,2026-10-18 19:25:06,39
+97,98,15,5,Southern Logistics Center,2026-10-18 19:25:06,39
+98,99,60,15,East Coast Fulfillment,2026-10-18 19:25:06,40
+99,100,42,10,East Coast Fulfillment,2026-10-18 19:25:06,40
+100,101,5,10,Central Distribution Hub,2026-11-02 16:05:43,40
+101,102,25,8,East Coast Fulfillment,2026-10-18 19:25:06,40
+102,103,39,10,West Coast Logistics,2026-10-30 11:10:23,41
+103,104,50,12,West Coast Logistics,2026-10-18 19:25:06,41
+104,105,30,8,Central Distribution Hub,2026-10-18 19:25:06,41
+105,106,75,15,West Coast Logistics,2026-10-18 19:25:06,41
+106,107,45,12,East Coast Fulfillment,2026-10-18 19:25:06,42
+107,108,59,15,Central Distribution Hub,2026-10-30 11:10:23,42
+108,109,34,10,East Coast Fulfillment,2026-10-30 11:10:23,42
+109,110,50,12,East Coast Fulfillment,2026-10-18 19:25:06,42
+110,111,25,8,Central Distribution Hub,2026-10-18 19:25:07,43
+111,112,35,10,West Coast Logistics,2026-10-18 19:25:07,43
+112,113,39,10,Southern Logistics Center,2026-10-30 18:16:30,43
+113,114,12,5,Central Distribution Hub,2026-10-18 19:25:07,43
+114,115,50,10,East Coast Fulfillment,2026-10-18 19:25:07,44
+115,116,40,8,East Coast Fulfillment,2026-10-18 19:25:07,44
+116,117,30,8,East Coast Fulfillment,2026-10-18 19:25:07,44
+117,118,60,12,East Coast Fulfillment,2026-10-18 19:25:07,44
+118,119,25,6,Central Distribution Hub,2026-10-18 19:25:07,45
+119,120,30,8,Central Distribution Hub,2026-10-18 19:25:07,45
+120,121,20,5,Southern Logistics Center,2026-10-18 19:25:07,45
+121,122,18,5,Central Distribution Hub,2026-10-18 19:25:07,45
+136,137,35,10,Central Warehouse,2026-10-31 01:18:42,47
+137,138,40,10,North Depot,2026-10-31 01:18:42,47
+138,139,45,12,Main Warehouse,2026-10-31 01:18:42,47
+139,140,50,10,Central Warehouse,2026-10-31 01:18:42,47
+140,141,60,15,Main Warehouse,2026-10-31 01:18:42,48
+141,142,45,10,Central Warehouse,2026-10-31 01:18:42,48
+142,143,40,10,North Depot,2026-10-31 01:18:42,48
+143,144,30,10,Main Warehouse,2026-10-31 01:18:42,50
+144,145,50,12,Central Warehouse,2026-10-31 01:18:42,50
+145,146,35,10,North Depot,2026-10-31 01:18:42,50
+146,147,35,10,Central Warehouse,2026-10-31 01:18:42,51
+147,148,45,10,Main Warehouse,2026-10-31 01:18:42,51
+148,149,29,8,North Depot,2026-10-31 01:32:37,51
+149,150,40,10,Central Warehouse,2026-10-31 01:18:42,52
+150,151,50,12,North Depot,2026-10-31 01:18:42,52
+151,152,35,10,Main Warehouse,2026-10-31 01:18:42,52
+152,153,50,12,Main Warehouse,2026-10-31 01:18:42,53
+153,154,40,10,North Depot,2026-10-31 01:18:42,53
+154,155,35,10,Central Warehouse,2026-10-31 01:18:42,53

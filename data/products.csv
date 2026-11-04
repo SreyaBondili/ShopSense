@@ -1,0 +1,60 @@
+product_id,product_name,category,price,stock,vendor_id,created_at
+83,Noise-Cancelling Wireless Headphones Pro,Electronics,1499.0,55,36,2026-10-18 19:25:06
+84,Ultra-Slim RGB Mechanical Keyboard,Electronics,1299.0,34,36,2026-10-18 19:25:06
+85,Smartwatch Series 7 Titanium,Electronics,1999.0,28,36,2026-10-18 19:25:06
+86,Thunderbolt 4 High-Speed USB Dock,Electronics,899.0,18,36,2026-10-18 19:25:06
+87,Organic Cotton Classic Graphic Tee,Fashion,399.0,78,37,2026-10-18 19:25:06
+88,Classic Slim-Fit Stretch Denim Jeans,Fashion,899.0,55,37,2026-10-18 19:25:06
+89,Lightweight Waterproof All-Weather Windbreaker,Fashion,999.0,38,37,2026-10-18 19:25:06
+90,Merino Wool Thermal Crewneck Sweater,Fashion,899.0,25,37,2026-10-18 19:25:06
+91,Data Science & AI Engineering Handbook,Books,399.0,65,38,2026-10-18 19:25:06
+92,Modern Web Architecture with FastAPI & React,Books,349.0,44,38,2026-10-18 19:25:06
+93,The Art of Scalable Cloud Computing,Books,399.0,32,38,2026-10-18 19:25:06
+94,Deep Learning Illustrated (Hardcover Edition),Books,449.0,22,38,2026-10-18 19:25:06
+95,Ergonomic Lumbar Support Mesh Office Chair,Home & Kitchen,2499.0,22,39,2026-10-18 19:25:06
+96,Cold Brew Precision Espresso Coffee Maker,Home & Kitchen,1499.0,29,39,2026-10-18 19:25:06
+97,Ultrasonic Aroma Diffuser with Ambient LED,Home & Kitchen,499.0,6,39,2026-10-18 19:25:06
+98,Non-Stick Ceramic Cookware 10-Piece Set,Home & Kitchen,1299.0,15,39,2026-10-18 19:25:06
+99,Hydrating Vitamin C + Hyaluronic Facial Serum,Beauty & Personal Care,399.0,60,40,2026-10-18 19:25:06
+100,Organic Herbal Daily Moisturizing Cream,Beauty & Personal Care,299.0,42,40,2026-10-18 19:25:06
+101,Exfoliating Mineral Himalayan Body Scrub,Beauty & Personal Care,249.0,5,40,2026-10-18 19:25:06
+102,Nourishing Botanical Night Repair Elixir,Beauty & Personal Care,499.0,25,40,2026-10-18 19:25:06
+103,4K Ultra HD Dual-Monitor Webcam 60FPS,Electronics,999.0,39,41,2026-10-18 19:25:06
+104,Wireless Ergonomic Vertical Mouse,Electronics,499.0,50,41,2026-10-18 19:25:06
+105,Active Noise-Cancelling Bluetooth Earbuds,Electronics,799.0,30,41,2026-10-18 19:25:06
+106,Fast Magnetic Wireless Charging Pad 15W,Electronics,499.0,75,41,2026-10-18 19:25:06
+107,Tailored Casual Linen Blend Button-Down,Fashion,699.0,45,42,2026-10-18 19:25:06
+108,Athletic Breathable Performance Joggers,Fashion,599.0,59,42,2026-10-18 19:25:06
+109,Unisex Heavyweight Fleece Pullover Hoodie,Fashion,799.0,34,42,2026-10-18 19:25:06
+110,Seamless Comfort Yoga Leggings,Fashion,499.0,50,42,2026-10-18 19:25:06
+111,Minimalist Solid Oak Bedside Lamp with Touch Dimmer,Home & Kitchen,699.0,25,43,2026-10-18 19:25:07
+112,Stainless Steel Double-Wall Thermal French Press,Home & Kitchen,599.0,35,43,2026-10-18 19:25:07
+113,Natural Bamboo Cutlery & Cutting Board Trio,Home & Kitchen,399.0,39,43,2026-10-18 19:25:07
+114,Cast Iron Enamelled Dutch Oven 5.5 Qt,Home & Kitchen,1199.0,12,43,2026-10-18 19:25:07
+115,Organic Rosewater Balancing Facial Mist,Beauty & Personal Care,199.0,50,44,2026-10-18 19:25:07
+116,Vegan Cold-Pressed Argan Hair Oil 100ml,Beauty & Personal Care,299.0,40,44,2026-10-18 19:25:07
+117,Charcoal Clarifying Detox Detox Clay Mask,Beauty & Personal Care,249.0,30,44,2026-10-18 19:25:07
+118,Pure Lavender Aromatherapy Essential Oil,Beauty & Personal Care,199.0,60,44,2026-10-18 19:25:07
+119,Algorithms & Data Structures: A Practical Guide,Books,399.0,25,45,2026-10-18 19:25:07
+120,Microservices Architecture with Docker & K8s,Books,349.0,30,45,2026-10-18 19:25:07
+121,Database Internals & Storage Engines,Books,449.0,20,45,2026-10-18 19:25:07
+122,Designing Distributed Cloud Systems,Books,399.0,18,45,2026-10-18 19:25:07
+137,Handcrafted Ceramic Coffee Mug,Home & Kitchen,249.0,35,47,2026-10-31 01:18:41
+138,Floral Print Pure Cotton Kurti,Fashion,599.0,40,47,2026-10-31 01:18:41
+139,Ayurvedic Glow Face Serum,Beauty & Personal Care,399.0,45,47,2026-10-31 01:18:41
+140,Eco-Friendly Canvas Tote Bag,Fashion,299.0,50,47,2026-10-31 01:18:41
+141,Braided 100W Fast-Charging USB-C Cable,Electronics,299.0,60,48,2026-10-31 01:18:41
+142,Anti-Glare Blue Light Computer Glasses,Electronics,499.0,45,48,2026-10-31 01:18:41
+143,Multi-Angle Aluminum Phone & Tablet Stand,Electronics,349.0,40,48,2026-10-31 01:18:41
+144,Non-Slip High-Density Exercise Foam Roller,Sports & Fitness,499.0,30,50,2026-10-31 01:18:41
+145,Speed Jump Rope with Ball Bearings,Sports & Fitness,249.0,50,50,2026-10-31 01:18:41
+146,Stainless Steel Insulated Sports Shaker Bottle,Sports & Fitness,399.0,35,50,2026-10-31 01:18:41
+147,Set of 4 Scented Botanical Soy Wax Candles,Home & Kitchen,399.0,35,51,2026-10-31 01:18:41
+148,Soft Microfiber Quick-Dry Bath Mat,Home & Kitchen,299.0,45,51,2026-10-31 01:18:41
+149,Glass Water Carafe with Natural Wood Ball Lid,Home & Kitchen,449.0,29,51,2026-10-31 01:18:41
+150,High-Rise Vintage Wide-Leg Baggy Jeans,Fashion,899.0,40,52,2026-10-31 01:18:41
+151,Oversized Streetwear Heavyweight Acid Wash Tee,Fashion,499.0,50,52,2026-10-31 01:18:41
+152,Relaxed Fit Tactical Cargo Pants with Pockets,Fashion,799.0,35,52,2026-10-31 01:18:41
+153,Adjustable Resistance Hand Grip Strengthener,Sports & Fitness,249.0,50,53,2026-10-31 01:18:41
+154,Breathable Shock-Absorbing Cycling Gloves,Sports & Fitness,349.0,40,53,2026-10-31 01:18:41
+155,All-Terrain Breathable Running Sneakers,Sports & Fitness,899.0,35,53,2026-10-31 01:18:41

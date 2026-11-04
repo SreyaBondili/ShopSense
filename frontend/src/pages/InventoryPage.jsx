@@ -15,16 +15,20 @@ export default function InventoryPage({ user }) {
   const [turnover, setTurnover] = useState(null);
   const [forecast, setForecast] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
-  // Filters
+  // Stock tab filters
   const [search, setSearch] = useState('');
   const [warehouseFilter, setWarehouseFilter] = useState('All');
   const [categoryFilter, setCategoryFilter] = useState('All');
   const [vendorFilter, setVendorFilter] = useState('All');
   const [statusFilter, setStatusFilter] = useState('All');
   const [lowStockOnly, setLowStockOnly] = useState(false);
+
+  // Turnover tab filter
+  const [turnoverSearch, setTurnoverSearch] = useState('');
 
   // Restock Modal state
   const [showRestockModal, setShowRestockModal] = useState(false);
@@ -38,34 +42,55 @@ export default function InventoryPage({ user }) {
     loadAllInventoryData();
   }, [statusFilter]);
 
-  const loadAllInventoryData = async () => {
-    setLoading(true);
+  const loadAllInventoryData = async (isManualRefresh = false) => {
+    if (isManualRefresh) {
+      setRefreshing(true);
+    } else {
+      setLoading(true);
+    }
     setError('');
+
     try {
-      const [invData, alertData, replData, turnData, foreData] = await Promise.all([
+      const [invRes, alertRes, replRes, turnRes, foreRes] = await Promise.allSettled([
         api.getInventory(statusFilter),
-        api.getInventoryAlerts().catch(() => []),
-        api.getInventoryReplenishment(5).catch(() => []),
-        api.getInventoryTurnover().catch(() => null),
-        api.getInventoryForecast(null, 14).catch(() => null),
+        api.getInventoryAlerts(),
+        api.getInventoryReplenishment(5),
+        api.getInventoryTurnover(),
+        api.getInventoryForecast(null, 14),
       ]);
 
-      setInventory(invData || []);
-      setAlerts(alertData || []);
-      setReplenishment(replData || []);
-      setTurnover(turnData);
-      setForecast(foreData);
+      if (invRes.status === 'fulfilled' && Array.isArray(invRes.value)) {
+        setInventory(invRes.value);
+      }
+      if (alertRes.status === 'fulfilled' && Array.isArray(alertRes.value)) {
+        setAlerts(alertRes.value);
+      }
+      if (replRes.status === 'fulfilled' && Array.isArray(replRes.value)) {
+        setReplenishment(replRes.value);
+      }
+      if (turnRes.status === 'fulfilled' && turnRes.value) {
+        setTurnover(turnRes.value);
+      }
+      if (foreRes.status === 'fulfilled' && foreRes.value) {
+        setForecast(foreRes.value);
+      }
+
+      if (isManualRefresh) {
+        setSuccess('✓ Live inventory data successfully updated from database.');
+        setTimeout(() => setSuccess(''), 3500);
+      }
     } catch (err) {
-      setError(err.message || 'Error loading inventory data.');
+      setError(err.message || 'Error updating inventory data.');
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   };
 
   const openRestockFor = (item) => {
     setSelectedItem(item);
-    setNewStock(item.current_stock);
-    setNewReorder(item.reorder_level);
+    setNewStock(item.current_stock ?? 0);
+    setNewReorder(item.reorder_level ?? item.safety_stock ?? 10);
     setNewWarehouse(item.warehouse || 'Main Warehouse');
     setShowRestockModal(true);
   };
@@ -84,7 +109,7 @@ export default function InventoryPage({ user }) {
       });
       setSuccess(`Updated stock for '${selectedItem.product_name}' to ${newStock} units.`);
       setShowRestockModal(false);
-      loadAllInventoryData();
+      await loadAllInventoryData(true);
     } catch (err) {
       setError(err.message || 'Restock update failed.');
     } finally {
@@ -111,7 +136,7 @@ export default function InventoryPage({ user }) {
   const uniqueCategories = Array.from(new Set(inventory.map(i => i.category).filter(Boolean)));
   const uniqueVendors = Array.from(new Set(inventory.map(i => i.vendor_name).filter(Boolean)));
 
-  // Filtered inventory
+  // Filtered inventory for Stock tab
   const filteredInventory = inventory.filter(item => {
     if (lowStockOnly && item.status === 'IN STOCK') return false;
     if (warehouseFilter !== 'All' && item.warehouse !== warehouseFilter) return false;
@@ -123,14 +148,25 @@ export default function InventoryPage({ user }) {
       const vName = (item.vendor_name || '').toLowerCase();
       const wName = (item.warehouse || '').toLowerCase();
       const cat = (item.category || '').toLowerCase();
-      if (!pName.includes(q) && !vName.includes(q) && !wName.includes(q) && !cat.includes(q)) {
+      const pId = String(item.product_id || '');
+      if (!pName.includes(q) && !vName.includes(q) && !wName.includes(q) && !cat.includes(q) && !pId.includes(q)) {
         return false;
       }
     }
     return true;
   });
 
-  // Calculate high-fidelity KPI values
+  // Filtered turnover items
+  const turnoverItems = (turnover?.items || []).filter(item => {
+    if (!turnoverSearch.trim()) return true;
+    const q = turnoverSearch.toLowerCase();
+    const pName = (item.product_name || '').toLowerCase();
+    const cat = (item.category || '').toLowerCase();
+    const vName = (item.vendor_name || '').toLowerCase();
+    return pName.includes(q) || cat.includes(q) || vName.includes(q);
+  });
+
+  // High-fidelity KPI calculations
   const totalUnits = inventory.reduce((s, i) => s + Number(i.current_stock || 0), 0);
   const totalValue = inventory.reduce((s, i) => s + (Number(i.current_stock || 0) * Number(i.price || 0)), 0);
   const turnoverRate = turnover?.overall_turnover_rate || (totalValue > 0 ? (turnover?.total_cogs ? (turnover.total_cogs / totalValue).toFixed(2) : '1.45') : '1.45');
@@ -141,7 +177,7 @@ export default function InventoryPage({ user }) {
   return (
     <div>
       {/* Page Header */}
-      <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <h1 className="page-title" style={{ margin: 0 }}>
@@ -157,8 +193,22 @@ export default function InventoryPage({ user }) {
           </div>
           <p className="page-subtitle">Turnover analytics, multi-warehouse stock controls, and automated replenishment</p>
         </div>
-        <button className="btn btn-secondary" onClick={loadAllInventoryData} style={{ fontSize: '13px' }}>
-          <RefreshCw size={14} /> Refresh
+        <button
+          type="button"
+          className="btn btn-secondary"
+          onClick={() => loadAllInventoryData(true)}
+          disabled={refreshing}
+          style={{
+            fontSize: '13px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            opacity: refreshing ? 0.75 : 1,
+            cursor: refreshing ? 'not-allowed' : 'pointer'
+          }}
+        >
+          <RefreshCw size={14} className={refreshing ? 'spin' : ''} />
+          <span>{refreshing ? 'Refreshing...' : 'Refresh'}</span>
         </button>
       </div>
 
@@ -228,10 +278,10 @@ export default function InventoryPage({ user }) {
         boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
       }}>
         {[
-          { id: 'stock', label: 'Stock Levels', icon: Warehouse },
+          { id: 'stock', label: `Stock Levels (${filteredInventory.length})`, icon: Warehouse },
           { id: 'replenishment', label: `Replenishment (${replenishment.length})`, icon: Sparkles },
           { id: 'alerts', label: `Alerts (${alerts.length})`, icon: ShieldAlert },
-          { id: 'turnover', label: 'Turnover Analytics', icon: TrendingUp },
+          { id: 'turnover', label: `Turnover Analytics (${turnoverItems.length})`, icon: TrendingUp },
           { id: 'forecast', label: 'ML Demand Forecast', icon: Cpu },
         ].map(tab => {
           const Icon = tab.icon;
@@ -239,6 +289,7 @@ export default function InventoryPage({ user }) {
           return (
             <button
               key={tab.id}
+              type="button"
               onClick={() => setActiveTab(tab.id)}
               style={{
                 display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 16px',
@@ -268,7 +319,7 @@ export default function InventoryPage({ user }) {
               <input
                 type="text"
                 className="form-input"
-                placeholder="Search products, warehouse, vendor..."
+                placeholder="Search products, warehouse, vendor, ID..."
                 value={search}
                 onChange={e => setSearch(e.target.value)}
                 style={{ paddingLeft: '34px' }}
@@ -382,6 +433,7 @@ export default function InventoryPage({ user }) {
                       </td>
                       <td style={{ textAlign: 'right' }}>
                         <button
+                          type="button"
                           className="btn btn-secondary"
                           onClick={() => openRestockFor(item)}
                           style={{
@@ -430,6 +482,7 @@ export default function InventoryPage({ user }) {
                 </h3>
               </div>
               <button
+                type="button"
                 onClick={() => setShowRestockModal(false)}
                 style={{ background: 'none', border: 'none', color: '#94A3B8', cursor: 'pointer' }}
               >
@@ -474,7 +527,7 @@ export default function InventoryPage({ user }) {
                 <input
                   type="text"
                   className="form-input"
-                  placeholder="e.g. Central Warehouse, North Depot"
+                  placeholder="e.g. Central Distribution Hub, North Depot"
                   value={newWarehouse}
                   onChange={e => setNewWarehouse(e.target.value)}
                   required
@@ -494,7 +547,7 @@ export default function InventoryPage({ user }) {
                   className="btn btn-primary"
                   disabled={submittingRestock}
                 >
-                  <RefreshCw size={14} />
+                  <RefreshCw size={14} className={submittingRestock ? 'spin' : ''} />
                   {submittingRestock ? 'Updating...' : 'Save Stock Update'}
                 </button>
               </div>
@@ -512,41 +565,79 @@ export default function InventoryPage({ user }) {
           </div>
           <p style={{ color: '#64748B', fontSize: '13px', marginBottom: '18px' }}>
             Formula-driven safety stock analysis based on daily sales velocity, supplier lead times, and warehouse capacity.
+            Formula: <code>Suggested Reorder = Target Stock - Current Stock</code> (Mentor Step 11: <code>reorder_qty = reorder_level * 2 - current_stock</code>).
           </p>
 
           <div className="table-container">
             <table className="table">
               <thead>
                 <tr>
-                  <th>Product</th>
-                  <th>Current Stock</th>
-                  <th>Safety Stock</th>
-                  <th>Recommended Order</th>
-                  <th>Urgency</th>
+                  <th>PRODUCT</th>
+                  <th>WAREHOUSE</th>
+                  <th>CURRENT STOCK</th>
+                  <th>SAFETY STOCK</th>
+                  <th>DAILY DEMAND</th>
+                  <th>RECOMMENDED ORDER</th>
+                  <th>URGENCY</th>
+                  <th style={{ textAlign: 'right' }}>ACTION</th>
                 </tr>
               </thead>
               <tbody>
-                {replenishment.map((r, idx) => (
-                  <tr key={idx}>
-                    <td>
-                      <div style={{ fontWeight: '600', color: '#1E293B' }}>{r.product_name}</div>
-                      <div style={{ fontSize: '11px', color: '#64748B' }}>by {r.vendor_name}</div>
-                    </td>
-                    <td style={{ fontWeight: '700', color: '#1E293B' }}>{r.current_stock}</td>
-                    <td style={{ color: '#64748B' }}>{r.safety_stock}</td>
-                    <td style={{ fontWeight: '700', color: '#6366F1' }}>+{r.recommended_order_quantity} units</td>
-                    <td>
-                      <span className={`badge ${
-                        r.urgency === 'CRITICAL' ? 'badge-danger' : r.urgency === 'HIGH' ? 'badge-warning' : 'badge-success'
-                      }`}>
-                        {r.urgency}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
+                {replenishment.map((r, idx) => {
+                  const safetyVal = r.safety_stock ?? r.reorder_level ?? 0;
+                  const orderQty = r.recommended_order_quantity ?? r.suggested_reorder_quantity ?? r.reorder_qty ?? 0;
+                  const urgencyLabel = r.urgency || r.priority || 'MEDIUM';
+
+                  const badgeStyle = urgencyLabel === 'CRITICAL'
+                    ? { background: '#FEE2E2', color: '#DC2626', border: '1px solid #FECACA' }
+                    : urgencyLabel === 'HIGH'
+                    ? { background: '#FEF3C7', color: '#D97706', border: '1px solid #FDE68A' }
+                    : urgencyLabel === 'MEDIUM'
+                    ? { background: '#FEF9C3', color: '#CA8A04', border: '1px solid #FEF08A' }
+                    : { background: '#ECFDF5', color: '#059669', border: '1px solid #A7F3D0' };
+
+                  return (
+                    <tr key={r.product_id || idx}>
+                      <td>
+                        <div style={{ fontWeight: '600', color: '#1E293B' }}>{r.product_name}</div>
+                        <div style={{ fontSize: '11px', color: '#64748B' }}>by {r.vendor_name} &bull; {r.category}</div>
+                      </td>
+                      <td style={{ color: '#64748B' }}>
+                        {r.warehouse || 'Main Warehouse'}
+                      </td>
+                      <td style={{ fontWeight: '700', color: r.current_stock === 0 ? '#DC2626' : '#1E293B' }}>
+                        {r.current_stock} units
+                      </td>
+                      <td style={{ color: '#64748B', fontWeight: '500' }}>
+                        {safetyVal} units
+                      </td>
+                      <td style={{ color: '#64748B' }}>
+                        {r.daily_demand || 1.0} units/day
+                      </td>
+                      <td style={{ fontWeight: '700', color: '#6366F1' }}>
+                        +{orderQty} units
+                      </td>
+                      <td>
+                        <span className="badge" style={badgeStyle}>
+                          {urgencyLabel}
+                        </span>
+                      </td>
+                      <td style={{ textAlign: 'right' }}>
+                        <button
+                          type="button"
+                          className="btn btn-primary"
+                          onClick={() => openRestockFor(r)}
+                          style={{ padding: '6px 14px', fontSize: '12px' }}
+                        >
+                          Restock
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
                 {replenishment.length === 0 && (
                   <tr>
-                    <td colSpan="5" style={{ textAlign: 'center', padding: '30px', color: '#64748B' }}>
+                    <td colSpan="8" style={{ textAlign: 'center', padding: '30px', color: '#64748B' }}>
                       All items are currently at healthy inventory levels.
                     </td>
                   </tr>
@@ -572,24 +663,28 @@ export default function InventoryPage({ user }) {
             <table className="table">
               <thead>
                 <tr>
-                  <th>Product</th>
-                  <th>Warehouse</th>
-                  <th>Current Stock</th>
-                  <th>Reorder Level</th>
-                  <th>Status</th>
-                  <th style={{ textAlign: 'right' }}>Action</th>
+                  <th>PRODUCT</th>
+                  <th>WAREHOUSE</th>
+                  <th>CURRENT STOCK</th>
+                  <th>REORDER LEVEL</th>
+                  <th>SHORTAGE</th>
+                  <th>STATUS</th>
+                  <th style={{ textAlign: 'right' }}>ACTION</th>
                 </tr>
               </thead>
               <tbody>
                 {alerts.map((a, idx) => (
-                  <tr key={idx}>
+                  <tr key={a.product_id || idx}>
                     <td>
                       <div style={{ fontWeight: '600', color: '#1E293B' }}>{a.product_name}</div>
-                      <div style={{ fontSize: '11px', color: '#64748B' }}>by {a.vendor_name}</div>
+                      <div style={{ fontSize: '11px', color: '#64748B' }}>by {a.vendor_name} &bull; {a.category}</div>
                     </td>
-                    <td style={{ color: '#64748B' }}>{a.warehouse}</td>
-                    <td style={{ fontWeight: '700', color: '#DC2626' }}>{a.current_stock}</td>
-                    <td style={{ color: '#64748B' }}>{a.reorder_level}</td>
+                    <td style={{ color: '#64748B' }}>{a.warehouse || 'Main Warehouse'}</td>
+                    <td style={{ fontWeight: '700', color: '#DC2626' }}>{a.current_stock} units</td>
+                    <td style={{ color: '#64748B' }}>{a.reorder_level} units</td>
+                    <td style={{ fontWeight: '600', color: '#D97706' }}>
+                      {a.shortage ?? Math.max(0, a.reorder_level - a.current_stock)} units
+                    </td>
                     <td>
                       <span className={`badge ${a.status === 'OUT OF STOCK' ? 'badge-danger' : 'badge-warning'}`}>
                         {a.status}
@@ -597,6 +692,7 @@ export default function InventoryPage({ user }) {
                     </td>
                     <td style={{ textAlign: 'right' }}>
                       <button
+                        type="button"
                         className="btn btn-primary"
                         onClick={() => openRestockFor(a)}
                         style={{ padding: '6px 14px', fontSize: '12px' }}
@@ -608,7 +704,7 @@ export default function InventoryPage({ user }) {
                 ))}
                 {alerts.length === 0 && (
                   <tr>
-                    <td colSpan="6" style={{ textAlign: 'center', padding: '30px', color: '#059669' }}>
+                    <td colSpan="7" style={{ textAlign: 'center', padding: '30px', color: '#059669' }}>
                       🎉 No active low-stock alerts. Inventory is optimally stocked!
                     </td>
                   </tr>
@@ -630,7 +726,7 @@ export default function InventoryPage({ user }) {
                   <span>Turnover Analytics & COGS Valuation</span>
                 </div>
                 <p style={{ color: '#64748B', fontSize: '13px', marginBottom: '20px' }}>
-                  Calculated using standard formula: <code>Inventory Turnover = Cost of Goods Sold (COGS) / Average Inventory Value</code>
+                  Calculated using mentor formula: <code>Inventory Turnover = Cost of Goods Sold (COGS) / Average Inventory Value</code>
                 </p>
 
                 <div className="kpi-grid" style={{ marginBottom: '24px' }}>
@@ -654,31 +750,74 @@ export default function InventoryPage({ user }) {
                   </div>
                 </div>
 
+                {/* Search Bar for Turnover Table */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '12px' }}>
+                  <div style={{ position: 'relative', width: '280px' }}>
+                    <input
+                      type="text"
+                      className="form-input"
+                      placeholder="Search product, category, vendor..."
+                      value={turnoverSearch}
+                      onChange={e => setTurnoverSearch(e.target.value)}
+                      style={{ paddingLeft: '34px' }}
+                    />
+                    <Search size={15} color="#94A3B8" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
+                  </div>
+                  <div style={{ fontSize: '13px', color: '#64748B' }}>
+                    Showing <strong>{turnoverItems.length}</strong> products with real transaction turnover
+                  </div>
+                </div>
+
                 <div className="table-container">
                   <table className="table">
                     <thead>
                       <tr>
-                        <th>Product</th>
-                        <th>Category</th>
-                        <th>Unit Price</th>
-                        <th>Stock</th>
-                        <th>Total Value</th>
+                        <th>PRODUCT</th>
+                        <th>CATEGORY</th>
+                        <th>UNIT PRICE</th>
+                        <th>CURRENT STOCK</th>
+                        <th>INVENTORY VALUE</th>
                         <th>COGS</th>
-                        <th>Turnover Rate</th>
+                        <th>TURNOVER RATE</th>
+                        <th>VELOCITY</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {(turnover.items || []).slice(0, 15).map(item => (
-                        <tr key={item.product_id}>
-                          <td style={{ fontWeight: '600', color: '#1E293B' }}>{item.product_name}</td>
-                          <td><span className="badge badge-info">{item.category}</span></td>
-                          <td>₹{Number(item.price).toFixed(2)}</td>
-                          <td style={{ fontWeight: '600' }}>{item.current_stock}</td>
-                          <td style={{ fontWeight: '700', color: '#059669' }}>₹{Number(item.inventory_value).toLocaleString('en-IN')}</td>
-                          <td>₹{Number(item.cogs).toLocaleString('en-IN')}</td>
-                          <td style={{ fontWeight: '700', color: '#6366F1' }}>{item.turnover_rate}x</td>
+                      {turnoverItems.map(item => {
+                        const rate = Number(item.turnover_rate || 0);
+                        const velBadgeStyle = rate >= 3.0
+                          ? { background: '#ECFDF5', color: '#059669', border: '1px solid #A7F3D0' }
+                          : rate >= 1.0
+                          ? { background: '#EEF2FF', color: '#6366F1', border: '1px solid #C7D2FE' }
+                          : { background: '#F1F5F9', color: '#64748B', border: '1px solid #CBD5E1' };
+
+                        return (
+                          <tr key={item.product_id}>
+                            <td>
+                              <div style={{ fontWeight: '600', color: '#1E293B' }}>{item.product_name}</div>
+                              <div style={{ fontSize: '11px', color: '#64748B' }}>{item.vendor_name} &bull; {item.warehouse}</div>
+                            </td>
+                            <td><span className="badge badge-info">{item.category}</span></td>
+                            <td style={{ fontWeight: '600' }}>₹{Number(item.price).toFixed(2)}</td>
+                            <td style={{ fontWeight: '600' }}>{item.current_stock} units</td>
+                            <td style={{ fontWeight: '700', color: '#059669' }}>₹{Number(item.inventory_value).toLocaleString('en-IN')}</td>
+                            <td style={{ fontWeight: '600', color: '#475569' }}>₹{Number(item.cogs).toLocaleString('en-IN')}</td>
+                            <td style={{ fontWeight: '700', color: '#6366F1' }}>{rate.toFixed(2)}x</td>
+                            <td>
+                              <span className="badge" style={velBadgeStyle}>
+                                {item.velocity || (rate >= 3 ? 'High' : rate >= 1 ? 'Moderate' : 'Slow')}
+                              </span>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                      {turnoverItems.length === 0 && (
+                        <tr>
+                          <td colSpan="8" style={{ textAlign: 'center', padding: '30px', color: '#64748B' }}>
+                            No product turnover records match your search.
+                          </td>
                         </tr>
-                      ))}
+                      )}
                     </tbody>
                   </table>
                 </div>
@@ -695,17 +834,17 @@ export default function InventoryPage({ user }) {
       {/* TAB 5: ML DEMAND FORECAST */}
       {activeTab === 'forecast' && (
         <div className="card" style={{ padding: '24px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '12px' }}>
             <div>
               <div className="card-title" style={{ margin: 0 }}>
                 <Cpu size={18} color="#6366F1" />
                 <span>Random Forest Demand Forecasting (14-Day Horizon)</span>
               </div>
               <p style={{ color: '#64748B', fontSize: '13px', marginTop: '4px' }}>
-                Chronological train/test split ML model evaluating future unit demand.
+                Chronological train/test split ML model evaluating future unit demand based on historical transaction patterns.
               </p>
             </div>
-            <button className="btn btn-secondary" onClick={exportForecastCSV} style={{ fontSize: '12px' }}>
+            <button type="button" className="btn btn-secondary" onClick={exportForecastCSV} style={{ fontSize: '12px' }}>
               <Download size={14} /> Export Forecast CSV
             </button>
           </div>
@@ -715,27 +854,30 @@ export default function InventoryPage({ user }) {
               <div className="kpi-card">
                 <div className="kpi-label">Model Accuracy</div>
                 <div className="kpi-value" style={{ color: '#059669' }}>
-                  <AnimatedCounter value={forecast.metrics.accuracy_pct || 83.45} duration={1000} />%
+                  <AnimatedCounter value={forecast.metrics.accuracy_pct || 0} duration={1000} />%
                 </div>
                 <div style={{ fontSize: '11px', color: '#059669', marginTop: '4px' }}>&ge; 80% Mentor Target Met</div>
               </div>
               <div className="kpi-card">
                 <div className="kpi-label">Mean Absolute Error (MAE)</div>
                 <div className="kpi-value" style={{ color: '#6366F1' }}>
-                  {forecast.metrics.mae || 1.45} units
+                  {forecast.metrics.mae} units
                 </div>
+                <div style={{ fontSize: '11px', color: '#64748B', marginTop: '4px' }}>Held-out evaluation error</div>
               </div>
               <div className="kpi-card">
-                <div className="kpi-label">RMSE</div>
+                <div className="kpi-label">Root Mean Squared Error (RMSE)</div>
                 <div className="kpi-value" style={{ color: '#D97706' }}>
-                  {forecast.metrics.rmse || 2.12} units
+                  {forecast.metrics.rmse} units
                 </div>
+                <div style={{ fontSize: '11px', color: '#64748B', marginTop: '4px' }}>Variance penalty metric</div>
               </div>
               <div className="kpi-card">
                 <div className="kpi-label">Forecast Horizon</div>
                 <div className="kpi-value" style={{ color: '#1E293B' }}>
                   {forecast.horizon_days || 14} Days
                 </div>
+                <div style={{ fontSize: '11px', color: '#64748B', marginTop: '4px' }}>Replenishment planning window</div>
               </div>
             </div>
           )}
@@ -745,10 +887,10 @@ export default function InventoryPage({ user }) {
               <table className="table">
                 <thead>
                   <tr>
-                    <th>Date</th>
-                    <th>Predicted Demand</th>
-                    <th>Confidence Interval (Lower)</th>
-                    <th>Confidence Interval (Upper)</th>
+                    <th>DATE</th>
+                    <th>PREDICTED DEMAND</th>
+                    <th>CONFIDENCE INTERVAL (LOWER)</th>
+                    <th>CONFIDENCE INTERVAL (UPPER)</th>
                   </tr>
                 </thead>
                 <tbody>

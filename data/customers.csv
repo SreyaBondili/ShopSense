@@ -1,0 +1,9 @@
+customer_id,full_name,email,total_orders,total_spent
+56,Alice Johnson (Customer),customer@shopsense.com,96,40850.57
+57,Rahul Verma,rahul.verma@example.com,93,40822.4
+58,Priya Patel,priya.patel@example.com,111,38939.89
+59,Carlos Mendez,carlos.m@example.com,117,38424.08
+60,Ananya Rao,ananya.rao@example.com,97,28814.34
+72,megha,megha@gmail.com,54,40402.93
+75,parvi,parvi@gmail.com,35,31238.0
+83,swarna,swarna@gmail.com,24,16465.0
