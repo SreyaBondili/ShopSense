@@ -1,6 +1,84 @@
 {
   "execution_history": [
     {
+      "run_id": 27,
+      "timestamp": "2026-11-07 14:58:28",
+      "job_id": "refresh_analytics_job",
+      "job_name": "Marketplace Analytics Refresh",
+      "execution_type": "Scheduled",
+      "trigger_type": "Scheduled",
+      "status": "SUCCESS",
+      "duration_seconds": 0.04,
+      "operation_summary": "Consolidated ₹387,122.80 total revenue across 1173 transactions. Evaluated 59 product turnover cycles and flagged 2 low-stock items.",
+      "details": "Consolidated ₹387,122.80 total revenue across 1173 transactions. Evaluated 59 product turnover cycles and flagged 2 low-stock items.",
+      "result": "Consolidated ₹387,122.80 total revenue across 1173 transactions. Evaluated 59 product turnover cycles and flagged 2 low-stock items."
+    },
+    {
+      "run_id": 25,
+      "timestamp": "2026-11-07 14:58:28",
+      "job_id": "refresh_analytics_job",
+      "job_name": "Marketplace Analytics Refresh",
+      "execution_type": "Manual",
+      "trigger_type": "Manual",
+      "status": "SUCCESS",
+      "duration_seconds": 0.06,
+      "operation_summary": "Consolidated ₹387,122.80 total revenue across 1173 transactions. Evaluated 59 product turnover cycles and flagged 2 low-stock items.",
+      "details": "Consolidated ₹387,122.80 total revenue across 1173 transactions. Evaluated 59 product turnover cycles and flagged 2 low-stock items.",
+      "result": "Consolidated ₹387,122.80 total revenue across 1173 transactions. Evaluated 59 product turnover cycles and flagged 2 low-stock items."
+    },
+    {
+      "run_id": 24,
+      "timestamp": "2026-11-07 14:58:23",
+      "job_id": "retrain_forecasting_job",
+      "job_name": "Inventory Demand Retrain Pipeline",
+      "execution_type": "Scheduled",
+      "trigger_type": "Scheduled",
+      "status": "SUCCESS",
+      "duration_seconds": 4.9,
+      "operation_summary": "Retrained Random Forest model (vlatest) on 2840 historical sales records. Accuracy: 92.63%, MAE: 2.83, RMSE: 3.82 (Active & Serving).",
+      "details": "Retrained Random Forest model (vlatest) on 2840 historical sales records. Accuracy: 92.63%, MAE: 2.83, RMSE: 3.82 (Active & Serving).",
+      "result": "Retrained Random Forest model (vlatest) on 2840 historical sales records. Accuracy: 92.63%, MAE: 2.83, RMSE: 3.82 (Active & Serving)."
+    },
+    {
+      "run_id": 23,
+      "timestamp": "2026-11-07 14:58:23",
+      "job_id": "refresh_analytics_job",
+      "job_name": "Marketplace Analytics Refresh",
+      "execution_type": "Manual",
+      "trigger_type": "Manual",
+      "status": "SUCCESS",
+      "duration_seconds": 0.09,
+      "operation_summary": "Consolidated ₹387,122.80 total revenue across 1173 transactions. Evaluated 59 product turnover cycles and flagged 2 low-stock items.",
+      "details": "Consolidated ₹387,122.80 total revenue across 1173 transactions. Evaluated 59 product turnover cycles and flagged 2 low-stock items.",
+      "result": "Consolidated ₹387,122.80 total revenue across 1173 transactions. Evaluated 59 product turnover cycles and flagged 2 low-stock items."
+    },
+    {
+      "run_id": 22,
+      "timestamp": "2026-11-07 14:58:17",
+      "job_id": "retrain_forecasting_job",
+      "job_name": "Inventory Demand Retrain Pipeline",
+      "execution_type": "Manual",
+      "trigger_type": "Manual",
+      "status": "SUCCESS",
+      "duration_seconds": 6.37,
+      "operation_summary": "Retrained Random Forest model (vlatest) on 2840 historical sales records. Accuracy: 92.63%, MAE: 2.83, RMSE: 3.82 (Active & Serving).",
+      "details": "Retrained Random Forest model (vlatest) on 2840 historical sales records. Accuracy: 92.63%, MAE: 2.83, RMSE: 3.82 (Active & Serving).",
+      "result": "Retrained Random Forest model (vlatest) on 2840 historical sales records. Accuracy: 92.63%, MAE: 2.83, RMSE: 3.82 (Active & Serving)."
+    },
+    {
+      "run_id": 21,
+      "timestamp": "2026-11-07 14:58:09",
+      "job_id": "refresh_analytics_job",
+      "job_name": "Marketplace Analytics Refresh",
+      "execution_type": "Manual",
+      "trigger_type": "Manual",
+      "status": "SUCCESS",
+      "duration_seconds": 0.06,
+      "operation_summary": "Consolidated ₹387,122.80 total revenue across 1173 transactions. Evaluated 59 product turnover cycles and flagged 2 low-stock items.",
+      "details": "Consolidated ₹387,122.80 total revenue across 1173 transactions. Evaluated 59 product turnover cycles and flagged 2 low-stock items.",
+      "result": "Consolidated ₹387,122.80 total revenue across 1173 transactions. Evaluated 59 product turnover cycles and flagged 2 low-stock items."
+    },
+    {
       "run_id": 20,
       "timestamp": "2026-11-07 14:17:21",
       "job_id": "refresh_analytics_job",
@@ -262,8 +340,8 @@
     }
   ],
   "policy_last_runs": {
-    "retrain_forecasting_job": "2026-11-07 14:17:07",
-    "refresh_analytics_job": "2026-11-07 14:17:21",
-    "simulated_failure_job": "2026-11-07 14:15:55"
+    "retrain_forecasting_job": "2026-11-07 14:58:23",
+    "refresh_analytics_job": "2026-11-07 14:58:28",
+    "simulated_failure_job": "2026-11-07 14:58:28"
   }
 }
