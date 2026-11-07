@@ -565,7 +565,7 @@ export default function InventoryPage({ user }) {
           </div>
           <p style={{ color: '#64748B', fontSize: '13px', marginBottom: '18px' }}>
             Formula-driven safety stock analysis based on daily sales velocity, supplier lead times, and warehouse capacity.
-            Formula: <code>Suggested Reorder = Target Stock - Current Stock</code> (Mentor Step 11: <code>reorder_qty = reorder_level * 2 - current_stock</code>).
+            Policy: <code>Suggested Reorder = Target Stock - Current Stock</code> (Safety Buffer: <code>reorder_qty = reorder_level * 2 - current_stock</code>).
           </p>
 
           <div className="table-container">
@@ -726,7 +726,7 @@ export default function InventoryPage({ user }) {
                   <span>Turnover Analytics & COGS Valuation</span>
                 </div>
                 <p style={{ color: '#64748B', fontSize: '13px', marginBottom: '20px' }}>
-                  Calculated using mentor formula: <code>Inventory Turnover = Cost of Goods Sold (COGS) / Average Inventory Value</code>
+                  Standard Financial Formula: <code>Inventory Turnover = Cost of Goods Sold (COGS) / Average Inventory Value</code>
                 </p>
 
                 <div className="kpi-grid" style={{ marginBottom: '24px' }}>
@@ -856,7 +856,7 @@ export default function InventoryPage({ user }) {
                 <div className="kpi-value" style={{ color: '#059669' }}>
                   <AnimatedCounter value={forecast.metrics.accuracy_pct || 0} duration={1000} />%
                 </div>
-                <div style={{ fontSize: '11px', color: '#059669', marginTop: '4px' }}>&ge; 80% Mentor Target Met</div>
+                <div style={{ fontSize: '11px', color: '#059669', marginTop: '4px' }}>Benchmark Exceeded (&ge; 80%)</div>
               </div>
               <div className="kpi-card">
                 <div className="kpi-label">Mean Absolute Error (MAE)</div>

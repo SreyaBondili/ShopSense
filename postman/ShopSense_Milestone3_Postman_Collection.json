@@ -1,12 +1,12 @@
 {
   "info": {
     "name": "ShopSense Milestone 3 API Collection",
-    "description": "Comprehensive Postman collection for ShopSense Milestone 3: Advanced Analytics, MLflow Model Tracking, APScheduler Workflow Automation, and Report Generation.",
+    "description": "Comprehensive Postman collection for ShopSense: Multi-Role Authentication, Product & Inventory Management, Advanced Analytics, MLflow Model Tracking, APScheduler Workflow Automation, and Report Generation.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
     {
-      "name": "Authentication & Roles",
+      "name": "Authentication & Role Security",
       "item": [
         {
           "name": "Admin Login",
@@ -27,7 +27,7 @@
             "header": [{"key": "Content-Type", "value": "application/json"}],
             "body": {
               "mode": "raw",
-              "raw": "{\"email\": \"techvendor@example.com\", \"password\": \"Vendor@123\"}"
+              "raw": "{\"email\": \"techworld@example.com\", \"password\": \"Vendor@123\"}"
             },
             "url": {"raw": "{{base_url}}/auth/login", "host": ["{{base_url}}"], "path": ["auth", "login"]}
           }
@@ -39,18 +39,91 @@
             "header": [{"key": "Content-Type", "value": "application/json"}],
             "body": {
               "mode": "raw",
-              "raw": "{\"email\": \"customer@example.com\", \"password\": \"Customer@123\"}"
+              "raw": "{\"email\": \"customer@shopsense.com\", \"password\": \"Customer@123\"}"
             },
             "url": {"raw": "{{base_url}}/auth/login", "host": ["{{base_url}}"], "path": ["auth", "login"]}
+          }
+        },
+        {
+          "name": "Invalid Login Credentials (Negative Test)",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\": \"admin@shopsense.com\", \"password\": \"WrongPassword!\"}"
+            },
+            "url": {"raw": "{{base_url}}/auth/login", "host": ["{{base_url}}"], "path": ["auth", "login"]}
+          }
+        },
+        {
+          "name": "Unauthorized Access (No Token Negative Test)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {"raw": "{{base_url}}/api/analytics/revenue", "host": ["{{base_url}}"], "path": ["api", "analytics", "revenue"]}
           }
         }
       ]
     },
     {
-      "name": "Milestone 3 - Analytics Services",
+      "name": "Core E-Commerce & Inventory",
       "item": [
         {
-          "name": "Advanced Revenue Analytics",
+          "name": "Get Products Catalog",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{admin_token}}"}],
+            "url": {"raw": "{{base_url}}/api/products", "host": ["{{base_url}}"], "path": ["api", "products"]}
+          }
+        },
+        {
+          "name": "Get Vendors List",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{admin_token}}"}],
+            "url": {"raw": "{{base_url}}/api/vendors", "host": ["{{base_url}}"], "path": ["api", "vendors"]}
+          }
+        },
+        {
+          "name": "Get Inventory Stock & Warehouses",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{admin_token}}"}],
+            "url": {"raw": "{{base_url}}/api/inventory", "host": ["{{base_url}}"], "path": ["api", "inventory"]}
+          }
+        },
+        {
+          "name": "Get Low-Stock Shortage Alerts",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{admin_token}}"}],
+            "url": {"raw": "{{base_url}}/api/inventory/alerts", "host": ["{{base_url}}"], "path": ["api", "inventory", "alerts"]}
+          }
+        },
+        {
+          "name": "Get Inventory Turnover Analytics",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{admin_token}}"}],
+            "url": {"raw": "{{base_url}}/api/inventory/turnover", "host": ["{{base_url}}"], "path": ["api", "inventory", "turnover"]}
+          }
+        },
+        {
+          "name": "Get Transactions History",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{admin_token}}"}],
+            "url": {"raw": "{{base_url}}/api/transactions", "host": ["{{base_url}}"], "path": ["api", "transactions"]}
+          }
+        }
+      ]
+    },
+    {
+      "name": "Business Intelligence & Analytics",
+      "item": [
+        {
+          "name": "Advanced Revenue Analytics & GMV",
           "request": {
             "method": "GET",
             "header": [{"key": "Authorization", "value": "Bearer {{admin_token}}"}],
@@ -100,10 +173,10 @@
       ]
     },
     {
-      "name": "Milestone 3 - MLflow Model Tracking",
+      "name": "AI Model Management & Operations",
       "item": [
         {
-          "name": "Get MLflow Status & Metrics",
+          "name": "Get MLflow Model Status & Registry",
           "request": {
             "method": "GET",
             "header": [{"key": "Authorization", "value": "Bearer {{admin_token}}"}],
@@ -111,7 +184,7 @@
           }
         },
         {
-          "name": "Trigger Model Retraining to MLflow",
+          "name": "Trigger Model Retraining",
           "request": {
             "method": "POST",
             "header": [{"key": "Authorization", "value": "Bearer {{admin_token}}"}],
@@ -121,10 +194,10 @@
       ]
     },
     {
-      "name": "Milestone 3 - Workflow Automation (APScheduler)",
+      "name": "Automation & Monitoring (APScheduler)",
       "item": [
         {
-          "name": "Get Workflow Scheduler Status",
+          "name": "Get Automation Pipeline Status",
           "request": {
             "method": "GET",
             "header": [{"key": "Authorization", "value": "Bearer {{admin_token}}"}],
@@ -132,7 +205,7 @@
           }
         },
         {
-          "name": "Trigger Workflow Manually",
+          "name": "Trigger Automated Workflow Manually",
           "request": {
             "method": "POST",
             "header": [{"key": "Authorization", "value": "Bearer {{admin_token}}"}],
@@ -142,7 +215,7 @@
       ]
     },
     {
-      "name": "Milestone 3 - Report Generation",
+      "name": "Reports & Exports",
       "item": [
         {
           "name": "Download PDF Report (Revenue)",

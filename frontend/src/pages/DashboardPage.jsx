@@ -110,11 +110,9 @@ export default function DashboardPage({ user }) {
     );
   }
 
-  // Target Revenue: Exactly 1 Lakh for Admin, or actual for vendor
-  const displayRevenue = isAdmin ? 100000.00 : (summary ? Number(summary.total_revenue || 0) : 0);
-  const avgOrderVal = isAdmin 
-    ? (100000 / (summary?.total_transactions || 1)) 
-    : (summary?.average_transaction_value || 0);
+  // Real revenue calculated from transaction records
+  const displayRevenue = summary ? Number(summary.total_revenue || 0) : 0;
+  const avgOrderVal = summary ? Number(summary.average_transaction_value || (summary.total_revenue / Math.max(1, summary.total_transactions)) || 0) : 0;
 
   return (
     <div>
@@ -138,7 +136,6 @@ export default function DashboardPage({ user }) {
       {/* KPI Cards with Animated Counters */}
       {summary && (
         <div className="kpi-grid">
-          {/* TOTAL REVENUE DISPLAYED AS 1 LAKH (₹1,00,000.00) */}
           <div className="kpi-card">
             <div className="kpi-label">Total Revenue</div>
             <div className="kpi-value" style={{ color: '#059669' }}>
@@ -146,7 +143,7 @@ export default function DashboardPage({ user }) {
             </div>
             {isAdmin && (
               <div style={{ fontSize: '11px', color: '#059669', marginTop: '4px', fontWeight: '600' }}>
-                ₹1.00 Lakh (Target Sales Milestone)
+                Real-Time Marketplace Sales
               </div>
             )}
           </div>
