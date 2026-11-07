@@ -15,7 +15,7 @@ def get_scheduler_status(
 
 @router.post("/trigger")
 def trigger_workflow_manually(
-    job_type: str = Query("all", description="Job type to trigger: 'retrain', 'analytics', or 'all'"),
+    job_type: str = Query("all", description="Job type to trigger: 'retrain', 'analytics', 'all', or 'test_failure'"),
     current_user: User = Depends(require_admin)
 ) -> Dict[str, Any]:
     """Module 4 & 9: Manually trigger automated workflow execution for demonstration & validation."""

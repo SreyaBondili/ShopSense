@@ -5,7 +5,7 @@ import { AreaChart, BarChart, DonutChart } from '../components/Charts';
 import {
   Download, BarChart2, TrendingUp, Users, Package, BrainCircuit,
   Target, RefreshCw, FileText, FileSpreadsheet, PlayCircle, Layers,
-  Activity, CheckCircle2, Clock, ShieldCheck, ChevronRight, Boxes
+  Activity, CheckCircle2, Clock, ShieldCheck, ChevronRight, Boxes, AlertCircle
 } from 'lucide-react';
 
 export default function AnalyticsPage({ user }) {
@@ -23,6 +23,7 @@ export default function AnalyticsPage({ user }) {
   const [inventoryTurnover, setInventoryTurnover] = useState(null);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
+  const [triggeringJob, setTriggeringJob] = useState(null);
   const [error, setError] = useState('');
   const [actionMessage, setActionMessage] = useState('');
   const [showDiagnostics, setShowDiagnostics] = useState(false);
@@ -101,16 +102,20 @@ export default function AnalyticsPage({ user }) {
 
   const handleTriggerWorkflow = async (jobType = 'all') => {
     setActionLoading(true);
+    setTriggeringJob(jobType);
     setActionMessage('');
+    setError('');
     try {
       const res = await api.triggerSchedulerJob(jobType);
-      setActionMessage(`✓ Automated workflow triggered: ${res.message || 'Pipeline tasks executed successfully.'}`);
+      const msg = res.message || 'Pipeline tasks executed successfully.';
+      setActionMessage(`✓ Automated workflow triggered: ${msg}`);
       const updatedSched = await api.getSchedulerStatus();
       setSchedulerStatus(updatedSched);
     } catch (err) {
       setError(err.message || 'Failed to trigger workflow.');
     } finally {
       setActionLoading(false);
+      setTriggeringJob(null);
     }
   };
 
@@ -895,7 +900,8 @@ export default function AnalyticsPage({ user }) {
               <div className="kpi-grid" style={{ marginBottom: '20px' }}>
                 <div className="kpi-card">
                   <div className="kpi-label">Automation Pipeline</div>
-                  <div className="kpi-value" style={{ color: '#059669', fontSize: '20px' }}>
+                  <div className="kpi-value" style={{ color: '#059669', fontSize: '20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span style={{ display: 'inline-block', width: '10px', height: '10px', borderRadius: '50%', background: '#10B981' }}></span>
                     {schedulerStatus.scheduler_status?.toUpperCase() || 'RUNNING'}
                   </div>
                   <div style={{ fontSize: '11px', color: '#059669', marginTop: '3px', fontWeight: '600' }}>
@@ -905,16 +911,18 @@ export default function AnalyticsPage({ user }) {
 
                 <div className="kpi-card">
                   <div className="kpi-label">Pipeline Reliability Rate</div>
-                  <div className="kpi-value" style={{ color: '#059669' }}>
+                  <div className="kpi-value" style={{ color: (schedulerStatus.reliability_success_rate ?? 100) >= 95 ? '#059669' : '#DC2626' }}>
                     <AnimatedCounter
-                      value={schedulerStatus.reliability_success_rate || 100}
+                      value={schedulerStatus.reliability_success_rate ?? 100}
                       suffix="%"
                       decimals={1}
                       duration={1200}
                     />
                   </div>
-                  <div style={{ fontSize: '11px', color: '#059669', marginTop: '3px', fontWeight: '600' }}>
-                    Zero Failures Recorded (100% Uptime)
+                  <div style={{ fontSize: '11px', color: (schedulerStatus.failed_jobs_count ?? 0) === 0 ? '#059669' : '#DC2626', marginTop: '3px', fontWeight: '600' }}>
+                    {(schedulerStatus.failed_jobs_count ?? 0) === 0
+                      ? 'Zero Failures Recorded (100% Uptime)'
+                      : `${schedulerStatus.failed_jobs_count} Failure(s) Recorded (${schedulerStatus.reliability_success_rate}% Reliability)`}
                   </div>
                 </div>
 
@@ -922,27 +930,27 @@ export default function AnalyticsPage({ user }) {
                   <div className="kpi-label">Total Jobs Executed</div>
                   <div className="kpi-value" style={{ color: '#6366F1' }}>
                     <AnimatedCounter
-                      value={schedulerStatus.total_jobs_executed || 0}
+                      value={schedulerStatus.total_jobs_executed ?? 0}
                       duration={1000}
                     />
                   </div>
                   <div style={{ fontSize: '11px', color: '#64748B', marginTop: '3px' }}>
-                    Recurring Analytical Workflows
+                    {schedulerStatus.successful_jobs_count ?? 0} Successful • {schedulerStatus.failed_jobs_count ?? 0} Failed
                   </div>
                 </div>
 
                 <div className="kpi-card">
                   <div className="kpi-label">Active Schedule Policies</div>
                   <div className="kpi-value" style={{ color: '#4F46E5', fontSize: '20px' }}>
-                    {schedulerStatus.scheduled_jobs?.length || 2} Policies
+                    {schedulerStatus.schedule_policies?.length || 3} Configured
                   </div>
                   <div style={{ fontSize: '11px', color: '#64748B', marginTop: '3px' }}>
-                    Interval: Every 2 Hours • Daily: 02:00 AM
+                    Interval & Cron Schedules Active
                   </div>
                 </div>
               </div>
 
-              {/* Action Banner: Pipeline Execution */}
+              {/* Action Banner: Pipeline Execution Controller */}
               <div className="card" style={{ padding: '24px', marginBottom: '20px', background: '#FAFAFF', border: '1px solid #E0E7FF' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
                   <div>
@@ -951,17 +959,18 @@ export default function AnalyticsPage({ user }) {
                       Analytical Workflow Automation Controller
                     </h3>
                     <p style={{ margin: '4px 0 0', fontSize: '12px', color: '#64748B' }}>
-                      Automatically executes data extraction, model retraining, valuation updates, and reporting tasks
+                      Executes demand forecast retraining, turnover analytics refresh, and performance evaluation pipelines.
                     </p>
                   </div>
-                  <div style={{ display: 'flex', gap: '8px' }}>
+                  <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                     <button
                       className="btn btn-secondary"
                       onClick={() => handleTriggerWorkflow('retrain')}
                       disabled={actionLoading}
-                      style={{ fontSize: '12px' }}
+                      style={{ fontSize: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}
                     >
-                      Run Model Refresh
+                      <RefreshCw size={14} className={triggeringJob === 'retrain' ? 'spin' : ''} />
+                      {triggeringJob === 'retrain' ? 'Refreshing Model...' : 'Run Model Refresh'}
                     </button>
                     <button
                       className="btn btn-primary"
@@ -969,17 +978,84 @@ export default function AnalyticsPage({ user }) {
                       disabled={actionLoading}
                       style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px' }}
                     >
-                      <PlayCircle size={14} /> Execute Full Workflow
+                      <PlayCircle size={14} className={triggeringJob === 'all' ? 'spin' : ''} />
+                      {triggeringJob === 'all' ? 'Executing Full Pipeline...' : 'Execute Full Workflow'}
                     </button>
                   </div>
                 </div>
+
+                {/* Inline Action Feedback */}
+                {actionLoading && (
+                  <div style={{ marginTop: '12px', padding: '10px 14px', background: '#EFF6FF', border: '1px solid #BFDBFE', borderRadius: '6px', color: '#1D4ED8', fontSize: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <RefreshCw size={14} className="spin" />
+                    <span>Executing backend analytical workflow... Results will appear in the audit log upon completion.</span>
+                  </div>
+                )}
+                {actionMessage && !actionLoading && (
+                  <div style={{ marginTop: '12px', padding: '10px 14px', background: '#ECFDF5', border: '1px solid #10B981', borderRadius: '6px', color: '#065F46', fontSize: '12px' }}>
+                    <span>{actionMessage}</span>
+                  </div>
+                )}
+                {error && !actionLoading && (
+                  <div style={{ marginTop: '12px', padding: '10px 14px', background: '#FEF2F2', border: '1px solid #FECACA', borderRadius: '6px', color: '#991B1B', fontSize: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <AlertCircle size={14} color="#DC2626" />
+                    <span>{error}</span>
+                  </div>
+                )}
               </div>
 
-              {/* Execution Audit History Table */}
-              <div className="card" style={{ padding: '24px' }}>
+              {/* Active Schedule Policies Card (Mentor Requirement 2) */}
+              <div className="card" style={{ padding: '24px', marginBottom: '20px' }}>
                 <div className="card-title" style={{ marginBottom: '16px' }}>
-                  <CheckCircle2 size={18} color="#059669" />
-                  <span>Pipeline Execution Audit Log</span>
+                  <Clock size={18} color="#4F46E5" />
+                  <span>Configured Automation Policies & Recurring Schedules</span>
+                </div>
+                <div className="table-container">
+                  <table className="table">
+                    <thead>
+                      <tr>
+                        <th>Policy Job Name</th>
+                        <th>Frequency / Cadence</th>
+                        <th>Trigger Type</th>
+                        <th>Last Run Time</th>
+                        <th>Next Run Time</th>
+                        <th>Policy Status</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {(schedulerStatus.schedule_policies || [
+                        { job_name: 'Inventory Demand Retrain Pipeline', frequency: 'Every 2 Hours', trigger_type: 'IntervalTrigger (hours=2)', last_run: 'Initialized', next_run: 'Calculating...', status: 'ACTIVE' },
+                        { job_name: 'Daily Scheduled Model Refresh (02:00 AM)', frequency: 'Daily at 02:00 AM', trigger_type: 'CronTrigger (hour=2, minute=0)', last_run: 'Scheduled at 02:00 AM', next_run: '02:00 AM Tomorrow', status: 'ACTIVE' },
+                        { job_name: 'Marketplace Analytics Refresh', frequency: 'Every 30 Minutes', trigger_type: 'IntervalTrigger (minutes=30)', last_run: 'Initialized', next_run: 'Calculating...', status: 'ACTIVE' }
+                      ]).map((pol, pIdx) => (
+                        <tr key={pIdx}>
+                          <td style={{ fontWeight: '600', color: '#1E293B' }}>{pol.job_name}</td>
+                          <td style={{ color: '#4F46E5', fontWeight: '500' }}>{pol.frequency}</td>
+                          <td style={{ fontSize: '12px', color: '#64748B' }}>{pol.trigger_type}</td>
+                          <td style={{ fontSize: '12px', color: '#64748B' }}>{pol.last_run || 'Pending'}</td>
+                          <td style={{ fontSize: '12px', color: '#10B981', fontWeight: '500' }}>{pol.next_run || 'Scheduled'}</td>
+                          <td>
+                            <span className="badge badge-success" style={{ fontSize: '11px', background: '#ECFDF5', color: '#059669', border: '1px solid #A7F3D0' }}>
+                              {pol.status || 'ACTIVE'}
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              {/* Execution Audit History Table (Requirements 1, 3, 5, 6) */}
+              <div className="card" style={{ padding: '24px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                  <div className="card-title" style={{ margin: 0 }}>
+                    <CheckCircle2 size={18} color="#059669" />
+                    <span>Pipeline Execution Audit Log</span>
+                  </div>
+                  <span style={{ fontSize: '12px', color: '#64748B' }}>
+                    {schedulerStatus.execution_history?.length || 0} Records Stored
+                  </span>
                 </div>
                 <div className="table-container">
                   <table className="table">
@@ -994,26 +1070,57 @@ export default function AnalyticsPage({ user }) {
                       </tr>
                     </thead>
                     <tbody>
-                      {schedulerStatus.execution_history?.map((e, idx) => (
-                        <tr key={idx}>
-                          <td style={{ fontWeight: '600', color: '#1E293B' }}>{e.job_name}</td>
-                          <td>
-                            <span className="badge badge-secondary" style={{ fontSize: '11px' }}>
-                              {e.trigger_type}
-                            </span>
-                          </td>
-                          <td style={{ fontSize: '12px', color: '#64748B' }}>{e.timestamp}</td>
-                          <td style={{ fontSize: '12px', color: '#1E293B' }}>{e.duration_seconds}s</td>
-                          <td>
-                            <span className="badge badge-success" style={{ fontSize: '11px' }}>
-                              {e.status}
-                            </span>
-                          </td>
-                          <td style={{ fontSize: '12px', color: '#64748B' }}>
-                            {typeof e.result === 'object' ? JSON.stringify(e.result).slice(0, 50) + '...' : String(e.result || 'Executed successfully')}
-                          </td>
-                        </tr>
-                      ))}
+                      {schedulerStatus.execution_history?.map((e, idx) => {
+                        const execType = e.execution_type || e.trigger_type || 'Scheduled';
+                        const isManual = execType.toLowerCase() === 'manual';
+                        const isSuccess = e.status?.toUpperCase() === 'SUCCESS';
+                        const summaryText = e.operation_summary || e.details || e.result || 'Executed successfully';
+
+                        return (
+                          <tr key={idx}>
+                            <td style={{ fontWeight: '600', color: '#1E293B' }}>{e.job_name}</td>
+                            <td>
+                              <span
+                                className="badge"
+                                style={{
+                                  fontSize: '11px',
+                                  fontWeight: '600',
+                                  padding: '3px 8px',
+                                  borderRadius: '12px',
+                                  background: isManual ? '#EEF2FF' : '#F8FAFC',
+                                  color: isManual ? '#4F46E5' : '#475569',
+                                  border: isManual ? '1px solid #C7D2FE' : '1px solid #E2E8F0'
+                                }}
+                              >
+                                {isManual ? 'Manual' : 'Scheduled'}
+                              </span>
+                            </td>
+                            <td style={{ fontSize: '12px', color: '#64748B' }}>{e.timestamp}</td>
+                            <td style={{ fontSize: '12px', color: '#1E293B', fontWeight: '500' }}>
+                              {e.duration_seconds}s
+                            </td>
+                            <td>
+                              <span
+                                className="badge"
+                                style={{
+                                  fontSize: '11px',
+                                  fontWeight: '600',
+                                  padding: '3px 8px',
+                                  borderRadius: '12px',
+                                  background: isSuccess ? '#ECFDF5' : '#FEF2F2',
+                                  color: isSuccess ? '#059669' : '#DC2626',
+                                  border: isSuccess ? '1px solid #A7F3D0' : '1px solid #FECACA'
+                                }}
+                              >
+                                {e.status}
+                              </span>
+                            </td>
+                            <td style={{ fontSize: '12px', color: '#334155', maxWidth: '420px', lineHeight: '1.4' }} title={summaryText}>
+                              {summaryText}
+                            </td>
+                          </tr>
+                        );
+                      })}
                     </tbody>
                   </table>
                 </div>
