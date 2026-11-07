@@ -58,7 +58,8 @@ def generate_demand_forecast(
                 "target_achieved": False
             },
             "history": [],
-            "forecast": []
+            "forecast": [],
+            "predictions": []
         }
 
     # 2. Build Daily Demand Time Series
@@ -191,5 +192,6 @@ def generate_demand_forecast(
             "evaluation_method": "Held-Out 80/20 Test Split with WAPE Accuracy (Mentor Specification Step 9)"
         },
         "history": history_series,
-        "forecast": future_forecast
+        "forecast": future_forecast,
+        "predictions": future_forecast
     }

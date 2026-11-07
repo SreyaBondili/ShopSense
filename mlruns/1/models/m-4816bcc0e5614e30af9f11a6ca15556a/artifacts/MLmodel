@@ -1,0 +1,23 @@
+artifact_path: file:C:/Users/Dell/.gemini/antigravity/scratch/ShopSense/mlruns/1/models/m-4816bcc0e5614e30af9f11a6ca15556a/artifacts
+flavors:
+  python_function:
+    env:
+      conda: conda.yaml
+      virtualenv: python_env.yaml
+    loader_module: mlflow.sklearn
+    model_path: model.pkl
+    predict_fn: predict
+    python_version: 3.13.4
+  sklearn:
+    code: null
+    pickled_model: model.pkl
+    serialization_format: pickle
+    sklearn_version: 1.9.1
+    skops_trusted_types: null
+mlflow_version: 3.18.0
+model_id: m-4816bcc0e5614e30af9f11a6ca15556a
+model_size_bytes: 495236
+model_uuid: m-4816bcc0e5614e30af9f11a6ca15556a
+prompts: null
+run_id: 367ee46f275d41f69144eb663896c717
+utc_time_created: '2026-11-07 06:36:26.507950'

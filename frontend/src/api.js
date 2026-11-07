@@ -220,4 +220,51 @@ export const api = {
       body: JSON.stringify(data),
     });
   },
+
+  // Milestone 3: Advanced Revenue & Benchmarking
+  async getAdvancedRevenue(vendorId = null) {
+    const q = vendorId ? `?vendor_id=${vendorId}` : '';
+    return this.request(`/api/analytics/revenue${q}`);
+  },
+
+  // Milestone 3: MLflow Model Tracking & Operations
+  async getMLflowStatus() {
+    return this.request('/api/analytics/mlflow-status');
+  },
+
+  async retrainMLflowModel() {
+    return this.request('/api/analytics/mlflow-retrain', {
+      method: 'POST',
+    });
+  },
+
+  // Milestone 3: Workflow Automation & APScheduler
+  async getSchedulerStatus() {
+    return this.request('/api/scheduler/status');
+  },
+
+  async triggerSchedulerJob(jobType = 'all') {
+    return this.request(`/api/scheduler/trigger?job_type=${encodeURIComponent(jobType)}`, {
+      method: 'POST',
+    });
+  },
+
+  // Milestone 3: Report Downloads (PDF & Excel)
+  async downloadReport(reportType = 'revenue', format = 'pdf') {
+    const token = localStorage.getItem('shopsense_token');
+    const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
+    const res = await fetch(`/api/reports/${format}?type=${encodeURIComponent(reportType)}`, { headers });
+    if (!res.ok) {
+      throw new Error(`Failed to download ${format.toUpperCase()} report: ${res.statusText}`);
+    }
+    const blob = await res.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `ShopSense_${reportType}_Report.${format === 'pdf' ? 'pdf' : 'xlsx'}`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    window.URL.revokeObjectURL(url);
+  },
 };

@@ -9,11 +9,35 @@ from app.schemas.analytics import (
     RevenueTrendItem,
     CategoryPerformanceItem,
 )
-from app.services import analytics_service, customer_analytics_service
-from app.utils.security import get_current_active_user
+from app.services import analytics_service, customer_analytics_service, revenue_service, mlflow_service
+from app.utils.security import get_current_active_user, require_admin
 from app.models.user import User
 
 router = APIRouter(prefix="/api/analytics", tags=["Analytics"])
+
+@router.get("/revenue")
+def get_advanced_revenue_metrics(
+    vendor_id: Optional[int] = Query(None, description="Optional vendor filter for Admin"),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user)
+):
+    """Milestone 3 Module 2: Advanced revenue analysis, GMV, growth %, vendor/product rankings, and profit/loss."""
+    return revenue_service.get_advanced_revenue_analysis(db, current_user, vendor_id)
+
+@router.get("/mlflow-status")
+def get_mlflow_tracking_status(
+    current_user: User = Depends(get_current_active_user)
+):
+    """Milestone 3 Module 3: Retrieve MLflow model tracking, metrics, and registered models."""
+    return mlflow_service.get_mlflow_status()
+
+@router.post("/mlflow-retrain")
+def retrain_mlflow_model(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_admin)
+):
+    """Milestone 3 Module 3: Trigger model retraining and log run to MLflow Model Registry."""
+    return mlflow_service.train_and_log_inventory_model(db, run_notes=f"Retrained by {current_user.email}")
 
 @router.get("/summary", response_model=MarketplaceSummary)
 def get_analytics_summary(

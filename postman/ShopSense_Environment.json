@@ -1,0 +1,26 @@
+{
+  "id": "shopsense-milestone3-environment",
+  "name": "ShopSense Local Environment",
+  "values": [
+    {
+      "key": "base_url",
+      "value": "http://127.0.0.1:8000",
+      "enabled": true
+    },
+    {
+      "key": "admin_token",
+      "value": "",
+      "enabled": true
+    },
+    {
+      "key": "vendor_token",
+      "value": "",
+      "enabled": true
+    },
+    {
+      "key": "customer_token",
+      "value": "",
+      "enabled": true
+    }
+  ]
+}

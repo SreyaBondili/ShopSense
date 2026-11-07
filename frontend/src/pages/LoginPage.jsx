@@ -6,13 +6,28 @@ import {
 } from 'lucide-react';
 
 export default function LoginPage({ onLoginSuccess }) {
-  // Three portal roles in the requested format: 'admin', 'vendor', 'customer'
-  const [activePortal, setActivePortal] = useState('admin');
+  // Read portal from URL query or default to 'admin'
+  const getInitialPortal = () => {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const p = (params.get('portal') || params.get('role') || '').toLowerCase();
+      if (['admin', 'vendor', 'customer'].includes(p)) return p;
+    } catch (e) {}
+    return 'admin';
+  };
+
+  const [activePortal, setActivePortal] = useState(getInitialPortal);
   const [mode, setMode] = useState('login'); // 'login' or 'register'
 
   // Form input states
-  const [email, setEmail] = useState('bsreya1610@gmail.com');
-  const [password, setPassword] = useState('Admin@123');
+  const [email, setEmail] = useState(() => {
+    const initP = getInitialPortal();
+    return initP === 'admin' ? 'bsreya1610@gmail.com' : '';
+  });
+  const [password, setPassword] = useState(() => {
+    const initP = getInitialPortal();
+    return initP === 'admin' ? 'Admin@123' : '';
+  });
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [successMsg, setSuccessMsg] = useState('');

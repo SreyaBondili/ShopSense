@@ -1,0 +1,206 @@
+{
+  "info": {
+    "name": "ShopSense Milestone 3 API Collection",
+    "description": "Comprehensive Postman collection for ShopSense Milestone 3: Advanced Analytics, MLflow Model Tracking, APScheduler Workflow Automation, and Report Generation.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Authentication & Roles",
+      "item": [
+        {
+          "name": "Admin Login",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\": \"bsreya1610@gmail.com\", \"password\": \"Admin@123\"}"
+            },
+            "url": {"raw": "{{base_url}}/auth/login", "host": ["{{base_url}}"], "path": ["auth", "login"]}
+          }
+        },
+        {
+          "name": "Vendor Login",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\": \"techvendor@example.com\", \"password\": \"Vendor@123\"}"
+            },
+            "url": {"raw": "{{base_url}}/auth/login", "host": ["{{base_url}}"], "path": ["auth", "login"]}
+          }
+        },
+        {
+          "name": "Customer Login",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\": \"customer@example.com\", \"password\": \"Customer@123\"}"
+            },
+            "url": {"raw": "{{base_url}}/auth/login", "host": ["{{base_url}}"], "path": ["auth", "login"]}
+          }
+        }
+      ]
+    },
+    {
+      "name": "Milestone 3 - Analytics Services",
+      "item": [
+        {
+          "name": "Advanced Revenue Analytics",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{admin_token}}"}],
+            "url": {"raw": "{{base_url}}/api/analytics/revenue", "host": ["{{base_url}}"], "path": ["api", "analytics", "revenue"]}
+          }
+        },
+        {
+          "name": "Vendor Performance Leaderboard",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{admin_token}}"}],
+            "url": {"raw": "{{base_url}}/api/analytics/vendor-performance", "host": ["{{base_url}}"], "path": ["api", "analytics", "vendor-performance"]}
+          }
+        },
+        {
+          "name": "Customer Purchasing Behavior",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{admin_token}}"}],
+            "url": {"raw": "{{base_url}}/api/analytics/customers", "host": ["{{base_url}}"], "path": ["api", "analytics", "customers"]}
+          }
+        },
+        {
+          "name": "Customer Segmentation (K-Means)",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{admin_token}}"}],
+            "url": {"raw": "{{base_url}}/api/analytics/segments", "host": ["{{base_url}}"], "path": ["api", "analytics", "segments"]}
+          }
+        },
+        {
+          "name": "Inventory Demand Forecast",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{admin_token}}"}],
+            "url": {"raw": "{{base_url}}/api/inventory/forecast?horizon=14", "host": ["{{base_url}}"], "path": ["api", "inventory", "forecast"]}
+          }
+        },
+        {
+          "name": "Personalized Recommendations",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{customer_token}}"}],
+            "url": {"raw": "{{base_url}}/api/recommendations?limit=5", "host": ["{{base_url}}"], "path": ["api", "recommendations"]}
+          }
+        }
+      ]
+    },
+    {
+      "name": "Milestone 3 - MLflow Model Tracking",
+      "item": [
+        {
+          "name": "Get MLflow Status & Metrics",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{admin_token}}"}],
+            "url": {"raw": "{{base_url}}/api/analytics/mlflow-status", "host": ["{{base_url}}"], "path": ["api", "analytics", "mlflow-status"]}
+          }
+        },
+        {
+          "name": "Trigger Model Retraining to MLflow",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Authorization", "value": "Bearer {{admin_token}}"}],
+            "url": {"raw": "{{base_url}}/api/analytics/mlflow-retrain", "host": ["{{base_url}}"], "path": ["api", "analytics", "mlflow-retrain"]}
+          }
+        }
+      ]
+    },
+    {
+      "name": "Milestone 3 - Workflow Automation (APScheduler)",
+      "item": [
+        {
+          "name": "Get Workflow Scheduler Status",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{admin_token}}"}],
+            "url": {"raw": "{{base_url}}/api/scheduler/status", "host": ["{{base_url}}"], "path": ["api", "scheduler", "status"]}
+          }
+        },
+        {
+          "name": "Trigger Workflow Manually",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Authorization", "value": "Bearer {{admin_token}}"}],
+            "url": {"raw": "{{base_url}}/api/scheduler/trigger?job_type=all", "host": ["{{base_url}}"], "path": ["api", "scheduler", "trigger"]}
+          }
+        }
+      ]
+    },
+    {
+      "name": "Milestone 3 - Report Generation",
+      "item": [
+        {
+          "name": "Download PDF Report (Revenue)",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{admin_token}}"}],
+            "url": {"raw": "{{base_url}}/api/reports/pdf?type=revenue", "host": ["{{base_url}}"], "path": ["api", "reports", "pdf"]}
+          }
+        },
+        {
+          "name": "Download Excel Report (Revenue)",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{admin_token}}"}],
+            "url": {"raw": "{{base_url}}/api/reports/excel?type=revenue", "host": ["{{base_url}}"], "path": ["api", "reports", "excel"]}
+          }
+        }
+      ]
+    },
+    {
+      "name": "Mentor Reference Compatibility Endpoints",
+      "item": [
+        {
+          "name": "Direct Revenue Analytics",
+          "request": {
+            "method": "GET",
+            "url": {"raw": "{{base_url}}/analytics/revenue", "host": ["{{base_url}}"], "path": ["analytics", "revenue"]}
+          }
+        },
+        {
+          "name": "Direct Vendor Performance",
+          "request": {
+            "method": "GET",
+            "url": {"raw": "{{base_url}}/analytics/vendor-performance", "host": ["{{base_url}}"], "path": ["analytics", "vendor-performance"]}
+          }
+        },
+        {
+          "name": "Direct Customer Analytics",
+          "request": {
+            "method": "GET",
+            "url": {"raw": "{{base_url}}/analytics/customers", "host": ["{{base_url}}"], "path": ["analytics", "customers"]}
+          }
+        },
+        {
+          "name": "Direct Demand Forecast",
+          "request": {
+            "method": "GET",
+            "url": {"raw": "{{base_url}}/forecast/2026-11", "host": ["{{base_url}}"], "path": ["forecast", "2026-11"]}
+          }
+        },
+        {
+          "name": "Direct Customer Recommendation",
+          "request": {
+            "method": "GET",
+            "url": {"raw": "{{base_url}}/recommend/1", "host": ["{{base_url}}"], "path": ["recommend", "1"]}
+          }
+        }
+      ]
+    }
+  ]
+}
