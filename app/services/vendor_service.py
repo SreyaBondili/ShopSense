@@ -20,7 +20,7 @@ def create_vendor(db: Session, data: VendorCreate, current_user: User) -> Vendor
     errors = validate_vendor_registration(payload)
     if errors:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=422,
             detail={"errors": errors}
         )
 
@@ -77,6 +77,11 @@ def get_vendors(
     category: Optional[str] = None,
     vendor_status: Optional[str] = None
 ) -> List[Vendor]:
+    if current_user.role not in [UserRole.ADMIN, UserRole.VENDOR]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Access forbidden: customer role is not authorized to view vendor list."
+        )
     query = db.query(Vendor)
 
     # Role-based restriction: Vendors can only view their own vendor record
@@ -101,6 +106,11 @@ def get_vendors(
     return query.order_by(Vendor.vendor_id.asc()).all()
 
 def get_vendor_by_id(db: Session, vendor_id: int, current_user: User) -> Vendor:
+    if current_user.role not in [UserRole.ADMIN, UserRole.VENDOR]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Access forbidden: customer role is not authorized to view vendor details."
+        )
     vendor = db.query(Vendor).filter(Vendor.vendor_id == vendor_id).first()
     if not vendor:
         raise HTTPException(
@@ -160,7 +170,7 @@ def update_vendor(db: Session, vendor_id: int, data: VendorUpdate, current_user:
 
     if field_errors:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=422,
             detail={"errors": field_errors}
         )
 

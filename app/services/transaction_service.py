@@ -17,7 +17,7 @@ def create_transaction(
     # 1. Verify quantity > 0
     if data.quantity <= 0:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=422,
             detail="Transaction quantity must be strictly greater than zero."
         )
 

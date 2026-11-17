@@ -7,8 +7,8 @@ NAME_REGEX = re.compile(r"^[a-zA-Z\s\.\-']{2,120}$")
 BUSINESS_NAME_REGEX = re.compile(r"^[a-zA-Z0-9\s\.\&\'\-\,\(\)]{2,150}$")
 
 VALID_CATEGORIES = {
-    "Electronics", "Fashion", "Books", "Home & Kitchen", "Beauty & Personal Care",
-    "Sports & Fitness", "Automotive", "Toys & Games", "Health & Wellness", "Grocery"
+    "General", "Electronics", "Fashion", "Books", "Home & Kitchen", "Beauty & Personal Care",
+    "Sports & Fitness", "Automotive", "Toys & Games", "Health & Wellness", "Grocery", "Other"
 }
 
 def validate_email_format(email: str) -> Tuple[bool, str]:

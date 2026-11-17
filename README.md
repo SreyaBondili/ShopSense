@@ -1,207 +1,144 @@
-# ShopSense – Multi-Vendor E-Commerce Analytics Platform
+# ShopSense — Multi-Vendor E-Commerce Analytics Platform (Milestone 3)
 
-
-ShopSense is a multi-vendor e-commerce analytics platform designed to help marketplace administrators and individual vendors track sales, manage inventory, and analyze business performance in real time.
-
-This repository contains the complete implementation for **Milestone 1**, which covers vendor onboarding, product catalog management, real-time stock and inventory tracking, transaction processing, and live interactive analytics dashboards.
+ShopSense is an enterprise-grade multi-vendor e-commerce intelligence and analytics platform designed to empower marketplace administrators, individual vendors, and customers with real-time operational metrics, predictive ML models, automated pipelines, and strict Role-Based Access Control (RBAC).
 
 ---
 
-## Project Overview
+## 🌟 Milestone 3 Capabilities & Targets
 
-In a typical multi-vendor marketplace, managing different sellers, dynamic stock levels, and daily sales numbers across categories can get complicated quickly. ShopSense solves this by separating the concerns into a high-performance **FastAPI REST backend** paired with an interactive **Streamlit dashboard** for visualization.
-
-### What Milestone 1 Delivers:
-- **Authentication & RBAC:** Secure JWT-based login with role-based permissions (`ADMIN` and `VENDOR`).
-- **Vendor Onboarding:** Seller registration with validation (business name, category, commission rates, duplicate email prevention) and lifecycle statuses (`PENDING`, `ACTIVE`, `SUSPENDED`).
-- **Product Catalog:** Full catalog management with search, category filtering, and strict vendor isolation.
-- **Inventory Tracking:** Automatic stock synchronization, reorder level alerts, and statuses (`IN STOCK`, `LOW STOCK`, `OUT OF STOCK`).
-- **Transaction Processing:** Atomic order placement that validates stock availability and prevents negative inventory.
-- **Marketplace Analytics:** Dynamic KPI cards, daily sales trends, product category breakdowns, and top seller rankings using Pandas and Plotly.
-
----
-
-## Tech Stack
-
-- **Backend:** Python 3.11+, FastAPI, Uvicorn
-- **Database:** MySQL 8.0, PyMySQL
-- **ORM:** SQLAlchemy 2.0
-- **Frontend Dashboard:** Streamlit, Plotly
-- **Data Analytics:** Pandas
-- **Validation & Security:** Pydantic v2, Bcrypt password hashing, PyJWT
-- **Testing:** Pytest
+| Target Metric | Benchmark Target | Actual Achieved Value | Evaluation Status |
+|---|---|---|---|
+| **API Response Time (p95)** | $\le 300$ ms (under simulated load) | **290 ms** (50 users, 151.8 req/s) | **PASS** ✅ |
+| **Dashboard Consistency** | $\ge 99\%$ | **100.00%** (Admin, Vendor, Customer) | **PASS** ✅ |
+| **Workflow Success Rate** | $= 100\%$ | **100.0%** (100/100 validation runs) | **PASS** ✅ |
+| **Forecasting Accuracy** | $\ge 80\%$ | **85.84%** (WAPE chronological holdout) | **PASS** ✅ |
+| **Segmentation Quality** | $\ge 85\%$ | **88.76%** (Normalized Silhouette + ARI) | **PASS** ✅ |
+| **Recommendation Relevance** | $\ge 75\%$ | **20.65%** (Leave-last-out Hit-Rate@5; $2.44\times$ lift over random) | Documented honestly |
 
 ---
 
-## System Architecture
+## 🏗️ System Architecture
 
-```
-                 +--------------------------+
-                 |  Streamlit Dashboard UI  |
-                 |     (Port: 8501)         |
-                 +------------+-------------+
-                              |
-                     REST API | (JWT Bearer)
-                              v
-                 +--------------------------+
-                 |   FastAPI REST Backend   |
-                 |     (Port: 8000)         |
-                 +------------+-------------+
-                              |
-                    SQLAlchemy ORM
-                              v
-                 +--------------------------+
-                 |   MySQL 8.0 Database     |
-                 |   (Database: shopsense)  |
-                 +--------------------------+
+```mermaid
+flowchart TD
+    subgraph Clients ["Visualization & Client Layer"]
+        ReactSPA["React 18 + Vite SPA\n(:5173 - Tri-Role hash navigation)"]
+        AdminDash["Streamlit Admin Dashboard\n(:8501)"]
+        VendorDash["Streamlit Vendor Dashboard\n(:8502)"]
+        CustDash["Streamlit Customer Portal\n(:8503)"]
+    end
 
-Analytics Flow:
-MySQL Ledger -> SQLAlchemy -> Pandas DataFrames -> Plotly Visuals -> Streamlit
+    subgraph Gateway ["Security Gateway"]
+        RBAC["JWT Bearer Authentication\nrequire_roles('ADMIN','VENDOR','CUSTOMER')"]
+        ObjGate["Object-Level Scoping Engine"]
+    end
+
+    subgraph Backend ["FastAPI REST Service (:8000)"]
+        ECommerce["Products, Vendors, Inventory, Transactions"]
+        Intelligence["Revenue Analytics, Benchmarking, Segments"]
+        MLOps["MLflow Registry, Random Forest Forecasting, Recommender"]
+        Automation["APScheduler (Interval & Cron Jobs)"]
+        Reports["ReportLab PDF & openpyxl Excel Generation"]
+    end
+
+    subgraph Storage ["Persistence"]
+        MySQL[("MySQL 8.0\n(1,184 Transactions | 101 Customers)")]
+        MLflowDB[("MLflow SQLite Store & Artifacts")]
+        HistoryJSON[("scheduler_history.json")]
+    end
+
+    Clients --> Gateway
+    Gateway --> Backend
+    Backend --> Storage
 ```
 
 ---
 
-## Database Schema
-
-The database consists of 5 normalized relational tables:
-
-1. **`users`** – Stores user credentials, hashed passwords, and assigned roles (`ADMIN` or `VENDOR`).
-2. **`vendors`** – Stores vendor business details, contact info, commission rate, and approval status.
-3. **`products`** – Stores product catalog items linked to specific vendors.
-4. **`inventory`** – Tracks current quantity, warehouse location, and reorder levels per product.
-5. **`transactions`** – Immutable log of completed sales orders with item quantities and totals.
-
----
-
-## Getting Started
+## 🚀 Quickstart & Setup Guide
 
 ### 1. Prerequisites
-- Python 3.10 or higher
-- MySQL Server 8.0+ running locally on port `3306`
-- Git
+- Python 3.11+
+- Node.js 18+ (for React frontend)
+- MySQL Server 8.0 running on localhost:3306
 
-### 2. Clone the Repository
+### 2. Virtual Environment & Dependencies
 ```bash
-git clone https://github.com/SreyaBondili/ShopSense.git
+# Clone and enter directory
 cd ShopSense
-```
 
-### 3. Set Up Virtual Environment & Dependencies
-```powershell
-# Create and activate virtual environment
-python -m venv .venv
-.\.venv\Scripts\Activate.ps1
+# Activate virtual environment
+.\.venv\Scripts\activate
 
-# Install requirements
+# Install backend dependencies (if needed)
 pip install -r requirements.txt
 ```
 
-### 4. Configure Environment Variables
-Copy `.env.example` to create your `.env` file:
-```powershell
-Copy-Item .env.example .env
+### 3. Launching the Backend REST API
+```bash
+uvicorn app.main:app --host 127.0.0.1 --port 8000 --reload
 ```
-Open `.env` and set your local MySQL root password:
-```env
-DATABASE_URL=mysql+pymysql://root:YOUR_PASSWORD@localhost:3306/shopsense
-SECRET_KEY=supersecretjwtkey_shopsense_internship_2026_demo_key_min32chars
-ALGORITHM=HS256
-ACCESS_TOKEN_EXPIRE_MINUTES=120
-BACKEND_HOST=127.0.0.1
-BACKEND_PORT=8000
-API_BASE_URL=http://127.0.0.1:8000
+Interactive API documentation is accessible at: `http://127.0.0.1:8000/docs`
+
+### 4. Running the Streamlit BI Dashboards
+```bash
+# Admin Dashboard (Marketplace KPIs, Segmentation, Forecasts, MLflow, Scheduler)
+streamlit run dashboard/admin_dashboard.py --server.port 8501
+
+# Vendor Dashboard (Store-scoped KPIs, Stock alerts, Marketplace benchmarking)
+streamlit run dashboard/vendor_dashboard.py --server.port 8502
+
+# Customer Portal (Personalized collaborative filtering picks, Wishlist, Order history)
+streamlit run dashboard/customer_dashboard.py --server.port 8503
 ```
-*(Note: If your MySQL password has special characters like `@`, URL-encode it, e.g. `%40`)*.
 
-### 5. Initialize Database & Seed Demo Data
-```powershell
-# Create tables in MySQL
-python create_tables.py
+### 5. Running the React + Vite Single Page Application
+```bash
+cd frontend
+npm install
+npm run dev
+```
+Visit `http://localhost:5173` with URL hash navigation (`#/dashboard`, `#/shop`, `#/vendors`, `#/analytics`).
 
-# (Optional) Seed realistic demo records
-python seed_data.py
+---
+
+## 🧪 Automated Testing & Verification
+
+### Run Pytest Suite (73 Tests)
+```bash
+pytest -v
+```
+
+### Run Locust Performance Load Test (50 Concurrent Users)
+```bash
+python scripts/run_locust_load_test.py
+```
+
+### Run 100-Iteration Workflow Automation Validation
+```bash
+python scripts/validate_workflow.py --iterations 100
+```
+
+### Run 28 Postman / Newman Automated Tests
+```bash
+python scripts/run_postman_tests.py
+```
+
+### Run Tri-Role Dashboard Data Consistency Tests
+```bash
+pytest tests/test_dashboard_consistency.py -v -s
 ```
 
 ---
 
-## Running the Project
+## 📚 Technical Documentation Index
 
-You will need **two terminal windows**:
-
-### Terminal 1: Start FastAPI Backend
-```powershell
-python -m uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
-```
-- API Docs (Swagger): [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
-- API Health Check: [http://127.0.0.1:8000/health](http://127.0.0.1:8000/health)
-
-### Terminal 2: Start Streamlit Dashboard
-```powershell
-python -m streamlit run dashboard/dashboard.py
-```
-- Dashboard UI will open at: [http://localhost:8501](http://localhost:8501)
-
----
-
-## Demo Login Credentials
-
-For quick evaluation, use these pre-seeded demo accounts:
-
-| Role | Email | Password | Access Scope |
-|---|---|---|---|
-| **Admin** | `admin@shopsense.com` | `Admin@123` | Full marketplace access (all vendors, products, inventory, transactions & analytics) |
-| **Vendor** | `techworld@example.com` | `Vendor@123` | Apex Electronics (scoped to their own catalog, stock & sales) |
-| **Vendor** | `trendsfashion@example.com` | `Vendor@123` | Aura Fashion Hub |
-| **Vendor** | `bookoasis@example.com` | `Vendor@123` | Book Haven Store |
-
-*(Or register a new account directly from the login page!)*
-
----
-
-## Running Automated Tests
-
-Run the test suite using pytest:
-```powershell
-python -m pytest
-```
-
-All 25 tests pass successfully, covering:
-- Password hashing and JWT generation
-- Duplicate email prevention and input validation
-- Negative price & stock rejection
-- Vendor authorization boundaries (a vendor cannot modify another vendor's goods)
-- Atomic transactions & stock deduction consistency
-- Live aggregation calculations
-
----
-
-## Project Structure
-
-```
-ShopSense/
-├── app/
-│   ├── main.py              # FastAPI app configuration & route mounts
-│   ├── config.py            # Environment variables loader
-│   ├── database.py          # SQLAlchemy engine & session setup
-│   ├── models/              # Database models (User, Vendor, Product, Inventory, Transaction)
-│   ├── schemas/             # Pydantic schemas for request & response validation
-│   ├── routes/              # API endpoints (/auth, /api/vendors, /api/products, etc.)
-│   ├── services/            # Business logic and database queries
-│   └── utils/               # Password hashing & validation utilities
-├── dashboard/
-│   ├── dashboard.py         # Streamlit frontend app
-│   └── api_client.py        # HTTP client interacting with FastAPI
-├── tests/                   # Pytest test cases
-├── create_tables.py         # Table creation script
-├── seed_data.py             # Demo data population script
-├── requirements.txt         # Project dependencies
-├── .env.example             # Sample environment variables
-└── README.md                # Documentation
-```
-
----
-
-## Author
-
-**Sreya Bondili**  
-
+- [docs/architecture.md](docs/architecture.md): Full system architecture diagram and component interaction specifications.
+- [docs/workflow.md](docs/workflow.md): Sequence diagram of customer checkout and automated ML pipelines.
+- [docs/database_schema.md](docs/database_schema.md): Entity-relationship diagram (ERD) of all database tables.
+- [docs/ml_justification.md](docs/ml_justification.md): RandomForest model justification, chronological hold-out evaluation, and feature engineering.
+- [docs/dashboards.md](docs/dashboards.md): Multi-role dashboard guide, chart mapping, and complete RBAC authorization matrix.
+- [docs/milestone3_traceability.md](docs/milestone3_traceability.md): Traceability matrix of all 15 deliverables across Modules 1–9.
+- [docs/evidence/audit.md](docs/evidence/audit.md): Complete baseline security and route audit.
+- [docs/evidence/performance_report.md](docs/evidence/performance_report.md): Locust 50-user load testing report and latency percentiles.
+- [docs/evidence/workflow_validation.md](docs/evidence/workflow_validation.md): 100-iteration workflow pipeline resilience report.
+- [docs/evidence/newman_report.md](docs/evidence/newman_report.md): Postman / Newman 28-test verification report.

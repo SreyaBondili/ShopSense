@@ -239,17 +239,50 @@ export const DonutChart = ({ data, size = 200 }) => {
   }
 
   const colors = ['#6366F1', '#818CF8', '#059669', '#D97706', '#3B82F6', '#8B5CF6', '#14B8A6', '#EC4899'];
-  const total = data.reduce((acc, d) => acc + (Number(d.revenue) || 0), 0) || 1;
+  const rawTotal = data.reduce((acc, d) => acc + (Number(d.revenue) || 0), 0);
+  const total = rawTotal || 1;
 
-  let currentAngle = 0;
   const radius = 65;
   const innerRadius = 40;
   const cx = 100;
   const cy = 100;
 
+  // --- Single-slice fix ---
+  // When there is only one category (or one slice covers 100 %), the SVG arc path
+  // collapses because start-point === end-point. Render two concentric circles instead.
+  if (data.length === 1) {
+    const singleColor = colors[0];
+    const d = data[0];
+    const val = Number(d.revenue) || 0;
+    return (
+      <div style={{ display: 'flex', alignItems: 'center', gap: '20px', flexWrap: 'wrap', justifyContent: 'center' }}>
+        <svg width={size} height={size} viewBox="0 0 200 200">
+          {/* Full outer ring */}
+          <circle cx={cx} cy={cy} r={radius} fill={singleColor} />
+          {/* Inner hole to make it a donut */}
+          <circle cx={cx} cy={cy} r={innerRadius} fill="#FFFFFF" />
+          <text x="100" y="96" textAnchor="middle" fill="#64748B" fontSize="10" fontWeight="600">TOTAL</text>
+          <text x="100" y="112" textAnchor="middle" fill="#1E293B" fontSize="13" fontWeight="800">
+            ₹{val >= 1000 ? `${(val / 1000).toFixed(1)}k` : val.toFixed(0)}
+          </text>
+        </svg>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '11px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span style={{ width: '10px', height: '10px', borderRadius: '3px', background: singleColor, display: 'inline-block' }}></span>
+            <span style={{ color: '#1E293B', minWidth: '85px', fontWeight: '500' }}>{d.category}</span>
+            <span style={{ color: '#64748B', fontWeight: '600' }}>100.0%</span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  let currentAngle = 0;
+
   const slices = data.map((d, i) => {
     const val = Number(d.revenue) || 0;
-    const sliceAngle = (val / total) * 360;
+    // Clamp to 359.99° so even a near-100% slice doesn't collapse
+    const sliceAngle = Math.min((val / total) * 360, 359.99);
     const startAngle = currentAngle;
     const endAngle = currentAngle + sliceAngle;
     currentAngle = endAngle;

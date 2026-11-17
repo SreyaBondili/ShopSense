@@ -1,0 +1,260 @@
+{
+  "total_tests": 28,
+  "passed": 28,
+  "failed": 0,
+  "success_rate_pct": 100.0,
+  "results": [
+    {
+      "folder": "Authentication & Role Security",
+      "name": "Admin Login",
+      "method": "POST",
+      "url": "/auth/login",
+      "status_code": 200,
+      "elapsed_ms": 607.42,
+      "passed": true
+    },
+    {
+      "folder": "Authentication & Role Security",
+      "name": "Vendor Login",
+      "method": "POST",
+      "url": "/auth/login",
+      "status_code": 200,
+      "elapsed_ms": 365.75,
+      "passed": true
+    },
+    {
+      "folder": "Authentication & Role Security",
+      "name": "Customer Login",
+      "method": "POST",
+      "url": "/auth/login",
+      "status_code": 200,
+      "elapsed_ms": 309.28,
+      "passed": true
+    },
+    {
+      "folder": "Authentication & Role Security",
+      "name": "Invalid Login Credentials (Negative Test)",
+      "method": "POST",
+      "url": "/auth/login",
+      "status_code": 401,
+      "elapsed_ms": 6.99,
+      "passed": true
+    },
+    {
+      "folder": "Authentication & Role Security",
+      "name": "Unauthorized Access (No Token Negative Test)",
+      "method": "GET",
+      "url": "/api/analytics/revenue",
+      "status_code": 401,
+      "elapsed_ms": 58.55,
+      "passed": true
+    },
+    {
+      "folder": "Core E-Commerce & Inventory",
+      "name": "Get Products Catalog",
+      "method": "GET",
+      "url": "/api/products",
+      "status_code": 200,
+      "elapsed_ms": 52.92,
+      "passed": true
+    },
+    {
+      "folder": "Core E-Commerce & Inventory",
+      "name": "Get Vendors List",
+      "method": "GET",
+      "url": "/api/vendors",
+      "status_code": 200,
+      "elapsed_ms": 16.1,
+      "passed": true
+    },
+    {
+      "folder": "Core E-Commerce & Inventory",
+      "name": "Get Inventory Stock & Warehouses",
+      "method": "GET",
+      "url": "/api/inventory",
+      "status_code": 200,
+      "elapsed_ms": 84.84,
+      "passed": true
+    },
+    {
+      "folder": "Core E-Commerce & Inventory",
+      "name": "Get Low-Stock Shortage Alerts",
+      "method": "GET",
+      "url": "/api/inventory/alerts",
+      "status_code": 200,
+      "elapsed_ms": 23.48,
+      "passed": true
+    },
+    {
+      "folder": "Core E-Commerce & Inventory",
+      "name": "Get Inventory Turnover Analytics",
+      "method": "GET",
+      "url": "/api/inventory/turnover",
+      "status_code": 200,
+      "elapsed_ms": 70.23,
+      "passed": true
+    },
+    {
+      "folder": "Core E-Commerce & Inventory",
+      "name": "Get Transactions History",
+      "method": "GET",
+      "url": "/api/transactions",
+      "status_code": 200,
+      "elapsed_ms": 117.66,
+      "passed": true
+    },
+    {
+      "folder": "Business Intelligence & Analytics",
+      "name": "Advanced Revenue Analytics & GMV",
+      "method": "GET",
+      "url": "/api/analytics/revenue",
+      "status_code": 200,
+      "elapsed_ms": 198.92,
+      "passed": true
+    },
+    {
+      "folder": "Business Intelligence & Analytics",
+      "name": "Vendor Performance Leaderboard",
+      "method": "GET",
+      "url": "/api/analytics/vendor-performance",
+      "status_code": 200,
+      "elapsed_ms": 167.81,
+      "passed": true
+    },
+    {
+      "folder": "Business Intelligence & Analytics",
+      "name": "Customer Purchasing Behavior",
+      "method": "GET",
+      "url": "/api/analytics/customers",
+      "status_code": 200,
+      "elapsed_ms": 759.81,
+      "passed": true
+    },
+    {
+      "folder": "Business Intelligence & Analytics",
+      "name": "Customer Segmentation (K-Means)",
+      "method": "GET",
+      "url": "/api/analytics/segments",
+      "status_code": 200,
+      "elapsed_ms": 318.03,
+      "passed": true
+    },
+    {
+      "folder": "Business Intelligence & Analytics",
+      "name": "Inventory Demand Forecast",
+      "method": "GET",
+      "url": "/api/inventory/forecast?horizon=14",
+      "status_code": 200,
+      "elapsed_ms": 421.58,
+      "passed": true
+    },
+    {
+      "folder": "Business Intelligence & Analytics",
+      "name": "Personalized Recommendations",
+      "method": "GET",
+      "url": "/api/recommendations?limit=5",
+      "status_code": 200,
+      "elapsed_ms": 69.27,
+      "passed": true
+    },
+    {
+      "folder": "AI Model Management & Operations",
+      "name": "Get MLflow Model Status & Registry",
+      "method": "GET",
+      "url": "/api/analytics/mlflow-status",
+      "status_code": 200,
+      "elapsed_ms": 1179.36,
+      "passed": true
+    },
+    {
+      "folder": "AI Model Management & Operations",
+      "name": "Trigger Model Retraining",
+      "method": "POST",
+      "url": "/api/analytics/mlflow-retrain",
+      "status_code": 200,
+      "elapsed_ms": 9880.1,
+      "passed": true
+    },
+    {
+      "folder": "Automation & Monitoring (APScheduler)",
+      "name": "Get Automation Pipeline Status",
+      "method": "GET",
+      "url": "/api/scheduler/status",
+      "status_code": 200,
+      "elapsed_ms": 14.81,
+      "passed": true
+    },
+    {
+      "folder": "Automation & Monitoring (APScheduler)",
+      "name": "Trigger Automated Workflow Manually",
+      "method": "POST",
+      "url": "/api/scheduler/trigger?job_type=all",
+      "status_code": 200,
+      "elapsed_ms": 8037.73,
+      "passed": true
+    },
+    {
+      "folder": "Reports & Exports",
+      "name": "Download PDF Report (Revenue)",
+      "method": "GET",
+      "url": "/api/reports/pdf?type=revenue",
+      "status_code": 200,
+      "elapsed_ms": 63.87,
+      "passed": true
+    },
+    {
+      "folder": "Reports & Exports",
+      "name": "Download Excel Report (Revenue)",
+      "method": "GET",
+      "url": "/api/reports/excel?type=revenue",
+      "status_code": 200,
+      "elapsed_ms": 55.92,
+      "passed": true
+    },
+    {
+      "folder": "Mentor Reference Compatibility Endpoints",
+      "name": "Direct Revenue Analytics",
+      "method": "GET",
+      "url": "/analytics/revenue",
+      "status_code": 200,
+      "elapsed_ms": 11.83,
+      "passed": true
+    },
+    {
+      "folder": "Mentor Reference Compatibility Endpoints",
+      "name": "Direct Vendor Performance",
+      "method": "GET",
+      "url": "/analytics/vendor-performance",
+      "status_code": 200,
+      "elapsed_ms": 5.84,
+      "passed": true
+    },
+    {
+      "folder": "Mentor Reference Compatibility Endpoints",
+      "name": "Direct Customer Analytics",
+      "method": "GET",
+      "url": "/analytics/customers",
+      "status_code": 200,
+      "elapsed_ms": 9.29,
+      "passed": true
+    },
+    {
+      "folder": "Mentor Reference Compatibility Endpoints",
+      "name": "Direct Demand Forecast",
+      "method": "GET",
+      "url": "/forecast/2026-11",
+      "status_code": 200,
+      "elapsed_ms": 720.38,
+      "passed": true
+    },
+    {
+      "folder": "Mentor Reference Compatibility Endpoints",
+      "name": "Direct Customer Recommendation",
+      "method": "GET",
+      "url": "/recommend/1",
+      "status_code": 200,
+      "elapsed_ms": 33.51,
+      "passed": true
+    }
+  ]
+}

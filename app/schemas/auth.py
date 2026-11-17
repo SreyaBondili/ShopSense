@@ -24,6 +24,7 @@ class UserRegisterRequest(BaseModel):
 class UserLoginRequest(BaseModel):
     email: EmailStr
     password: str
+    role: Optional[str] = None
 
 class TokenResponse(BaseModel):
     access_token: str
@@ -39,6 +40,7 @@ class UserResponse(BaseModel):
     full_name: str
     email: str
     role: UserRole
+    phone: Optional[str] = None
     is_active: bool
     created_at: datetime
     vendor_id: Optional[int] = None

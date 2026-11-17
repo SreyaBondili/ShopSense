@@ -1,3 +1,5 @@
+import os
+os.environ["TESTING"] = "1"
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
@@ -21,6 +23,14 @@ engine_test = create_engine(
     poolclass=StaticPool,
 )
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine_test)
+
+@pytest.fixture(autouse=True)
+def clear_caches_between_tests():
+    """Ensure in-memory analytics TTL caches do not leak state between test cases."""
+    from app.utils.cache import analytics_cache
+    analytics_cache.clear()
+    yield
+    analytics_cache.clear()
 
 @pytest.fixture(scope="session", autouse=True)
 def setup_test_db():
@@ -134,3 +144,21 @@ def other_vendor_user(db):
 @pytest.fixture
 def other_vendor_token(other_vendor_user):
     return create_access_token(data={"sub": str(other_vendor_user.user_id), "email": other_vendor_user.email, "role": other_vendor_user.role.value, "vendor_id": other_vendor_user.vendor.vendor_id})
+
+@pytest.fixture
+def customer_user(db):
+    user = User(
+        full_name="Charlie Customer",
+        email="customer_test@example.com",
+        password_hash=hash_password("CustomerSecurePass123!"),
+        role=UserRole.CUSTOMER,
+        is_active=True
+    )
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+    return user
+
+@pytest.fixture
+def customer_token(customer_user):
+    return create_access_token(data={"sub": str(customer_user.user_id), "email": customer_user.email, "role": customer_user.role.value})

@@ -87,26 +87,51 @@ def get_current_active_user(
         )
     return current_user
 
+def require_roles(*allowed_roles: str):
+    """
+    Dependency factory to enforce Role-Based Access Control (RBAC).
+    Reads the verified role directly from the authenticated JWT token payload.
+    Returns 401 if unauthenticated, 403 if role is not authorized.
+    """
+    def role_checker(current_user: User = Depends(get_current_active_user)) -> User:
+        user_role_str = current_user.role.value if hasattr(current_user.role, "value") else str(current_user.role)
+        allowed = [r.value if hasattr(r, "value") else str(r) for r in allowed_roles]
+        if user_role_str not in allowed:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail=f"Access forbidden: role '{user_role_str}' is not authorized for this resource."
+            )
+        return current_user
+    return role_checker
+
 def require_admin(
-    current_user: User = Depends(get_current_active_user)
+    current_user: User = Depends(require_roles(UserRole.ADMIN, "ADMIN"))
 ) -> User:
     """FastAPI dependency to enforce ADMIN role."""
-    if current_user.role != UserRole.ADMIN:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Admin privileges required"
-        )
     return current_user
 
 def require_vendor(
-    current_user: User = Depends(get_current_active_user)
+    current_user: User = Depends(require_roles(UserRole.ADMIN, "ADMIN", UserRole.VENDOR, "VENDOR"))
 ) -> User:
-    """FastAPI dependency to enforce VENDOR role."""
-    if current_user.role != UserRole.VENDOR and current_user.role != UserRole.ADMIN:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Vendor access required"
-        )
+    """FastAPI dependency to enforce VENDOR role (or ADMIN)."""
+    return current_user
+
+def require_vendor_or_admin(
+    current_user: User = Depends(require_roles(UserRole.ADMIN, "ADMIN", UserRole.VENDOR, "VENDOR"))
+) -> User:
+    """FastAPI dependency to enforce VENDOR or ADMIN role."""
+    return current_user
+
+def require_customer_or_admin(
+    current_user: User = Depends(require_roles(UserRole.ADMIN, "ADMIN", UserRole.CUSTOMER, "CUSTOMER"))
+) -> User:
+    """FastAPI dependency to enforce CUSTOMER or ADMIN role."""
+    return current_user
+
+def require_customer(
+    current_user: User = Depends(require_roles(UserRole.CUSTOMER, "CUSTOMER"))
+) -> User:
+    """FastAPI dependency to enforce CUSTOMER role."""
     return current_user
 
 def block_suspended_vendor(user: User) -> None:

@@ -7,6 +7,7 @@ from app.models.product import Product
 from app.models.vendor import Vendor
 from app.models.inventory import Inventory
 from app.models.user import User, UserRole
+from app.utils.cache import cached_endpoint
 
 def _get_scoped_dataframes(
     db: Session,
@@ -137,6 +138,7 @@ def get_summary(
         "total_products": int(len(df_p))
     }
 
+@cached_endpoint("vendor_performance", ttl_seconds=30)
 def get_vendor_performance(
     db: Session,
     current_user: User

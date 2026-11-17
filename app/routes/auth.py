@@ -24,6 +24,14 @@ def login(
     """Authenticate with email and password and receive a JWT Bearer token."""
     return auth_service.authenticate_user(db, payload)
 
+@router.post("/refresh", response_model=TokenResponse)
+def refresh_token(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user)
+):
+    """Renew active JWT session token to prevent unexpected session timeout."""
+    return auth_service.refresh_token(db, current_user)
+
 @router.get("/me", response_model=UserResponse)
 def get_current_user_profile(
     db: Session = Depends(get_db),

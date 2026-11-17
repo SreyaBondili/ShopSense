@@ -236,6 +236,7 @@ export default function VendorsPage({ user }) {
                   value={newVendor.category}
                   onChange={e => setNewVendor({ ...newVendor, category: e.target.value })}
                 >
+                  <option value="General">General</option>
                   <option value="Electronics">Electronics</option>
                   <option value="Fashion">Fashion</option>
                   <option value="Books">Books</option>
@@ -327,6 +328,7 @@ export default function VendorsPage({ user }) {
               onChange={e => setCategoryFilter(e.target.value)}
             >
               <option value="All">All Categories</option>
+              <option value="General">General</option>
               <option value="Electronics">Electronics</option>
               <option value="Fashion">Fashion</option>
               <option value="Books">Books</option>

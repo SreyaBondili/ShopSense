@@ -6,8 +6,14 @@ export default defineConfig({
   server: {
     port: 3000,
     proxy: {
-      '/auth': 'http://127.0.0.1:8000',
-      '/api': 'http://127.0.0.1:8000'
+      '/auth': {
+        target: 'http://127.0.0.1:8000',
+        changeOrigin: true,
+      },
+      '/api': {
+        target: 'http://127.0.0.1:8000',
+        changeOrigin: true,
+      }
     }
   }
 });

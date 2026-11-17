@@ -85,7 +85,25 @@ def test_product_recommendations_cosine_similarity(client, admin_token):
         assert "product_name" in r
         assert "recommendation_reason" in r
 
-def test_recommendation_evaluation_metrics(client, admin_token):
+def test_recommendation_evaluation_metrics(client, admin_token, db, vendor_user, customer_user):
+    from app.models.product import Product
+    from app.models.transaction import Transaction
+    from datetime import datetime
+
+    # Seed products and customer purchase history so collaborative filtering has data to evaluate
+    p1 = Product(product_name="Wireless Mouse", category="Electronics", price=25.0, stock=50, vendor_id=vendor_user.vendor.vendor_id)
+    p2 = Product(product_name="Mechanical Keyboard", category="Electronics", price=75.0, stock=30, vendor_id=vendor_user.vendor.vendor_id)
+    p3 = Product(product_name="USB-C Hub", category="Electronics", price=35.0, stock=40, vendor_id=vendor_user.vendor.vendor_id)
+    db.add_all([p1, p2, p3])
+    db.commit()
+    db.refresh(p1)
+    db.refresh(p2)
+    db.refresh(p3)
+
+    t1 = Transaction(user_id=customer_user.user_id, vendor_id=vendor_user.vendor.vendor_id, product_id=p1.product_id, quantity=1, amount=25.0, transaction_date=datetime.now())
+    db.add(t1)
+    db.commit()
+
     headers = {"Authorization": f"Bearer {admin_token}"}
     res = client.get("/api/recommendations/evaluation?k=5", headers=headers)
     assert res.status_code == 200

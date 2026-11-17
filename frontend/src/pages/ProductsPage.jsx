@@ -163,36 +163,55 @@ export default function ProductsPage({ user }) {
         </button>
       </div>
 
-      {error && <div className="alert alert-error"><span>⚠️</span><span>{error}</span></div>}
+      {error && (
+        <div className="alert alert-error" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 18px', marginBottom: '20px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <span style={{ fontSize: '20px' }}>⚠️</span>
+            <div>
+              <strong style={{ display: 'block', fontSize: '14px', marginBottom: '2px' }}>Data Fetching Error</strong>
+              <span style={{ fontSize: '13px' }}>{error}</span>
+            </div>
+          </div>
+          <button
+            onClick={() => loadProducts()}
+            className="btn btn-secondary"
+            style={{ fontSize: '12.5px', padding: '6px 14px', background: '#FFFFFF' }}
+          >
+            Retry Connection
+          </button>
+        </div>
+      )}
       {success && <div className="alert alert-success"><span>✅</span><span>{success}</span></div>}
 
-      {/* KPI Cards */}
-      <div className="kpi-grid">
-        <div className="kpi-card">
-          <div className="kpi-label">Catalog Products</div>
-          <div className="kpi-value" style={{ color: '#1E293B' }}>
-            <AnimatedCounter value={totalProds} duration={1000} />
+      {/* KPI Cards — only displayed when catalog data is loaded */}
+      {(!error || products.length > 0) && (
+        <div className="kpi-grid">
+          <div className="kpi-card">
+            <div className="kpi-label">Catalog Products</div>
+            <div className="kpi-value" style={{ color: '#1E293B' }}>
+              <AnimatedCounter value={totalProds} duration={1000} />
+            </div>
+          </div>
+          <div className="kpi-card">
+            <div className="kpi-label">Active Categories</div>
+            <div className="kpi-value" style={{ color: '#6366F1' }}>
+              <AnimatedCounter value={totalCategories} duration={1000} />
+            </div>
+          </div>
+          <div className="kpi-card">
+            <div className="kpi-label">In-Stock Units</div>
+            <div className="kpi-value" style={{ color: '#059669' }}>
+              <AnimatedCounter value={totalStockUnits} duration={1100} />
+            </div>
+          </div>
+          <div className="kpi-card">
+            <div className="kpi-label">Average Unit Price</div>
+            <div className="kpi-value" style={{ color: '#1E293B' }}>
+              ₹{avgPrice}
+            </div>
           </div>
         </div>
-        <div className="kpi-card">
-          <div className="kpi-label">Active Categories</div>
-          <div className="kpi-value" style={{ color: '#6366F1' }}>
-            <AnimatedCounter value={totalCategories} duration={1000} />
-          </div>
-        </div>
-        <div className="kpi-card">
-          <div className="kpi-label">In-Stock Units</div>
-          <div className="kpi-value" style={{ color: '#059669' }}>
-            <AnimatedCounter value={totalStockUnits} duration={1100} />
-          </div>
-        </div>
-        <div className="kpi-card">
-          <div className="kpi-label">Average Unit Price</div>
-          <div className="kpi-value" style={{ color: '#1E293B' }}>
-            ₹{avgPrice}
-          </div>
-        </div>
-      </div>
+      )}
 
       {/* Add Product Form — Clean Multi-Column Horizontal Card */}
       {showAddForm && (

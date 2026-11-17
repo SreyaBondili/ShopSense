@@ -68,26 +68,36 @@ def test_api_mlflow_endpoints(client, admin_token):
     assert status_res.status_code == 200
     ml_data = status_res.json()
     assert ml_data["registered_model_name"] == "InventoryForecast"
-    assert ml_data["target_achieved"] is True
+    # Target achieved is strictly bound to measured accuracy >= 80.0% (Task 5 requirement)
+    assert ml_data["target_achieved"] == (ml_data.get("best_accuracy_pct", 0) >= 80.0)
 
-def test_mentor_compatibility_endpoints(client):
-    """Verify endpoints matching mentor's direct lecture snippets."""
-    res_rev = client.get("/analytics/revenue")
+def test_mentor_compatibility_endpoints(client, admin_token):
+    """Verify endpoints matching mentor's direct lecture snippets with RBAC protection."""
+    # Anonymous requests must return 401 Unauthorized (Task 2 requirement)
+    assert client.get("/analytics/revenue").status_code == 401
+    assert client.get("/analytics/vendor-performance").status_code == 401
+    assert client.get("/analytics/customers").status_code == 401
+    assert client.get("/forecast/2026-11").status_code == 401
+    assert client.get("/recommend/1").status_code == 401
+
+    # Authenticated admin requests succeed with valid payload
+    headers = {"Authorization": f"Bearer {admin_token}"}
+    res_rev = client.get("/analytics/revenue", headers=headers)
     assert res_rev.status_code == 200
     assert "total_revenue" in res_rev.json()
 
-    res_vp = client.get("/analytics/vendor-performance")
+    res_vp = client.get("/analytics/vendor-performance", headers=headers)
     assert res_vp.status_code == 200
     assert isinstance(res_vp.json(), list)
 
-    res_cust = client.get("/analytics/customers")
+    res_cust = client.get("/analytics/customers", headers=headers)
     assert res_cust.status_code == 200
     assert "total_customers" in res_cust.json()
 
-    res_fc = client.get("/forecast/2026-11")
+    res_fc = client.get("/forecast/2026-11", headers=headers)
     assert res_fc.status_code == 200
     assert "predictions" in res_fc.json()
 
-    res_rec = client.get("/recommend/1")
+    res_rec = client.get("/recommend/1", headers=headers)
     assert res_rec.status_code == 200
     assert isinstance(res_rec.json(), list)

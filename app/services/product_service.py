@@ -22,7 +22,7 @@ def create_product(db: Session, data: ProductCreate, current_user: User) -> Prod
         # Admin must specify vendor_id
         if not data.vendor_id:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=422,
                 detail="vendor_id is required for product creation."
             )
         target_vendor_id = data.vendor_id
@@ -54,12 +54,12 @@ def create_product(db: Session, data: ProductCreate, current_user: User) -> Prod
     # 4. Validate price and stock
     if data.price <= 0:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=422,
             detail="Product price must be greater than zero."
         )
     if data.stock < 0:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=422,
             detail="Initial product stock cannot be negative."
         )
 
@@ -144,7 +144,7 @@ def update_product(db: Session, product_id: int, data: ProductUpdate, current_us
     if "price" in update_dict and update_dict["price"] is not None:
         if update_dict["price"] <= 0:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=422,
                 detail="Price must be greater than zero."
             )
         product.price = update_dict["price"]
@@ -158,7 +158,7 @@ def update_product(db: Session, product_id: int, data: ProductUpdate, current_us
     if "stock" in update_dict and update_dict["stock"] is not None:
         if update_dict["stock"] < 0:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=422,
                 detail="Stock cannot be negative."
             )
         product.stock = update_dict["stock"]

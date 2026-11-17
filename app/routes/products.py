@@ -4,7 +4,7 @@ from typing import List, Optional
 from app.database import get_db
 from app.schemas.product import ProductCreate, ProductUpdate, ProductResponse
 from app.services import product_service
-from app.utils.security import get_current_active_user
+from app.utils.security import get_current_active_user, require_roles
 from app.models.user import User
 
 router = APIRouter(prefix="/api/products", tags=["Products"])
@@ -13,9 +13,9 @@ router = APIRouter(prefix="/api/products", tags=["Products"])
 def create_product(
     payload: ProductCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_active_user)
+    current_user: User = Depends(require_roles("ADMIN", "VENDOR"))
 ):
-    """Add a new product to catalog and initialize inventory."""
+    """Add a new product to catalog and initialize inventory (Admin or Vendor only)."""
     p = product_service.create_product(db, payload, current_user)
     return ProductResponse(
         product_id=p.product_id,
@@ -75,9 +75,9 @@ def update_product(
     product_id: int,
     payload: ProductUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_active_user)
+    current_user: User = Depends(require_roles("ADMIN", "VENDOR"))
 ):
-    """Update product and synchronize stock with inventory."""
+    """Update product and synchronize stock with inventory (Admin or own Vendor only)."""
     p = product_service.update_product(db, product_id, payload, current_user)
     return ProductResponse(
         product_id=p.product_id,
@@ -94,7 +94,7 @@ def update_product(
 def delete_product(
     product_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_active_user)
+    current_user: User = Depends(require_roles("ADMIN", "VENDOR"))
 ):
-    """Delete a product from the catalog."""
+    """Delete a product from the catalog (Admin or own Vendor only)."""
     return product_service.delete_product(db, product_id, current_user)

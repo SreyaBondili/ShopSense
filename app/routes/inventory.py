@@ -4,7 +4,7 @@ from typing import List, Optional, Dict, Any
 from app.database import get_db
 from app.schemas.inventory import InventoryUpdate, InventoryResponse
 from app.services import inventory_service, replenishment_service, forecasting_service
-from app.utils.security import get_current_active_user
+from app.utils.security import get_current_active_user, require_roles
 from app.models.user import User
 
 router = APIRouter(prefix="/api/inventory", tags=["Inventory"])
@@ -13,15 +13,15 @@ router = APIRouter(prefix="/api/inventory", tags=["Inventory"])
 def get_inventory(
     status_filter: Optional[str] = Query(None, alias="status", description="Filter by status (IN STOCK, LOW STOCK, OUT OF STOCK)"),
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_active_user)
+    current_user: User = Depends(require_roles("ADMIN", "VENDOR"))
 ):
-    """View inventory levels and warehouse status with visual status categorization."""
+    """View inventory levels and warehouse status (Admin or Vendor only)."""
     return inventory_service.get_inventory_items(db, current_user, status_filter)
 
 @router.get("/alerts")
 def get_inventory_alerts(
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_active_user)
+    current_user: User = Depends(require_roles("ADMIN", "VENDOR"))
 ):
     """Module 1.E: Low-Stock and Out-of-Stock alert system with shortage calculations."""
     return replenishment_service.get_low_stock_alerts(db, current_user)
@@ -29,7 +29,7 @@ def get_inventory_alerts(
 @router.get("/turnover")
 def get_turnover_analytics(
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_active_user)
+    current_user: User = Depends(require_roles("ADMIN", "VENDOR"))
 ):
     """Module 1.C: Inventory Turnover = COGS / Average Inventory Value."""
     return replenishment_service.get_inventory_turnover(db, current_user)
@@ -39,7 +39,7 @@ def get_inventory_demand_forecast(
     product_id: Optional[int] = Query(None, description="Optional filter by product ID"),
     horizon: int = Query(14, description="Forecast horizon in days (e.g. 7, 14, 30)"),
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_active_user)
+    current_user: User = Depends(require_roles("ADMIN", "VENDOR"))
 ):
     """Module 1.D: Random Forest demand forecasting with held-out chronological accuracy."""
     return forecasting_service.generate_demand_forecast(db, current_user, product_id, horizon)
@@ -48,7 +48,7 @@ def get_inventory_demand_forecast(
 def get_replenishment_suggestions(
     lead_time_days: int = Query(5, description="Supplier lead time in days"),
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_active_user)
+    current_user: User = Depends(require_roles("ADMIN", "VENDOR"))
 ):
     """Module 1.F: Suggested Reorder Quantity = Target Stock - Current Stock."""
     return replenishment_service.get_replenishment_recommendations(db, current_user, lead_time_days)
@@ -57,7 +57,7 @@ def get_replenishment_suggestions(
 def get_inventory_for_product(
     product_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_active_user)
+    current_user: User = Depends(require_roles("ADMIN", "VENDOR"))
 ):
     """Retrieve detailed inventory tracking for a single product."""
     return inventory_service.get_inventory_by_product_id(db, product_id, current_user)
@@ -67,7 +67,7 @@ def update_inventory(
     product_id: int,
     payload: InventoryUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_active_user)
+    current_user: User = Depends(require_roles("ADMIN", "VENDOR"))
 ):
     """Update stock counts, reorder levels, or warehouse location."""
     return inventory_service.update_inventory_by_product_id(db, product_id, payload, current_user)

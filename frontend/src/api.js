@@ -2,7 +2,26 @@
 
 const API_BASE = '';
 
+let lastAuthErrorTime = 0;
+
 export const api = {
+  isTokenExpired() {
+    const token = localStorage.getItem('shopsense_token');
+    if (!token) return true;
+    try {
+      const parts = token.split('.');
+      if (parts.length !== 3) return true;
+      const base64Url = parts[1];
+      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      const padded = base64.padEnd(base64.length + (4 - (base64.length % 4)) % 4, '=');
+      const payload = JSON.parse(atob(padded));
+      if (!payload.exp) return false;
+      return Math.floor(Date.now() / 1000) >= payload.exp;
+    } catch {
+      return true;
+    }
+  },
+
   async request(endpoint, options = {}) {
     const token = localStorage.getItem('shopsense_token');
     const headers = {
@@ -11,10 +30,30 @@ export const api = {
       ...options.headers,
     };
 
-    const res = await fetch(`${API_BASE}${endpoint}`, {
-      ...options,
-      headers,
-    });
+    const controller = new AbortController();
+    const timeoutMs = options.timeout || 15000;
+    const timerId = setTimeout(() => controller.abort(), timeoutMs);
+
+    let res;
+    try {
+      res = await fetch(`${API_BASE}${endpoint}`, {
+        ...options,
+        headers,
+        signal: controller.signal,
+      });
+    } catch (networkErr) {
+      clearTimeout(timerId);
+      if (networkErr.name === 'AbortError') {
+        throw new Error(
+          'Authentication request timed out. Please check that the backend server is running and responsive on http://127.0.0.1:8000.'
+        );
+      }
+      throw new Error(
+        'Cannot connect to ShopSense backend server (http://127.0.0.1:8000). Please ensure the FastAPI backend is running.'
+      );
+    } finally {
+      clearTimeout(timerId);
+    }
 
     if (!res.ok) {
       let errorMsg = `HTTP Error ${res.status}`;
@@ -30,6 +69,30 @@ export const api = {
       } catch (e) {
         // keep fallback message
       }
+
+      const isAuthEndpoint = endpoint.startsWith('/auth/login') || endpoint.startsWith('/auth/register');
+
+      if (!isAuthEndpoint) {
+        if (res.status === 401) {
+          const now = Date.now();
+          if (now - lastAuthErrorTime > 3500) {
+            lastAuthErrorTime = now;
+            sessionStorage.setItem('shopsense_session_expired_msg', 'Your session has expired. Please sign in again.');
+            window.dispatchEvent(new CustomEvent('shopsense-auth-error', {
+              detail: { status: 401, message: 'Your session has expired. Please sign in again.' }
+            }));
+          }
+        } else if (res.status === 403) {
+          const now = Date.now();
+          if (now - lastAuthErrorTime > 3500) {
+            lastAuthErrorTime = now;
+            window.dispatchEvent(new CustomEvent('shopsense-auth-error', {
+              detail: { status: 403, message: errorMsg || 'Access Denied: You do not have permission for this resource.' }
+            }));
+          }
+        }
+      }
+
       throw new Error(errorMsg);
     }
 
@@ -37,10 +100,12 @@ export const api = {
   },
 
   // Auth
-  async login(email, password) {
+  async login(email, password, role = null) {
+    const payload = { email, password };
+    if (role) payload.role = role;
     const data = await this.request('/auth/login', {
       method: 'POST',
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify(payload),
     });
     localStorage.setItem('shopsense_token', data.access_token);
     localStorage.setItem('shopsense_user', JSON.stringify({
@@ -50,6 +115,21 @@ export const api = {
       vendor_id: data.vendor_id,
     }));
     return data;
+  },
+
+  async refreshToken() {
+    const token = localStorage.getItem('shopsense_token');
+    if (!token) return null;
+    try {
+      const data = await this.request('/auth/refresh', { method: 'POST', timeout: 8000 });
+      if (data && data.access_token) {
+        localStorage.setItem('shopsense_token', data.access_token);
+        return data;
+      }
+    } catch {
+      return null;
+    }
+    return null;
   },
 
   async register(userData) {
@@ -62,10 +142,20 @@ export const api = {
   logout() {
     localStorage.removeItem('shopsense_token');
     localStorage.removeItem('shopsense_user');
+    // Clear sessionStorage in case anything was stored there
+    sessionStorage.clear();
+    // Clear all cookies (belt-and-suspenders for any server-side cookies)
+    document.cookie.split(';').forEach(c => {
+      document.cookie = c.trim().split('=')[0] + '=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/';
+    });
   },
 
   getUser() {
     try {
+      if (this.isTokenExpired()) {
+        this.logout();
+        return null;
+      }
       const u = localStorage.getItem('shopsense_user');
       return u ? JSON.parse(u) : null;
     } catch {
@@ -200,13 +290,20 @@ export const api = {
     return this.request('/api/analytics/segments');
   },
 
-  // Recommendations (Milestone 2)
+  // Recommendations (Milestone 2 & Milestone 3)
   async getRecommendations(limit = 5) {
     return this.request(`/api/recommendations?limit=${limit}`);
   },
 
-  async getRecommendationEvaluation(k = 5) {
+  async getRecommendationEvaluation(k = 5, vendorId = null) {
+    if (vendorId) {
+      return this.request(`/api/analytics/vendor-recommendations?k=${k}`);
+    }
     return this.request(`/api/recommendations/evaluation?k=${k}`);
+  },
+
+  async getVendorRecommendationEvaluation(k = 5) {
+    return this.request(`/api/analytics/vendor-recommendations?k=${k}`);
   },
 
   // Transactions
@@ -223,8 +320,10 @@ export const api = {
 
   // Milestone 3: Advanced Revenue & Benchmarking
   async getAdvancedRevenue(vendorId = null) {
-    const q = vendorId ? `?vendor_id=${vendorId}` : '';
-    return this.request(`/api/analytics/revenue${q}`);
+    if (vendorId) {
+      return this.request('/api/analytics/vendor-revenue');
+    }
+    return this.request('/api/analytics/revenue');
   },
 
   // Milestone 3: MLflow Model Tracking & Operations

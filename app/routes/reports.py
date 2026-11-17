@@ -3,7 +3,7 @@ from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 from typing import Optional
 from app.database import get_db
-from app.utils.security import get_current_active_user
+from app.utils.security import get_current_active_user, require_roles
 from app.models.user import User, UserRole
 from app.services import revenue_service, analytics_service, replenishment_service, customer_analytics_service
 from app.reports.pdf_generator import generate_pdf_report
@@ -13,6 +13,12 @@ router = APIRouter(prefix="/api/reports", tags=["Reports"])
 
 def _build_report_dataset(report_type: str, db: Session, current_user: User):
     report_type = report_type.lower()
+
+    if current_user.role == UserRole.VENDOR and report_type in ["revenue", "vendors", "customers"]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=f"Vendors are only authorized to download 'inventory' and 'products' reports. Access to '{report_type}' report requires Admin privileges."
+        )
 
     if report_type == "revenue":
         rev = revenue_service.get_advanced_revenue_analysis(db, current_user)
@@ -35,11 +41,22 @@ def _build_report_dataset(report_type: str, db: Session, current_user: User):
     elif report_type == "vendors":
         vendors_data = analytics_service.get_vendor_performance(db, current_user)
         headers = ["Vendor ID", "Business Name", "Category", "Revenue (INR)", "Orders", "Units Sold", "Status"]
+        def _get_v_val(item, key, default=""):
+            return item.get(key, default) if isinstance(item, dict) else getattr(item, key, default)
+
         rows = [
-            [v.vendor_id, v.business_name, v.category, f"Rs. {v.total_revenue:,.2f}", v.transaction_count, v.total_quantity_sold, v.status]
+            [
+                _get_v_val(v, "vendor_id"),
+                _get_v_val(v, "business_name"),
+                _get_v_val(v, "category"),
+                f"Rs. {float(_get_v_val(v, 'total_revenue', 0.0)):,.2f}",
+                _get_v_val(v, "total_transactions", _get_v_val(v, "transaction_count", 0)),
+                _get_v_val(v, "total_quantity_sold", 0),
+                _get_v_val(v, "status")
+            ]
             for v in vendors_data
         ]
-        total_rev = sum(v.total_revenue for v in vendors_data)
+        total_rev = sum(float(_get_v_val(v, "total_revenue", 0.0)) for v in vendors_data)
         summary = {
             "Total Vendors": str(len(vendors_data)),
             "Total Vendor Revenue": f"Rs. {total_rev:,.2f}",
@@ -50,14 +67,27 @@ def _build_report_dataset(report_type: str, db: Session, current_user: User):
     elif report_type == "products":
         prods = analytics_service.get_product_performance(db, current_user)
         headers = ["Product ID", "Product Name", "Category", "Price", "Units Sold", "Revenue (INR)", "Stock Status"]
+        def _get_p_val(item, key, default=""):
+            return item.get(key, default) if isinstance(item, dict) else getattr(item, key, default)
+
         rows = [
-            [p.product_id, p.product_name, p.category, f"Rs. {p.price:,.2f}", p.units_sold, f"Rs. {p.revenue:,.2f}", p.stock_status]
+            [
+                _get_p_val(p, "product_id"),
+                _get_p_val(p, "product_name"),
+                _get_p_val(p, "category"),
+                f"Rs. {float(_get_p_val(p, 'price', 0.0)):,.2f}",
+                _get_p_val(p, "quantity_sold", _get_p_val(p, "units_sold", 0)),
+                f"Rs. {float(_get_p_val(p, 'total_revenue', _get_p_val(p, 'revenue', 0.0))):,.2f}",
+                _get_p_val(p, "inventory_status", _get_p_val(p, "stock_status", "IN STOCK"))
+            ]
             for p in prods
         ]
+        total_prod_rev = sum(float(_get_p_val(p, "total_revenue", _get_p_val(p, "revenue", 0.0))) for p in prods)
+        total_prod_units = sum(int(_get_p_val(p, "quantity_sold", _get_p_val(p, "units_sold", 0))) for p in prods)
         summary = {
             "Total Products": str(len(prods)),
-            "Total Product Revenue": f"Rs. {sum(p.revenue for p in prods):,.2f}",
-            "Total Units Sold": f"{sum(p.units_sold for p in prods):,}"
+            "Total Product Revenue": f"Rs. {total_prod_rev:,.2f}",
+            "Total Units Sold": f"{total_prod_units:,}"
         }
         filename = "ShopSense_Products_Report"
 
@@ -107,9 +137,9 @@ def _build_report_dataset(report_type: str, db: Session, current_user: User):
 def export_pdf_report(
     type: str = Query("revenue", description="Report type: revenue, vendors, products, customers, inventory"),
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_active_user)
+    current_user: User = Depends(require_roles("ADMIN", "VENDOR"))
 ):
-    """Module 6: Download generated PDF business intelligence report."""
+    """Module 6: Download generated PDF business intelligence report (Admin or Vendor)."""
     dataset = _build_report_dataset(type, db, current_user)
     pdf_buffer = generate_pdf_report(type, dataset)
     filename = f"{dataset['filename']}.pdf"
@@ -124,9 +154,9 @@ def export_pdf_report(
 def export_excel_report(
     type: str = Query("revenue", description="Report type: revenue, vendors, products, customers, inventory"),
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_active_user)
+    current_user: User = Depends(require_roles("ADMIN", "VENDOR"))
 ):
-    """Module 6: Download generated Excel (.xlsx) analytical spreadsheet."""
+    """Module 6: Download generated Excel (.xlsx) analytical spreadsheet (Admin or Vendor)."""
     dataset = _build_report_dataset(type, db, current_user)
     excel_buffer = generate_excel_report(type, dataset)
     filename = f"{dataset['filename']}.xlsx"

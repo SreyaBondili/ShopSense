@@ -66,3 +66,45 @@ def test_analytics_metrics_and_role_scoping(client, admin_token, vendor_token, o
     cats = {c["category"]: c["revenue"] for c in cat_perf}
     assert cats.get("Electronics") == 200.0
     assert cats.get("Fashion") == 150.0
+
+    # 9. Check Vendor-Scoped Advanced Revenue API (/api/analytics/vendor-revenue)
+    v1_rev = client.get("/api/analytics/vendor-revenue", headers=v1_headers)
+    assert v1_rev.status_code == 200
+    v1_rev_data = v1_rev.json()
+    assert v1_rev_data["total_revenue"] == 200.0
+    assert v1_rev_data["gmv"] == 200.0
+    assert v1_rev_data["total_orders"] == 1
+
+    v2_rev = client.get("/api/analytics/vendor-revenue", headers=v2_headers)
+    assert v2_rev.status_code == 200
+    v2_rev_data = v2_rev.json()
+    assert v2_rev_data["total_revenue"] == 150.0
+    assert v2_rev_data["gmv"] == 150.0
+    assert v2_rev_data["total_orders"] == 1
+
+    # 10. Check Vendor-Scoped Recommendation Analytics API (/api/analytics/vendor-recommendations)
+    v1_rec = client.get("/api/analytics/vendor-recommendations?k=5", headers=v1_headers)
+    assert v1_rec.status_code == 200
+    v1_rec_data = v1_rec.json()
+    assert v1_rec_data["status"] == "success"
+    assert v1_rec_data["vendor_name"] == "Jane's Tech Boutique"
+    assert "metrics" in v1_rec_data
+    assert "top_recommended_products" in v1_rec_data
+    # Verify vendor isolation: only vendor 1's products in top_recommended_products
+    v1_pids = {p["product_id"] for p in v1_rec_data["top_recommended_products"]}
+    assert p1["product_id"] in v1_pids
+    assert p2["product_id"] not in v1_pids
+
+    v2_rec = client.get("/api/analytics/vendor-recommendations?k=5", headers=v2_headers)
+    assert v2_rec.status_code == 200
+    v2_rec_data = v2_rec.json()
+    assert v2_rec_data["status"] == "success"
+    assert v2_rec_data["vendor_name"] == "Bob's Fashion Den"
+    v2_pids = {p["product_id"] for p in v2_rec_data["top_recommended_products"]}
+    assert p2["product_id"] in v2_pids
+    assert p1["product_id"] not in v2_pids
+
+    # 11. Check Alias endpoint (/api/recommendations/vendor)
+    alias_rec = client.get("/api/recommendations/vendor?k=5", headers=v1_headers)
+    assert alias_rec.status_code == 200
+    assert alias_rec.json()["vendor_name"] == "Jane's Tech Boutique"

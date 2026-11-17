@@ -19,3 +19,9 @@ frontend/dist/
 # MLflow runs
 mlruns/
 
+
+# Temporary scratch scripts
+scratch/
+mlflow_data/
+*.db
+*.sqlite

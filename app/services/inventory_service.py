@@ -107,7 +107,7 @@ def update_inventory_by_product_id(
         new_stock = update_dict["current_stock"]
         if new_stock < 0:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=422,
                 detail="Stock cannot be negative."
             )
         inventory.current_stock = new_stock
@@ -118,7 +118,7 @@ def update_inventory_by_product_id(
     if "reorder_level" in update_dict and update_dict["reorder_level"] is not None:
         if update_dict["reorder_level"] < 0:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=422,
                 detail="Reorder level cannot be negative."
             )
         inventory.reorder_level = update_dict["reorder_level"]

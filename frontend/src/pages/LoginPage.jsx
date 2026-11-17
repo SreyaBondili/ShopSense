@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { api } from '../api';
 import {
   ShieldCheck, Store, User, Mail, Lock, Eye, EyeOff,
@@ -19,15 +19,24 @@ export default function LoginPage({ onLoginSuccess }) {
   const [activePortal, setActivePortal] = useState(getInitialPortal);
   const [mode, setMode] = useState('login'); // 'login' or 'register'
 
-  // Form input states
-  const [email, setEmail] = useState(() => {
-    const initP = getInitialPortal();
-    return initP === 'admin' ? 'bsreya1610@gmail.com' : '';
-  });
-  const [password, setPassword] = useState(() => {
-    const initP = getInitialPortal();
-    return initP === 'admin' ? 'Admin@123' : '';
-  });
+  // Per-portal form state — each role gets independent email/password
+  const emptyForms = { admin: { email: '', password: '' }, vendor: { email: '', password: '' }, customer: { email: '', password: '' } };
+  const [forms, setForms] = useState(emptyForms);
+
+  // Convenience getters/setters for the active portal's fields
+  const email = forms[activePortal].email;
+  const password = forms[activePortal].password;
+  const setEmail = (val) => setForms(prev => ({ ...prev, [activePortal]: { ...prev[activePortal], email: val } }));
+  const setPassword = (val) => setForms(prev => ({ ...prev, [activePortal]: { ...prev[activePortal], password: val } }));
+
+  // On mount: check for session expired notice
+  useEffect(() => {
+    const expiredNotice = sessionStorage.getItem('shopsense_session_expired_msg');
+    if (expiredNotice) {
+      setError(expiredNotice);
+      sessionStorage.removeItem('shopsense_session_expired_msg');
+    }
+  }, []);
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
@@ -36,30 +45,37 @@ export default function LoginPage({ onLoginSuccess }) {
   // Registration data
   const blankReg = {
     full_name: '', email: '', password: '',
-    admin_secret: '', phone: '', business_name: '', category: 'Electronics'
+    phone: '', business_name: '', category: 'General'
   };
   const [regData, setRegData] = useState(blankReg);
 
-  // Switch between Admin, Vendor, Customer tabs in purple theme
+  // Switch between Admin, Vendor, Customer tabs
   const handlePortalSwitch = (portal) => {
     setActivePortal(portal);
     setError('');
     setSuccessMsg('');
+    // Each role keeps its own state; no cross-contamination
+    setRegData(blankReg);
     if (portal === 'admin') {
-      setEmail('bsreya1610@gmail.com');
-      setPassword('Admin@123');
-    } else {
-      setEmail('');
-      setPassword('');
+      setMode('login');
     }
   };
 
   const executeLogin = async (loginEmail, loginPass) => {
     setError('');
     setSuccessMsg('');
+    if (!loginEmail || !loginEmail.trim()) {
+      setError('Please enter your email address.');
+      return;
+    }
+    if (!loginPass) {
+      setError('Please enter your password.');
+      return;
+    }
     setLoading(true);
     try {
-      const user = await api.login(loginEmail.trim(), loginPass);
+      const portalRole = activePortal.toUpperCase();
+      const user = await api.login(loginEmail.trim(), loginPass, portalRole);
       onLoginSuccess(user);
     } catch (err) {
       setError(err.message || 'Login failed. Please check credentials.');
@@ -77,34 +93,55 @@ export default function LoginPage({ onLoginSuccess }) {
     }
   };
 
-  const handleOneClickAccess = () => {
-    if (activePortal === 'admin') {
-      executeLogin('bsreya1610@gmail.com', 'Admin@123');
-    }
-  };
-
   const handleRegister = async () => {
     setError('');
     setSuccessMsg('');
     setLoading(true);
     try {
       const targetRole = activePortal.toUpperCase();
+      if (targetRole === 'ADMIN') {
+        throw new Error('Admin registration is restricted. Public self-registration is not allowed.');
+      }
+      if (!regData.full_name || regData.full_name.trim().length < 2) {
+        throw new Error('Please enter a valid full name.');
+      }
+      if (!regData.email || !regData.email.includes('@')) {
+        throw new Error('Please enter a valid email address.');
+      }
+      if (!regData.password || regData.password.length < 6) {
+        throw new Error('Password must be at least 6 characters.');
+      }
       const payload = {
-        full_name: regData.full_name,
+        full_name: regData.full_name.trim(),
         email: regData.email.trim(),
         password: regData.password,
         role: targetRole,
       };
-      if (targetRole === 'ADMIN') payload.admin_secret = regData.admin_secret;
+      if (targetRole === 'CUSTOMER') {
+        if (!regData.phone || !regData.phone.trim()) {
+          throw new Error('Phone number is required for customer registration.');
+        }
+        const cleanedPhone = regData.phone.trim();
+        const digits = cleanedPhone.replace(/\D/g, '');
+        if (digits.length < 10 || digits.length > 15) {
+          throw new Error('Please enter a valid phone number with at least 10 digits.');
+        }
+        payload.phone = cleanedPhone;
+      }
       if (targetRole === 'VENDOR') {
-        payload.phone = regData.phone;
-        payload.business_name = regData.business_name;
-        payload.category = regData.category;
+        if (!regData.phone || !regData.phone.trim()) {
+          throw new Error('Phone number is required for vendor registration.');
+        }
+        payload.phone = regData.phone.trim();
+        payload.business_name = regData.business_name ? regData.business_name.trim() : `${regData.full_name.trim()}'s Store`;
+        payload.category = regData.category || 'General';
       }
       await api.register(payload);
       setRegData(blankReg);
       setMode('login');
-      setSuccessMsg(`✓ Account created! Please sign in with your credentials.`);
+      setEmail('');
+      setPassword('');
+      setSuccessMsg(`✓ ${currentPortal.roleLabel} registration successful! Please enter your email and password to sign in.`);
     } catch (err) {
       setError(err.message || 'Registration failed.');
     } finally {
@@ -117,19 +154,19 @@ export default function LoginPage({ onLoginSuccess }) {
     admin: {
       roleLabel: 'Admin',
       emailLabel: 'ADMIN EMAIL ADDRESS',
-      placeholderEmail: 'admin@shopsense.com',
+      placeholderEmail: 'Enter your email',
       icon: ShieldCheck,
     },
     vendor: {
       roleLabel: 'Vendor',
       emailLabel: 'VENDOR EMAIL ADDRESS',
-      placeholderEmail: 'vendor@shopsense.com',
+      placeholderEmail: 'Enter your email',
       icon: Store,
     },
     customer: {
       roleLabel: 'Customer',
       emailLabel: 'CUSTOMER EMAIL ADDRESS',
-      placeholderEmail: 'customer@shopsense.com',
+      placeholderEmail: 'Enter your email',
       icon: User,
     }
   };
@@ -275,7 +312,11 @@ export default function LoginPage({ onLoginSuccess }) {
 
         {/* LOGIN FORM */}
         {mode === 'login' && (
-          <form onSubmit={handleSubmit}>
+          <form onSubmit={handleSubmit} key={activePortal} autoComplete="off">
+            {/* Hidden dummy inputs — trick browsers into NOT autofilling the real fields */}
+            <input type="text" name="fake_username" style={{ display: 'none' }} readOnly tabIndex="-1" aria-hidden="true" />
+            <input type="password" name="fake_password" style={{ display: 'none' }} readOnly tabIndex="-1" aria-hidden="true" />
+
             {/* EMAIL INPUT */}
             <div style={{ marginBottom: '16px' }}>
               <label style={{
@@ -297,6 +338,9 @@ export default function LoginPage({ onLoginSuccess }) {
                 <input
                   type="email"
                   className="form-input"
+                  name={`${activePortal}-email`}
+                  id={`${activePortal}-email`}
+                  autoComplete="off"
                   placeholder={currentPortal.placeholderEmail}
                   value={email}
                   onChange={e => setEmail(e.target.value)}
@@ -335,6 +379,9 @@ export default function LoginPage({ onLoginSuccess }) {
                 <input
                   type={showPassword ? 'text' : 'password'}
                   className="form-input"
+                  name={`${activePortal}-password`}
+                  id={`${activePortal}-password`}
+                  autoComplete="new-password"
                   placeholder="Enter your password"
                   value={password}
                   onChange={e => setPassword(e.target.value)}
@@ -388,49 +435,12 @@ export default function LoginPage({ onLoginSuccess }) {
                 justifyContent: 'center',
                 gap: '8px',
                 boxShadow: '0 4px 14px rgba(99, 102, 241, 0.35)',
-                transition: 'all 0.2s ease',
-                marginBottom: '12px'
+                transition: 'all 0.2s ease'
               }}
             >
               <span>{loading ? 'Authenticating...' : `Sign In as ${currentPortal.roleLabel}`}</span>
               <ArrowRight size={16} />
             </button>
-
-            {/* 1-CLICK QUICK ACCESS BUTTON (Soft Lavender Card) - ADMIN ONLY */}
-            {activePortal === 'admin' && (
-              <button
-                type="button"
-                onClick={handleOneClickAccess}
-                disabled={loading}
-                style={{
-                  width: '100%',
-                  padding: '11px 16px',
-                  borderRadius: '10px',
-                  border: '1px solid #C7D2FE',
-                  background: '#FFFFFF',
-                  color: '#4F46E5',
-                  fontSize: '13px',
-                  fontWeight: '600',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '8px',
-                  transition: 'all 0.2s ease'
-                }}
-                onMouseEnter={e => {
-                  e.currentTarget.style.background = '#EEF2FF';
-                  e.currentTarget.style.borderColor = '#6366F1';
-                }}
-                onMouseLeave={e => {
-                  e.currentTarget.style.background = '#FFFFFF';
-                  e.currentTarget.style.borderColor = '#C7D2FE';
-                }}
-              >
-                <ShieldCheck size={15} color="#6366F1" />
-                <span>1-Click Admin Access</span>
-              </button>
-            )}
           </form>
         )}
 
@@ -491,6 +501,21 @@ export default function LoginPage({ onLoginSuccess }) {
               </div>
             )}
 
+            {activePortal === 'customer' && (
+              <div style={{ marginBottom: '14px' }}>
+                <label className="form-label">Phone Number *</label>
+                <input
+                  type="tel"
+                  className="form-input"
+                  placeholder="e.g. 9876543210 or +91 9876543210"
+                  value={regData.phone}
+                  onChange={e => setRegData({ ...regData, phone: e.target.value })}
+                  required
+                  style={{ width: '100%', padding: '10px 12px', borderRadius: '10px', border: '1px solid #CBD5E1' }}
+                />
+              </div>
+            )}
+
             {activePortal === 'vendor' && (
               <>
                 <div style={{ marginBottom: '14px' }}>
@@ -526,6 +551,7 @@ export default function LoginPage({ onLoginSuccess }) {
                       onChange={e => setRegData({ ...regData, category: e.target.value })}
                       style={{ width: '100%', padding: '10px 12px', borderRadius: '10px', border: '1px solid #CBD5E1' }}
                     >
+                      <option value="General">General</option>
                       <option value="Electronics">Electronics</option>
                       <option value="Fashion">Fashion</option>
                       <option value="Books">Books</option>
@@ -569,9 +595,14 @@ export default function LoginPage({ onLoginSuccess }) {
           fontSize: '12.5px',
           color: '#64748B'
         }}>
-          {mode === 'login' ? (
+          {activePortal === 'admin' ? (
+            <span style={{ color: '#64748B', fontSize: '12px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+              <ShieldCheck size={14} color="#6366F1" />
+              <span>Admin accounts are pre-provisioned and cannot be self-registered.</span>
+            </span>
+          ) : mode === 'login' ? (
             <span>
-              Don't have an account?{' '}
+              Don't have a {currentPortal.roleLabel.toLowerCase()} account?{' '}
               <button
                 type="button"
                 onClick={() => { setMode('register'); setError(''); setSuccessMsg(''); }}
@@ -584,7 +615,7 @@ export default function LoginPage({ onLoginSuccess }) {
                   padding: 0
                 }}
               >
-                Register Here
+                Register as {currentPortal.roleLabel}
               </button>
             </span>
           ) : (
@@ -592,7 +623,14 @@ export default function LoginPage({ onLoginSuccess }) {
               Already registered?{' '}
               <button
                 type="button"
-                onClick={() => { setMode('login'); setError(''); setSuccessMsg(''); }}
+                onClick={() => {
+                  setMode('login');
+                  setError('');
+                  setSuccessMsg('');
+                  setEmail('');
+                  setPassword('');
+                  setRegData(blankReg);
+                }}
                 style={{
                   background: 'none',
                   border: 'none',
@@ -602,7 +640,7 @@ export default function LoginPage({ onLoginSuccess }) {
                   padding: 0
                 }}
               >
-                Back to Sign In
+                Back to {currentPortal.roleLabel} Sign In
               </button>
             </span>
           )}
